@@ -42,12 +42,12 @@
 
 ## Фаза 4 — Страницы
 
-- [-] 4.1 `index.astro` (главная) — каркас без хардкода: текст/SEO из `site` + `sections`
-- [ ] 4.2 `products/index.astro` (каталог)
-- [ ] 4.3 `lines/[slug].astro`
-- [ ] 4.4 `products/[slug].astro`
-- [ ] 4.5 5 юридических страниц
-- [ ] 4.6 Коммит + пуш
+- [x] 4.1 `index.astro` (главная) — секции в порядке §4.1 ТЗ (Hero → Каталог → Доставка/оплата → Заказ → Баннеры → FAQ → Форма)
+- [x] 4.2 `products/index.astro` (каталог: линейки → модели)
+- [x] 4.3 `lines/[slug].astro` (generic, `getStaticPaths` + `ContentBlocks`)
+- [x] 4.4 `products/[slug].astro` (карточка: юр. поля + блоки + JSON-LD Product/Breadcrumb)
+- [x] 4.5 5 юридических страниц (`privacy`, `cookie-policy`, `terms`, `returns`, `complaints`)
+- [x] 4.6 Коммит + пуш
 
 ## Фаза 5 — Функциональные модули
 
@@ -107,3 +107,4 @@
 | 2026-10-18 | 1.1–1.2, 4.1 | Создан `content.config.ts` (коллекции `site` + `sections` + `seoSchema`), контент-файлы `site/settings.md` и `sections/home.md`. `index.astro` переписан без хардкода: заголовок/описание/SEO берутся из CMS. `astro build` проходит. |
 | 2026-10-18 | 1.1–1.2, 2.1–2.4 | Расширен `content.config.ts` (коллекции `products`, `lines`, `legal`, `faq` + `contentBlocks` + `seoSchema`). Созданы плейсхолдеры `lines/*`, `products/*`, `legal/*`, `faq/*`. Реализованы `BaseLayout`, `Header`+`Nav`+`Logo`, `Footer`+`LegalBlock`, `SEO` + JSON-LD (`Organization`, `Product`, `ItemList`, `BreadcrumbList`, `FAQPage`). `index.astro` переведён на `BaseLayout`. `astro build` проходит. |
 | 2026-10-18 | 3.1–3.2 | Реализованы гибкие блоки контента: `ContentBlocks.astro` (маппинг `type` → компонент) и 14 компонентов в `src/components/blocks/` (`Hero`, `RichText`, `Image`, `ImageCarousel`, `Video`, `VideoGif`, `Gallery`, `Cta`, `Faq`, `Specs`, `Banner`, `Columns`, `Quote`, `Divider`). Интерактив (карусель, лайтбокс, аккордеон) подключается в Фазе 5. `astro build` проходит. |
+| 2026-10-18 | 4.1–4.6 | Реализованы все страницы Фазы 4: `index.astro` (секции в порядке §4.1 ТЗ), `products/index.astro` (каталог линейки→модели), `lines/[slug].astro` и `products/[slug].astro` (generic через `getStaticPaths` + `ContentBlocks`), 5 юридических страниц (`privacy`, `cookie-policy`, `terms`, `returns`, `complaints` через `render()`). JSON-LD (`Organization`, `ItemList`, `FAQPage`, `Product`, `BreadcrumbList`) встроен в страницы. `astro build` проходит (12 страниц). |

@@ -1,22 +1,318 @@
 ---
+/**
+ * index.astro — главная страница.
+ *
+ * Секции в порядке §4.1 ТЗ:
+ *   Hero → Каталог (линейки → модели) → Доставка и оплата → Заказ
+ *   → Баннеры «важные моменты» → FAQ → Форма заказа → Footer (юр. блок).
+ *
+ * Все тексты, реквизиты и SEO берутся из CMS (`site/settings.md`,
+ * `sections/*.md`, `lines/*.md`, `products/*.md`, `faq/*.md`).
+ * Движок не содержит ни контента, ни стилей.
+ */
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 // Единый источник правды: реквизиты и глобальный SEO — из `site/settings.md`.
 const settings = await getEntry('site', 'settings');
+const s = settings?.data;
 
 // Тексты секций главной — из коллекции `sections`.
 const sections = await getCollection('sections');
-const home = sections.find((s) => s.id === 'home') ?? sections[0];
+const byId = (id: string) => sections.find((sec) => sec.id === id);
 
-const brand = settings?.data.brand ?? 'Kiberstol.by';
-const tagline = settings?.data.tagline ?? 'Игровые компьютерные столы';
-const seoTitle = settings?.data.seo?.title ?? `${brand} — ${tagline}`;
-const seoDescription =
-  settings?.data.seo?.description ?? home?.data.body ?? tagline;
+const hero = byId('hero');
+const advantages = byId('advantages');
+const delivery = byId('delivery');
+const order = byId('order');
+const contact = byId('contact');
+
+// Каталог: линейки и модели (вложенность линейка → модели).
+const lines = (await getCollection('lines')).sort((a, b) => a.data.order - b.data.order);
+const products = (await getCollection('products')).sort((a, b) => a.data.order - b.data.order);
+
+// FAQ — вопросы-ответы (аккордеон).
+const faq = (await getCollection('faq')).sort((a, b) => a.data.order - b.data.order);
+
+const brand = s?.brand ?? 'Kiberstol.by';
+const tagline = s?.tagline ?? 'Игровые компьютерные столы';
+const seoTitle = s?.seo?.title ?? `${brand} — ${tagline}`;
+const seoDescription = s?.seo?.description ?? hero?.data.body ?? tagline;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.by';
+
+// JSON-LD: Organization (реквизиты ИП) + ItemList (каталог) + FAQPage.
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: s?.fullName ?? brand,
+  ...(s?.unp && { taxID: s.unp }),
+  url: siteUrl,
+  ...(s?.phone && { telephone: s.phone }),
+  ...(s?.email && { email: s.email }),
+  ...(s?.address && {
+    address: { '@type': 'PostalAddress', streetAddress: s.address },
+  }),
+};
+
+const itemListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: lines.map((line, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: line.data.title,
+    url: `${siteUrl}/lines/${line.id}`,
+  })),
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.data.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.data.answer },
+  })),
+};
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription}>
-  <h1>{home?.data.heading ?? brand}</h1>
-  <p>{home?.data.subheading ?? tagline}</p>
+<BaseLayout
+  title={seoTitle}
+  description={seoDescription}
+  type="website"
+  jsonLd={[organizationJsonLd, itemListJsonLd, faqJsonLd]}
+>
+  <!-- 1. Hero — комната геймера -->
+  <section class="relative overflow-hidden border-b border-border bg-surface">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+      <h1 class="max-w-3xl text-3xl font-bold leading-tight text-text sm:text-5xl">
+        {hero?.data.heading ?? brand}
+      </h1>
+      {hero?.data.subheading && (
+        <p class="mt-4 max-w-2xl text-lg text-muted">{hero.data.subheading}</p>
+      )}
+      {hero?.data.body && (
+        <p class="mt-2 max-w-2xl text-muted">{hero.data.body}</p>
+      )}
+      {hero?.data.ctaText && hero?.data.ctaHref && (
+        <a
+          href={hero.data.ctaHref}
+          class="mt-8 inline-block rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
+        >
+          {hero.data.ctaText}
+        </a>
+      )}
+    </div>
+  </section>
+
+  <!-- 2. Каталог: линейки → модели -->
+  <section id="catalog" class="mx-auto max-w-6xl px-4 py-12">
+    <h2 class="mb-6 text-2xl font-bold text-text">Каталог</h2>
+    <div class="space-y-10">
+      {
+        lines.map((line) => {
+          const lineProducts = products.filter((p) => p.data.line === line.id);
+          return (
+            <div>
+              <a
+                href={`/lines/${line.id}`}
+                class="group mb-4 flex items-center gap-3"
+              >
+                {line.data.image && (
+                  <img
+                    src={line.data.image}
+                    alt={line.data.title}
+                    loading="lazy"
+                    class="h-12 w-12 rounded border border-border object-cover"
+                  />
+                )}
+                <div>
+                  <h3 class="text-xl font-semibold text-text group-hover:text-primary">
+                    {line.data.title}
+                  </h3>
+                  {line.data.description && (
+                    <p class="text-sm text-muted">{line.data.description}</p>
+                  )}
+                </div>
+              </a>
+              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {
+                  lineProducts.map((product) => (
+                    <a
+                      href={`/products/${product.id}`}
+                      class="group block overflow-hidden rounded border border-border bg-surface transition hover:border-primary"
+                    >
+                      {product.data.image && (
+                        <img
+                          src={product.data.image}
+                          alt={product.data.title}
+                          loading="lazy"
+                          class="h-40 w-full object-cover"
+                        />
+                      )}
+                      <div class="p-4">
+                        {product.data.badge && (
+                          <span class="mb-2 inline-block rounded bg-secondary px-2 py-0.5 text-xs font-semibold text-bg">
+                            {product.data.badge}
+                          </span>
+                        )}
+                        <h4 class="font-semibold text-text group-hover:text-primary">
+                          {product.data.title}
+                        </h4>
+                        {product.data.shortDescription && (
+                          <p class="mt-1 text-sm text-muted">
+                            {product.data.shortDescription}
+                          </p>
+                        )}
+                        <p class="mt-2 font-bold text-primary">
+                          {product.data.price.toLocaleString('ru-BY')} BYN
+                        </p>
+                      </div>
+                    </a>
+                  ))
+                }
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <!-- 3. Доставка и оплата -->
+  <section id="delivery" class="border-t border-border bg-surface">
+    <div class="mx-auto max-w-6xl px-4 py-12">
+      <h2 class="mb-6 text-2xl font-bold text-text">
+        {delivery?.data.heading ?? 'Доставка и оплата'}
+      </h2>
+      {delivery?.data.body && (
+        <p class="mb-6 max-w-3xl text-muted">{delivery.data.body}</p>
+      )}
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="rounded border border-border p-5">
+          <h3 class="mb-3 font-semibold text-text">Способы оплаты</h3>
+          <ul class="space-y-1 text-sm text-muted">
+            {s?.paymentMethods.map((m) => <li>• {m}</li>)}
+          </ul>
+        </div>
+        <div class="rounded border border-border p-5">
+          <h3 class="mb-3 font-semibold text-text">Способы и сроки доставки</h3>
+          <ul class="space-y-1 text-sm text-muted">
+            {s?.deliveryMethods.map((m) => <li>• {m}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Заказ (CTA на форму) -->
+  {order && (
+    <section id="order" class="mx-auto max-w-6xl px-4 py-12">
+      <h2 class="mb-4 text-2xl font-bold text-text">
+        {order.data.heading ?? 'Оформление заказа'}
+      </h2>
+      {order.data.body && <p class="mb-6 max-w-3xl text-muted">{order.data.body}</p>}
+      {order.data.ctaText && order.data.ctaHref && (
+        <a
+          href={order.data.ctaHref}
+          class="inline-block rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
+        >
+          {order.data.ctaText}
+        </a>
+      )}
+    </section>
+  )}
+
+  <!-- 5. Баннеры «важные моменты» (преимущества) -->
+  {advantages && (
+    <section id="advantages" class="border-t border-border bg-surface">
+      <div class="mx-auto max-w-6xl px-4 py-12">
+        <h2 class="mb-6 text-2xl font-bold text-text">
+          {advantages.data.heading ?? 'Почему Kiberstol'}
+        </h2>
+        {advantages.data.body && (
+          <p class="max-w-3xl text-muted">{advantages.data.body}</p>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- 6. FAQ -->
+  {faq.length > 0 && (
+    <section id="faq" class="mx-auto max-w-6xl px-4 py-12">
+      <h2 class="mb-6 text-2xl font-bold text-text">Частые вопросы</h2>
+      <div class="space-y-2">
+        {
+          faq.map((item, i) => (
+            <div class="rounded border border-border bg-surface">
+              <button
+                type="button"
+                class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left font-semibold text-text"
+                aria-expanded="false"
+                aria-controls={`faq-answer-${i}`}
+              >
+                <span>{item.data.question}</span>
+                <span class="text-primary" aria-hidden="true">+</span>
+              </button>
+              <div id={`faq-answer-${i}`} class="hidden px-4 pb-4 text-muted">
+                {item.data.answer}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  )}
+
+  <!-- 7. Форма заказа (имя + телефон → Telegram) -->
+  <section id="contacts" class="border-t border-border bg-surface">
+    <div class="mx-auto max-w-6xl px-4 py-12">
+      <h2 class="mb-4 text-2xl font-bold text-text">
+        {contact?.data.heading ?? 'Оставить заявку'}
+      </h2>
+      {contact?.data.body && (
+        <p class="mb-6 max-w-3xl text-muted">{contact.data.body}</p>
+      )}
+      <form
+        id="order-form"
+        class="max-w-md space-y-4"
+        action="/api/submit.php"
+        method="POST"
+      >
+        <div>
+          <label for="name" class="mb-1 block text-sm font-semibold text-text">
+            Имя
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            autocomplete="name"
+            class="w-full rounded border border-border bg-bg px-3 py-2 text-text"
+          />
+        </div>
+        <div>
+          <label for="phone" class="mb-1 block text-sm font-semibold text-text">
+            Телефон
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            autocomplete="tel"
+            class="w-full rounded border border-border bg-bg px-3 py-2 text-text"
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
+        >
+          Отправить заявку
+        </button>
+      </form>
+    </div>
+  </section>
 </BaseLayout>

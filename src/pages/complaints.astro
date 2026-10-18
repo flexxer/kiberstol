@@ -1,0 +1,20 @@
+---
+/**
+ * complaints.astro — Порядок подачи обращений.
+ * Контент — из `legal/complaints.md` (CMS). Страница noindex.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const entry = await getEntry('legal', 'complaints');
+const { Content } = await render(entry!);
+
+const title = entry!.data.seo?.title ?? entry!.data.title;
+const description = entry!.data.seo?.description ?? '';
+---
+
+<BaseLayout title={title} description={description} noindex={true}>
+  <article class="prose prose-invert mx-auto max-w-3xl px-4 py-12">
+    <Content />
+  </article>
+</BaseLayout>
