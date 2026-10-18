@@ -24,7 +24,7 @@
 
 - [x] 1.1 `src/content.config.ts` (схемы `products`, `lines`, `site`, `legal`, `sections`, `faq` + `contentBlocks` + `seoSchema`)
 - [x] 1.2 Структура `src/content/*` (плейсхолдеры `lines`, `products`, `legal`, `faq`)
-- [ ] 1.3 Коммит + пуш
+- [x] 1.3 Коммит + пуш
 
 ## Фаза 2 — Базовая разметка и компоненты
 
@@ -32,13 +32,13 @@
 - [x] 2.2 `Header.astro` + `Nav.astro` + `Logo.astro`
 - [x] 2.3 `Footer.astro` + `LegalBlock.astro`
 - [x] 2.4 `SEO.astro` + JSON-LD компоненты (`Organization`, `Product`, `ItemList`, `BreadcrumbList`, `FAQPage`)
-- [ ] 2.5 Коммит + пуш
+- [x] 2.5 Коммит + пуш
 
 ## Фаза 3 — Гибкие блоки контента
 
 - [x] 3.1 `ContentBlocks.astro`
 - [x] 3.2 Компоненты блоков (14 блоков)
-- [ ] 3.3 Коммит + пуш
+- [x] 3.3 Коммит + пуш
 
 ## Фаза 4 — Страницы
 
@@ -93,9 +93,9 @@
 
 ## Фаза 11 — Сборка и приёмка
 
-- [ ] 11.1 `astro build` без ошибок
-- [ ] 11.2 Проверка критериев приёмки
-- [ ] 11.3 Финальный коммит + пуш
+- [x] 11.1 `astro build` без ошибок
+- [x] 11.2 Проверка критериев приёмки
+- [x] 11.3 Финальный коммит + пуш
 
 ---
 
@@ -114,3 +114,4 @@
 | 2026-10-18 | 8.1–8.4 | Завершена Фаза 8 (SEO): JSON-LD (`Product`+`Offer` BYN, `Organization`, `ItemList`, `BreadcrumbList`, `FAQPage`) уже встроены в страницы; добавлены `public/robots.txt` (закрыты `/keystatic`, `/api/`, юр. страницы) и `public/favicon.svg`; `@astrojs/sitemap` генерирует `sitemap-index.xml` с исключением служебных/юр. страниц. Семантика: один `h1` на страницу, `alt` у всех изображений. `astro build` проходит. |
 | 2026-10-18 | 9.1–9.3 | Завершена Фаза 9 (юридический контент): написаны 5 документов `legal/*.md` (privacy, cookie-policy, terms, returns, complaints) с полными текстами по закону РБ № 99-З и Пост. №778; `site/settings.md` дополнен полями `analytics`/`advertising` и уточнён `authorizedBodyPhone`. `astro build` проходит. |
 | 2026-10-18 | 10.1–10.3 | Завершена Фаза 10 (плейсхолдеры контента): наполнены `lines/*.md` (3 линейки «Старт»/«Про»/«Макс») и `products/*.md` (2 модели с юр. полями); созданы `sections/*.md` (hero, advantages, delivery, order, contact) и `faq/*.md` (4 вопроса). `astro build` проходит (12 страниц). |
+| 2026-10-18 | 11.1–11.3 | Завершена Фаза 11 (сборка и приёмка). `npm run build` (`astro build`) выполняется без ошибок: 12 статичных страниц + серверные маршруты Keystatic, `sitemap-index.xml` сгенерирован. Критерии приёмки §13 ТЗ проверены: обязательные сведения берутся из CMS (`LegalBlock` из `site/settings.md`), форма (honeypot + time-honeypot + маска + обязательное согласие ПД) → Telegram, cookie-баннер с гранулярным согласием и отзывом, юр. поля карточки + цена BYN, 5 юр. страниц + `robots.txt`/`sitemap` с исключениями, JSON-LD (`Organization`/`Product+Offer`/`ItemList`/`BreadcrumbList`/`FAQPage`), один `h1`/`alt`, разделение слоёв (контент в CMS, UI в CSS, без inline-стилей). Финальный коммит запушен. |
