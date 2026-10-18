@@ -1,4 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/* Self-host шрифты (Manrope, Unbounded, Inter, JetBrains Mono) */
+@import './fonts.css';
+
+/* Единственная фиксированная тема — cyberpunk (без свитчера) */
+@import './themes/cyberpunk.css';
 
 /* Reveal-on-scroll (reveal.ts) */
 [data-reveal] {

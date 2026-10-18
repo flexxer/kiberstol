@@ -67,10 +67,10 @@
 
 ## Фаза 7 — Тема cyberpunk
 
-- [ ] 7.1 `cyberpunk.css` (адаптация под бренд)
-- [ ] 7.2 `global.css` + `fonts.css`
-- [ ] 7.3 Удалить свитчер тем
-- [ ] 7.4 Коммит + пуш
+- [x] 7.1 `cyberpunk.css` (адаптация под бренд)
+- [x] 7.2 `global.css` + `fonts.css`
+- [x] 7.3 Удалить свитчер тем
+- [x] 7.4 Коммит + пуш
 
 ## Фаза 8 — SEO
 
@@ -110,3 +110,4 @@
 | 2026-10-18 | 4.1–4.6 | Реализованы все страницы Фазы 4: `index.astro` (секции в порядке §4.1 ТЗ), `products/index.astro` (каталог линейки→модели), `lines/[slug].astro` и `products/[slug].astro` (generic через `getStaticPaths` + `ContentBlocks`), 5 юридических страниц (`privacy`, `cookie-policy`, `terms`, `returns`, `complaints` через `render()`). JSON-LD (`Organization`, `ItemList`, `FAQPage`, `Product`, `BreadcrumbList`) встроен в страницы. `astro build` проходит (12 страниц). |
 | 2026-10-18 | 5.1–5.6 | Реализованы функциональные модули Фазы 5: `form.ts` (honeypot + time-honeypot + маска `+375 XX XXX-XX-XX` → `POST /api/submit.php` → Telegram) + `public/api/submit.php` (серверная защита, токен через `getenv`); `consent.ts` + `cookie-consent.ts` (гранулярное согласие аналитика/маркетинг, баннер в `BaseLayout`); `analytics.ts` + `advertising.ts` (gated-загрузка GA4/Метрика/Ads/Директ после согласия, отзыв удаляет cookie); `carousel.ts` + `lightbox.ts`; `faq.ts`, `reveal.ts`, `menu.ts`, `app.ts` (bootstrap). Форма на главной дополнена чекбоксами ПД/реклама и honeypot-полями. `astro build` проходит (12 страниц). |
 | 2026-10-18 | 6.1–6.4 | Реализована Keystatic CMS (Фаза 6): `keystatic.config.ts` (коллекции `products`, `lines`, `site` (singleton), `legal`, `sections`, `faq` + гибкие блоки `contentBlocks` через `fields.blocks` с полем `type` для совместимости с Zod-схемой `discriminatedUnion`). Подключена интеграция `@keystatic/astro` (маршруты `/keystatic` и `/api/keystatic`). Медиа-слой `public/assets/uploads` (WebP, quality 80, ≤2000px). Для серверных маршрутов CMS добавлен адаптер `@astrojs/node` (`output: 'static'` + `mode: 'standalone'` — контентные страницы остаются статичными). `astro build` проходит (12 статичных страниц + серверные маршруты CMS). |
+| 2026-10-18 | 7.1–7.4 | Реализована тема cyberpunk (Фаза 7): `src/styles/themes/cyberpunk.css` — единственная фиксированная тема, адаптированная под бренд (голубой `#00d4ff` / фиолетовый `#8b5cf6` / белый на тёмном фоне). Определены семантические Tailwind-токены (`text-text`, `text-muted`, `text-primary`, `text-accent`, `bg-bg`, `bg-surface`, `bg-primary`, `bg-secondary`, `border-border`, `border-primary`) через `@theme`, неоновое свечение, кастомная утилита `link-underline`, адаптация `prose` под тёмную тему. `src/styles/fonts.css` — self-host шрифты (Manrope/Unbounded/Inter/JetBrains Mono, variable). `global.css` переведён на Tailwind v4 (`@plugin '@tailwindcss/typography'`). Свитчер тем отсутствует (ничего удалять не потребовалось). `astro build` проходит (12 страниц). |

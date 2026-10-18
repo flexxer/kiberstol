@@ -1,0 +1,18 @@
+/* ============================================================================
+ * fonts.css — self-host шрифты (Fontsource, OFL, кириллица)
+ *
+ * Подключаются локально (без внешних CDN) — важно для скорости и
+ * соответствия требованиям BY-хостинга. Все шрифты — variable (одна
+ * загрузка на семейство, полный диапазон начертаний).
+ *
+ * Роли:
+ *   - Manrope Variable   — основной текст (body)
+ *   - Unbounded Variable — дисплейный (заголовки, логотип)
+ *   - Inter Variable      — fallback для текста
+ *   - JetBrains Mono      — моноширинный (цены, характеристики, код)
+ * ========================================================================== */
+
+@import '@fontsource-variable/manrope';
+@import '@fontsource-variable/unbounded';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
