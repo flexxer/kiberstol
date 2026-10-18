@@ -3,6 +3,9 @@ dist/
 # generated types
 .astro/
 
+# Keystatic CMS (локальный медиа-слой и служебные файлы)
+.keystatic/
+
 # dependencies
 node_modules/
 

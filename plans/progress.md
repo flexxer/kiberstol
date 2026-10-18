@@ -60,10 +60,10 @@
 
 ## Фаза 6 — Keystatic CMS
 
-- [ ] 6.1 `keystatic.config.ts`
-- [ ] 6.2 `src/pages/keystatic/[...params].astro`
-- [ ] 6.3 Медиа-слой (`public/assets/uploads`)
-- [ ] 6.4 Коммит + пуш
+- [x] 6.1 `keystatic.config.ts`
+- [x] 6.2 `src/pages/keystatic/[...params].astro`
+- [x] 6.3 Медиа-слой (`public/assets/uploads`)
+- [x] 6.4 Коммит + пуш
 
 ## Фаза 7 — Тема cyberpunk
 
@@ -109,3 +109,4 @@
 | 2026-10-18 | 3.1–3.2 | Реализованы гибкие блоки контента: `ContentBlocks.astro` (маппинг `type` → компонент) и 14 компонентов в `src/components/blocks/` (`Hero`, `RichText`, `Image`, `ImageCarousel`, `Video`, `VideoGif`, `Gallery`, `Cta`, `Faq`, `Specs`, `Banner`, `Columns`, `Quote`, `Divider`). Интерактив (карусель, лайтбокс, аккордеон) подключается в Фазе 5. `astro build` проходит. |
 | 2026-10-18 | 4.1–4.6 | Реализованы все страницы Фазы 4: `index.astro` (секции в порядке §4.1 ТЗ), `products/index.astro` (каталог линейки→модели), `lines/[slug].astro` и `products/[slug].astro` (generic через `getStaticPaths` + `ContentBlocks`), 5 юридических страниц (`privacy`, `cookie-policy`, `terms`, `returns`, `complaints` через `render()`). JSON-LD (`Organization`, `ItemList`, `FAQPage`, `Product`, `BreadcrumbList`) встроен в страницы. `astro build` проходит (12 страниц). |
 | 2026-10-18 | 5.1–5.6 | Реализованы функциональные модули Фазы 5: `form.ts` (honeypot + time-honeypot + маска `+375 XX XXX-XX-XX` → `POST /api/submit.php` → Telegram) + `public/api/submit.php` (серверная защита, токен через `getenv`); `consent.ts` + `cookie-consent.ts` (гранулярное согласие аналитика/маркетинг, баннер в `BaseLayout`); `analytics.ts` + `advertising.ts` (gated-загрузка GA4/Метрика/Ads/Директ после согласия, отзыв удаляет cookie); `carousel.ts` + `lightbox.ts`; `faq.ts`, `reveal.ts`, `menu.ts`, `app.ts` (bootstrap). Форма на главной дополнена чекбоксами ПД/реклама и honeypot-полями. `astro build` проходит (12 страниц). |
+| 2026-10-18 | 6.1–6.4 | Реализована Keystatic CMS (Фаза 6): `keystatic.config.ts` (коллекции `products`, `lines`, `site` (singleton), `legal`, `sections`, `faq` + гибкие блоки `contentBlocks` через `fields.blocks` с полем `type` для совместимости с Zod-схемой `discriminatedUnion`). Подключена интеграция `@keystatic/astro` (маршруты `/keystatic` и `/api/keystatic`). Медиа-слой `public/assets/uploads` (WebP, quality 80, ≤2000px). Для серверных маршрутов CMS добавлен адаптер `@astrojs/node` (`output: 'static'` + `mode: 'standalone'` — контентные страницы остаются статичными). `astro build` проходит (12 статичных страниц + серверные маршруты CMS). |
