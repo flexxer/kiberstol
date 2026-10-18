@@ -13,12 +13,12 @@
 
 ## Фаза 0 — Инициализация проекта и репозитория
 
-- [ ] 0.1 Создать git-репозиторий `kiberstol` (локально + remote)
-- [ ] 0.2 Инициализировать Astro-проект (на базе FastPage, без Sveltia)
-- [ ] 0.3 Установить зависимости (Astro, Tailwind, sitemap, Keystatic, React, шрифты)
-- [ ] 0.4 Настроить `astro.config.mjs`
-- [ ] 0.5 Создать `.gitignore`, `.env.example`
-- [ ] 0.6 Коммит + пуш
+- [x] 0.1 Создать git-репозиторий `kiberstol` (локально + remote)
+- [x] 0.2 Инициализировать Astro-проект (на базе FastPage, без Sveltia)
+- [x] 0.3 Установить зависимости (Astro, Tailwind, sitemap, Keystatic, React, шрифты)
+- [x] 0.4 Настроить `astro.config.mjs`
+- [x] 0.5 Создать `.gitignore`, `.env.example`
+- [x] 0.6 Коммит + пуш
 
 ## Фаза 1 — Контентная модель
 
@@ -103,4 +103,4 @@
 
 | Дата | Шаг | Заметка |
 |---|---|---|
-| — | — | — |
+| 2026-10-18 | 0.1–0.6 | Инициализирован Astro-проект (Astro 7.4, Tailwind 4.3, Keystatic, React 19), установлены зависимости, `astro build` проходит. Создан репозиторий `flexxer/kiberstol`, первый коммит запушен. |
