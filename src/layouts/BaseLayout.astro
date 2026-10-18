@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import { getEntry } from 'astro:content';
 import SEO from '../components/seo/SEO.astro';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
@@ -28,6 +29,13 @@ const {
   keywords,
   jsonLd,
 } = Astro.props;
+
+// Идентификаторы аналитики/рекламы — из `site/settings.md` (единый источник правды).
+// Передаются на клиент через data-атрибуты <body> и подставляются в
+// analytics.ts / advertising.ts только после согласия пользователя.
+const settings = await getEntry('site', 'settings');
+const analytics = settings?.data.analytics;
+const advertising = settings?.data.advertising;
 ---
 
 <!doctype html>
@@ -54,12 +62,66 @@ const {
 
     <ClientRouter />
   </head>
-  <body>
+  <body
+    data-ga4-id={analytics?.ga4Id}
+    data-yandex-metrika-id={analytics?.yandexMetrikaId}
+    data-google-ads-id={advertising?.googleAdsId}
+    data-yandex-direct-id={advertising?.yandexDirectId}
+  >
     <Header />
     <main>
       <slot />
     </main>
     <Footer />
+
+    <!-- Cookie-баннер (гранулярное согласие: аналитика / маркетинг) -->
+    <div
+      id="cookie-banner"
+      class="fixed bottom-0 left-0 right-0 z-[90] border-t border-border bg-surface p-4 shadow-lg"
+      role="dialog"
+      aria-label="Согласие на использование cookie"
+    >
+      <div class="mx-auto max-w-6xl">
+        <p class="mb-3 text-sm text-muted">
+          Мы используем cookie для аналитики и рекламы. Вы можете выбрать,
+          какие категории разрешить. Подробнее — в{' '}
+          <a href="/cookie-policy" class="text-primary hover:underline">политике cookie</a>.
+        </p>
+        <div class="mb-3 flex flex-col gap-2 text-sm sm:flex-row sm:gap-6">
+          <label class="flex items-center gap-2 text-text">
+            <input type="checkbox" name="consent-analytics" />
+            Аналитика
+          </label>
+          <label class="flex items-center gap-2 text-text">
+            <input type="checkbox" name="consent-marketing" />
+            Реклама
+          </label>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            data-consent="accept-all"
+            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-bg transition hover:opacity-90"
+          >
+            Принять всё
+          </button>
+          <button
+            type="button"
+            data-consent="reject-all"
+            class="rounded border border-border px-4 py-2 text-sm text-text transition hover:bg-bg"
+          >
+            Отказаться
+          </button>
+          <button
+            type="button"
+            data-consent="save"
+            class="rounded border border-border px-4 py-2 text-sm text-text transition hover:bg-bg"
+          >
+            Сохранить выбор
+          </button>
+        </div>
+      </div>
+    </div>
 
     <script>
       import { initPage } from '../scripts/app';

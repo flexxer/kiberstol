@@ -51,12 +51,12 @@
 
 ## Фаза 5 — Функциональные модули
 
-- [ ] 5.1 `form.ts` + `public/api/submit.php`
-- [ ] 5.2 `consent.ts` + `cookie-consent.ts`
-- [ ] 5.3 `analytics.ts` + `advertising.ts`
-- [ ] 5.4 `carousel.ts` + `lightbox.ts`
-- [ ] 5.5 `faq.ts`, `reveal.ts`, `menu.ts`, `app.ts`
-- [ ] 5.6 Коммит + пуш
+- [x] 5.1 `form.ts` + `public/api/submit.php`
+- [x] 5.2 `consent.ts` + `cookie-consent.ts`
+- [x] 5.3 `analytics.ts` + `advertising.ts`
+- [x] 5.4 `carousel.ts` + `lightbox.ts`
+- [x] 5.5 `faq.ts`, `reveal.ts`, `menu.ts`, `app.ts`
+- [x] 5.6 Коммит + пуш
 
 ## Фаза 6 — Keystatic CMS
 
@@ -108,3 +108,4 @@
 | 2026-10-18 | 1.1–1.2, 2.1–2.4 | Расширен `content.config.ts` (коллекции `products`, `lines`, `legal`, `faq` + `contentBlocks` + `seoSchema`). Созданы плейсхолдеры `lines/*`, `products/*`, `legal/*`, `faq/*`. Реализованы `BaseLayout`, `Header`+`Nav`+`Logo`, `Footer`+`LegalBlock`, `SEO` + JSON-LD (`Organization`, `Product`, `ItemList`, `BreadcrumbList`, `FAQPage`). `index.astro` переведён на `BaseLayout`. `astro build` проходит. |
 | 2026-10-18 | 3.1–3.2 | Реализованы гибкие блоки контента: `ContentBlocks.astro` (маппинг `type` → компонент) и 14 компонентов в `src/components/blocks/` (`Hero`, `RichText`, `Image`, `ImageCarousel`, `Video`, `VideoGif`, `Gallery`, `Cta`, `Faq`, `Specs`, `Banner`, `Columns`, `Quote`, `Divider`). Интерактив (карусель, лайтбокс, аккордеон) подключается в Фазе 5. `astro build` проходит. |
 | 2026-10-18 | 4.1–4.6 | Реализованы все страницы Фазы 4: `index.astro` (секции в порядке §4.1 ТЗ), `products/index.astro` (каталог линейки→модели), `lines/[slug].astro` и `products/[slug].astro` (generic через `getStaticPaths` + `ContentBlocks`), 5 юридических страниц (`privacy`, `cookie-policy`, `terms`, `returns`, `complaints` через `render()`). JSON-LD (`Organization`, `ItemList`, `FAQPage`, `Product`, `BreadcrumbList`) встроен в страницы. `astro build` проходит (12 страниц). |
+| 2026-10-18 | 5.1–5.6 | Реализованы функциональные модули Фазы 5: `form.ts` (honeypot + time-honeypot + маска `+375 XX XXX-XX-XX` → `POST /api/submit.php` → Telegram) + `public/api/submit.php` (серверная защита, токен через `getenv`); `consent.ts` + `cookie-consent.ts` (гранулярное согласие аналитика/маркетинг, баннер в `BaseLayout`); `analytics.ts` + `advertising.ts` (gated-загрузка GA4/Метрика/Ads/Директ после согласия, отзыв удаляет cookie); `carousel.ts` + `lightbox.ts`; `faq.ts`, `reveal.ts`, `menu.ts`, `app.ts` (bootstrap). Форма на главной дополнена чекбоксами ПД/реклама и honeypot-полями. `astro build` проходит (12 страниц). |
