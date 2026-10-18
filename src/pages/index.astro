@@ -1,21 +1,22 @@
 ---
-import '../styles/global.css';
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Единый источник правды: реквизиты и глобальный SEO — из `site/settings.md`.
+const settings = await getEntry('site', 'settings');
+
+// Тексты секций главной — из коллекции `sections`.
+const sections = await getCollection('sections');
+const home = sections.find((s) => s.id === 'home') ?? sections[0];
+
+const brand = settings?.data.brand ?? 'Kiberstol.by';
+const tagline = settings?.data.tagline ?? 'Игровые компьютерные столы';
+const seoTitle = settings?.data.seo?.title ?? `${brand} — ${tagline}`;
+const seoDescription =
+  settings?.data.seo?.description ?? home?.data.body ?? tagline;
 ---
 
-<html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kiberstol.by — игровые компьютерные столы</title>
-    <meta
-      name="description"
-      content="Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol — доступное качество."
-    />
-  </head>
-  <body>
-    <main>
-      <h1>Kiberstol.by</h1>
-      <p>Игровые компьютерные столы</p>
-    </main>
-  </body>
-</html>
+<BaseLayout title={seoTitle} description={seoDescription}>
+  <h1>{home?.data.heading ?? brand}</h1>
+  <p>{home?.data.subheading ?? tagline}</p>
+</BaseLayout>

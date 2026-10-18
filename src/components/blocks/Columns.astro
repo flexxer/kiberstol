@@ -1,0 +1,21 @@
+---
+/**
+ * Columns — многоколоночный блок (каждая колонка: заголовок + текст).
+ */
+interface Props {
+  columns: { heading?: string; content?: string }[];
+}
+
+const { columns } = Astro.props;
+---
+
+<div class={`grid gap-6 ${columns.length > 1 ? 'md:grid-cols-2' : ''} ${columns.length > 2 ? 'lg:grid-cols-3' : ''}`}>
+  {
+    columns.map((col) => (
+      <div class="rounded border border-border bg-surface p-5">
+        {col.heading && <h3 class="mb-2 font-semibold text-text">{col.heading}</h3>}
+        {col.content && <p class="text-sm text-muted">{col.content}</p>}
+      </div>
+    ))
+  }
+</div>

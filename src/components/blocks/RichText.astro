@@ -1,0 +1,13 @@
+---
+/**
+ * RichText — WYSIWYG-текст (заголовки, списки, ссылки, жирный/курсив).
+ * Рендерится через @tailwindcss/typography (класс `prose`).
+ */
+interface Props {
+  content: string;
+}
+
+const { content } = Astro.props;
+---
+
+<div class="prose prose-invert max-w-none" set:html={content} />

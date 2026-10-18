@@ -1,0 +1,57 @@
+---
+/**
+ * Kiberstol — логотип (плейсхолдер до получения фирменного логотипа).
+ *
+ * Использует currentColor → наследует цвет текста и адаптируется
+ * к теме без доп. стилей. Бренд берётся из `site/settings.md`.
+ *
+ * Пропсы:
+ *  - withWordmark: показывать ли текстовую часть «KiberStol»
+ *  - size: размер знака в px (высота)
+ */
+import { getEntry } from 'astro:content';
+
+interface Props {
+  withWordmark?: boolean;
+  size?: number;
+}
+
+const { withWordmark = true, size = 28 } = Astro.props;
+
+const settings = await getEntry('site', 'settings');
+const brand = settings?.data.brand ?? 'Kiberstol.by';
+---
+
+<a
+  href="/"
+  class="inline-flex items-center gap-2"
+  aria-label={`${brand} — на главную`}
+>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 128 128"
+    fill="none"
+    aria-hidden="true"
+    class="shrink-0"
+  >
+    <rect x="4" y="4" width="120" height="120" rx="28" fill="currentColor" opacity="0.12" />
+    <path
+      d="M70.5 16 38 72h22l-6.5 40L90 56H66l4.5-40Z"
+      fill="currentColor"
+    />
+    <path
+      d="M38 72h22l-6.5 40L90 56H66l4.5-40L38 72Z"
+      fill="currentColor"
+      opacity="0.35"
+    />
+  </svg>
+
+  {
+    withWordmark && (
+      <span class="text-lg font-bold leading-none tracking-tight">
+        Kiber<span class="text-accent">Stol</span>
+      </span>
+    )
+  }
+</a>

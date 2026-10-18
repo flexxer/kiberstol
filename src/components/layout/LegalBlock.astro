@@ -1,0 +1,56 @@
+---
+/**
+ * LegalBlock — обязательные сведения ИП (закон РБ, §4.2 ТЗ).
+ * Размещается в самом низу футера. Данные — из `site/settings.md`.
+ *
+ * Место жительства ИП НЕ указывается (требование ТЗ).
+ */
+import { getEntry } from 'astro:content';
+
+const settings = await getEntry('site', 'settings');
+const s = settings!.data;
+---
+
+<section class="border-t border-border py-6 text-xs text-muted" aria-label="Сведения о продавце">
+  <div class="mx-auto max-w-6xl space-y-2 px-4">
+    <p>
+      <span class="font-semibold text-text">{s.fullName}</span>
+      {s.unp && <> · УНП {s.unp}</>}
+      {s.registrationDate && <> · зарегистрирован {s.registrationDate}</>}
+    </p>
+    <p>
+      {s.tradeRegistryNumber && (
+        <>Сведения о включении в торговый реестр: № {s.tradeRegistryNumber}</>
+      )}
+      {s.tradeRegistryDate && <> от {s.tradeRegistryDate}</>}
+    </p>
+    <p>
+      {s.phone && (
+        <a href={`tel:${s.phone.replace(/[^+\d]/g, '')}`} class="hover:text-text">
+          {s.phone}
+        </a>
+      )}
+      {s.email && (
+        <>
+          {' · '}
+          <a href={`mailto:${s.email}`} class="hover:text-text">
+            {s.email}
+          </a>
+        </>
+      )}
+    </p>
+    {s.workHours && <p>Режим работы: {s.workHours}</p>}
+    {s.authorizedBody && (
+      <p>Уполномоченный рассматривать обращения покупателей: {s.authorizedBody}</p>
+    )}
+    {s.authorizedBodyPhone && (
+      <p>Телефоны работников местного исполнительного органа: {s.authorizedBodyPhone}</p>
+    )}
+    {s.paymentMethods.length > 0 && (
+      <p>Способы оплаты: {s.paymentMethods.join('; ')}</p>
+    )}
+    {s.deliveryMethods.length > 0 && (
+      <p>Способы и сроки доставки: {s.deliveryMethods.join('; ')}</p>
+    )}
+  </div>
+</section>

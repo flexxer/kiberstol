@@ -1,0 +1,22 @@
+---
+/**
+ * Video — inline-видео с контролами.
+ */
+interface Props {
+  src: string;
+  poster?: string;
+  controls?: boolean;
+  autoplay?: boolean;
+}
+
+const { src, poster, controls = true, autoplay = false } = Astro.props;
+---
+
+<video
+  src={src}
+  poster={poster}
+  controls={controls}
+  autoplay={autoplay}
+  playsinline
+  class="w-full rounded border border-border"
+/>

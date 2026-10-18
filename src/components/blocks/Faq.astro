@@ -1,0 +1,35 @@
+---
+/**
+ * Faq — аккордеон вопросов-ответов.
+ * Интерактив подключается в Фазе 5 (`faq.ts`).
+ */
+interface Props {
+  items: { question: string; answer: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="faq space-y-2">
+  {
+    items.map((item, i) => (
+      <div class="faq-item rounded border border-border bg-surface">
+        <button
+          type="button"
+          class="faq-question flex w-full items-center justify-between gap-4 px-4 py-3 text-left font-semibold text-text"
+          aria-expanded="false"
+          aria-controls={`faq-answer-${i}`}
+        >
+          <span>{item.question}</span>
+          <span class="faq-icon text-primary" aria-hidden="true">+</span>
+        </button>
+        <div
+          id={`faq-answer-${i}`}
+          class="faq-answer hidden px-4 pb-4 text-muted"
+        >
+          {item.answer}
+        </div>
+      </div>
+    ))
+  }
+</div>

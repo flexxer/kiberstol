@@ -1,0 +1,19 @@
+---
+/**
+ * Divider — разделитель/спейсер.
+ * `line` — горизонтальная линия, `space` — вертикальный отступ.
+ */
+interface Props {
+  style?: 'line' | 'space';
+}
+
+const { style = 'line' } = Astro.props;
+---
+
+{
+  style === 'line' ? (
+    <hr class="border-border" />
+  ) : (
+    <div class="h-8" aria-hidden="true" />
+  )
+}

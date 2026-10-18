@@ -1,0 +1,21 @@
+---
+/**
+ * VideoGif — видео в режиме «gif»: без звука, зациклено, без контролов.
+ */
+interface Props {
+  src: string;
+  poster?: string;
+}
+
+const { src, poster } = Astro.props;
+---
+
+<video
+  src={src}
+  poster={poster}
+  autoplay
+  muted
+  loop
+  playsinline
+  class="w-full rounded border border-border"
+/>

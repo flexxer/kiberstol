@@ -22,27 +22,27 @@
 
 ## Фаза 1 — Контентная модель
 
-- [ ] 1.1 `src/content.config.ts` (схемы всех коллекций + `contentBlocks` + `seoSchema`)
-- [ ] 1.2 Структура `src/content/*` с плейсхолдер-файлами
+- [x] 1.1 `src/content.config.ts` (схемы `products`, `lines`, `site`, `legal`, `sections`, `faq` + `contentBlocks` + `seoSchema`)
+- [x] 1.2 Структура `src/content/*` (плейсхолдеры `lines`, `products`, `legal`, `faq`)
 - [ ] 1.3 Коммит + пуш
 
 ## Фаза 2 — Базовая разметка и компоненты
 
-- [ ] 2.1 `BaseLayout.astro`
-- [ ] 2.2 `Header.astro` + `Nav.astro`
-- [ ] 2.3 `Footer.astro` + `LegalBlock.astro`
-- [ ] 2.4 `SEO.astro` + JSON-LD компоненты
+- [x] 2.1 `BaseLayout.astro`
+- [x] 2.2 `Header.astro` + `Nav.astro` + `Logo.astro`
+- [x] 2.3 `Footer.astro` + `LegalBlock.astro`
+- [x] 2.4 `SEO.astro` + JSON-LD компоненты (`Organization`, `Product`, `ItemList`, `BreadcrumbList`, `FAQPage`)
 - [ ] 2.5 Коммит + пуш
 
 ## Фаза 3 — Гибкие блоки контента
 
-- [ ] 3.1 `ContentBlocks.astro`
-- [ ] 3.2 Компоненты блоков (14 блоков)
+- [x] 3.1 `ContentBlocks.astro`
+- [x] 3.2 Компоненты блоков (14 блоков)
 - [ ] 3.3 Коммит + пуш
 
 ## Фаза 4 — Страницы
 
-- [ ] 4.1 `index.astro` (главная)
+- [-] 4.1 `index.astro` (главная) — каркас без хардкода: текст/SEO из `site` + `sections`
 - [ ] 4.2 `products/index.astro` (каталог)
 - [ ] 4.3 `lines/[slug].astro`
 - [ ] 4.4 `products/[slug].astro`
@@ -104,3 +104,6 @@
 | Дата | Шаг | Заметка |
 |---|---|---|
 | 2026-10-18 | 0.1–0.6 | Инициализирован Astro-проект (Astro 7.4, Tailwind 4.3, Keystatic, React 19), установлены зависимости, `astro build` проходит. Создан репозиторий `flexxer/kiberstol`, первый коммит запушен. |
+| 2026-10-18 | 1.1–1.2, 4.1 | Создан `content.config.ts` (коллекции `site` + `sections` + `seoSchema`), контент-файлы `site/settings.md` и `sections/home.md`. `index.astro` переписан без хардкода: заголовок/описание/SEO берутся из CMS. `astro build` проходит. |
+| 2026-10-18 | 1.1–1.2, 2.1–2.4 | Расширен `content.config.ts` (коллекции `products`, `lines`, `legal`, `faq` + `contentBlocks` + `seoSchema`). Созданы плейсхолдеры `lines/*`, `products/*`, `legal/*`, `faq/*`. Реализованы `BaseLayout`, `Header`+`Nav`+`Logo`, `Footer`+`LegalBlock`, `SEO` + JSON-LD (`Organization`, `Product`, `ItemList`, `BreadcrumbList`, `FAQPage`). `index.astro` переведён на `BaseLayout`. `astro build` проходит. |
+| 2026-10-18 | 3.1–3.2 | Реализованы гибкие блоки контента: `ContentBlocks.astro` (маппинг `type` → компонент) и 14 компонентов в `src/components/blocks/` (`Hero`, `RichText`, `Image`, `ImageCarousel`, `Video`, `VideoGif`, `Gallery`, `Cta`, `Faq`, `Specs`, `Banner`, `Columns`, `Quote`, `Divider`). Интерактив (карусель, лайтбокс, аккордеон) подключается в Фазе 5. `astro build` проходит. |

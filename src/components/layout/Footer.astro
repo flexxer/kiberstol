@@ -1,0 +1,68 @@
+---
+/**
+ * Footer — подвал: навигация, контакты, юридические документы
+ * и обязательный юридический блок (LegalBlock).
+ */
+import { getEntry } from 'astro:content';
+import Logo from '../ui/Logo.astro';
+import LegalBlock from './LegalBlock.astro';
+
+const settings = await getEntry('site', 'settings');
+const { brand, phone, email } = settings!.data;
+---
+
+<footer class="border-t border-border bg-surface">
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <div class="mb-6">
+      <Logo />
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      <div>
+        <p class="mb-2 font-semibold text-text">Навигация</p>
+        <ul class="space-y-1 text-sm">
+          {
+            settings!.data.nav.map((item) => (
+              <li>
+                <a href={item.href} class="link-underline text-muted hover:text-primary">
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <p class="mb-2 font-semibold text-text">Документы</p>
+        <ul class="space-y-1 text-sm">
+          <li><a href="/privacy" class="link-underline text-muted hover:text-primary">Политика конфиденциальности</a></li>
+          <li><a href="/cookie-policy" class="link-underline text-muted hover:text-primary">Политика cookie</a></li>
+          <li><a href="/terms" class="link-underline text-muted hover:text-primary">Оплата и доставка</a></li>
+          <li><a href="/returns" class="link-underline text-muted hover:text-primary">Возврат товара</a></li>
+          <li><a href="/complaints" class="link-underline text-muted hover:text-primary">Порядок обращений</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="mb-2 font-semibold text-text">Контакты</p>
+        <div class="flex flex-col gap-1">
+          <a
+            href={`tel:${phone.replace(/[^+\d]/g, '')}`}
+            class="link-underline text-sm text-muted hover:text-primary"
+          >
+            {phone}
+          </a>
+          <a
+            href={`mailto:${email}`}
+            class="link-underline text-sm text-muted hover:text-primary"
+          >
+            {email}
+          </a>
+        </div>
+      </div>
+    </div>
+    <p class="mt-6 text-center text-xs text-muted">
+      © {new Date().getFullYear()} {brand}. Все права защищены.
+    </p>
+  </div>
+
+  <LegalBlock />
+</footer>

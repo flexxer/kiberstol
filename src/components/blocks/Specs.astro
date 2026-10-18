@@ -1,0 +1,30 @@
+---
+/**
+ * Specs — таблица характеристик (имя → значение).
+ */
+interface Props {
+  items: { name: string; value: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="overflow-hidden rounded border border-border">
+  <table class="w-full text-sm">
+    <tbody>
+      {
+        items.map((item) => (
+          <tr class="border-b border-border last:border-b-0">
+            <th
+              scope="row"
+              class="w-1/3 bg-surface px-4 py-3 text-left font-semibold text-text"
+            >
+              {item.name}
+            </th>
+            <td class="px-4 py-3 text-muted">{item.value}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

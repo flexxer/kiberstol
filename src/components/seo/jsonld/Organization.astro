@@ -1,0 +1,31 @@
+---
+interface Props {
+  name: string;
+  unp?: string;
+  url?: string;
+  logo?: string;
+  address?: string;
+  telephone?: string;
+  email?: string;
+  sameAs?: string[];
+}
+
+const { name, unp, url, logo, address, telephone, email, sameAs } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name,
+  ...(unp && { taxID: unp }),
+  ...(url && { url }),
+  ...(logo && { logo }),
+  ...(address && {
+    address: { '@type': 'PostalAddress', streetAddress: address },
+  }),
+  ...(telephone && { telephone }),
+  ...(email && { email }),
+  ...(sameAs && sameAs.length > 0 && { sameAs }),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

@@ -1,0 +1,27 @@
+---
+/**
+ * CTA — кнопка/призыв к действию.
+ */
+interface Props {
+  text: string;
+  href: string;
+  style?: 'primary' | 'secondary' | 'outline';
+}
+
+const { text, href, style = 'primary' } = Astro.props;
+
+const styleClass = {
+  primary: 'bg-primary text-bg hover:opacity-90',
+  secondary: 'bg-secondary text-bg hover:opacity-90',
+  outline: 'border border-primary text-primary hover:bg-primary hover:text-bg',
+}[style];
+---
+
+<div class="flex">
+  <a
+    href={href}
+    class={`inline-block rounded px-6 py-3 font-semibold transition ${styleClass}`}
+  >
+    {text}
+  </a>
+</div>

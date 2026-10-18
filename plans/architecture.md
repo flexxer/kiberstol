@@ -126,7 +126,7 @@
 |---|---|---|
 | `products` | Модели столов | `title`, `line`, `price`, юр. поля (manufacturer, supplier, countryOfOrigin, warranty, used), `specs`, `image`, `gallery`, `badge`, `content` (blocks), `seo` |
 | `lines` | Линейки столов | `title`, `description`, `image`, `features`, `content` (blocks), `seo` |
-| `site` | Реквизиты ИП (единый источник правды) | `brand`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `brandColors`, `paymentMethods`, `deliveryMethods`, `nav`, `analytics`, `advertising` |
+| `site` | Реквизиты ИП (единый источник правды) | `brand`, `tagline`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `brandColors`, `paymentMethods`, `deliveryMethods`, `nav`, `analytics`, `advertising`, `seo` |
 | `legal` | Юр. документы | `title`, `updatedAt`, `seo` |
 | `sections` | Тексты секций главной | переиспользуется из FastPage |
 | `faq` | Вопросы-ответы | `question`, `answer`, `order` |
@@ -136,6 +136,26 @@
 ### Гибкие блоки контента (`contentBlocks`)
 
 Блоки: `hero`, `richText`, `image`, `imageCarousel`, `video`, `videoGif`, `gallery`, `cta`, `faq`, `specs`, `banner`, `columns`, `quote`, `divider`. Каждый — отдельный Astro-компонент в `src/components/blocks/`, рендерятся через `ContentBlocks.astro`.
+
+### Разделение слоёв: контент / движок / UI
+
+Архитектурный принцип проекта — строгое разделение трёх слоёв, чтобы контент настраивался **только в CMS**, а внешний вид — **только в CSS**. Движок (Astro-компоненты и логика) не содержит ни контента, ни стилей.
+
+| Слой | Что содержит | Где настраивается | Пример |
+|---|---|---|---|
+| **Контент** | Тексты, изображения, цены, реквизиты, блоки, FAQ, SEO-поля | **Только Keystatic CMS** (`src/content/*`) | `site/settings.md`, `sections/*.md`, `lines`, `products`, `faq`, `legal` |
+| **Движок** | Структура, логика, рендер, маршруты, скрипты | **Только код** (`src/components`, `src/layouts`, `src/pages`, `src/scripts`) | `BaseLayout`, `ContentBlocks`, `form.ts` |
+| **UI** | Цвета, шрифты, отступы, анимации, адаптивность | **Только CSS** (`src/styles/*`) | `cyberpunk.css`, Tailwind-утилиты |
+
+**Правила:**
+
+- **Контент не хардкодится** в компонентах: все видимые тексты, цены, реквизиты, изображения и блоки берутся из CMS-коллекций. Изменение контента в CMS не требует правки кода.
+- **UI не задаётся в контенте:** CMS не управляет цветами, шрифтами, отступами и анимациями. Визуальное оформление определяется только CSS-темой и Tailwind-классами в компонентах.
+- **Движок не содержит стилей и контента:** Astro-компоненты описывают структуру и логику, но не встраивают inline-стили и не дублируют тексты.
+- **Единый источник правды:** реквизиты, навигация, аналитика/реклама и глобальный SEO — в `site/settings.md`; тексты секций — в `sections`; товары/линейки — в `products`/`lines`.
+- **Смена темы = смена CSS:** ребрендинг (цвета, шрифты) выполняется правкой CSS-темы без изменения контента и движка.
+
+> **Реализовано на старте:** [`index.astro`](../src/pages/index.astro) не содержит захардкоженных текстов — заголовок, описание и SEO-мета берутся из [`site/settings.md`](../src/content/site/settings.md) и [`sections/home.md`](../src/content/sections/home.md) через `getEntry`/`getCollection`.
 
 ---
 

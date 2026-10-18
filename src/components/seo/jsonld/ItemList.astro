@@ -1,0 +1,20 @@
+---
+interface Props {
+  items: { name: string; url?: string; position?: number }[];
+}
+
+const { items } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: item.position ?? index + 1,
+    name: item.name,
+    ...(item.url && { url: item.url }),
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

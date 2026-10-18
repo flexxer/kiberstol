@@ -1,0 +1,81 @@
+---
+/**
+ * Header — шапка: логотип, бренд, телефон, основная навигация.
+ * Данные (бренд, телефон, навигация) берутся из `site/settings.md`.
+ */
+import { getEntry } from 'astro:content';
+import Logo from '../ui/Logo.astro';
+import Nav from './Nav.astro';
+
+const settings = await getEntry('site', 'settings');
+const { phone } = settings!.data;
+const telHref = `tel:${phone.replace(/[^+\d]/g, '')}`;
+---
+
+<header data-header="visible" class="sticky top-0 z-50 border-b border-border bg-bg/90 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+    <Logo />
+
+    <div class="flex items-center gap-2 sm:gap-4">
+      <!-- Ссылки навигации: только на десктопе -->
+      <div class="hidden md:block">
+        <Nav />
+      </div>
+
+      <!-- Телефон для заказа: только на десктопе -->
+      <a
+        href={telHref}
+        class="hidden text-sm font-semibold text-text hover:text-primary md:inline"
+      >
+        {phone}
+      </a>
+
+      <!-- Гамбургер: только на мобильном -->
+      <button
+        id="menu-toggle"
+        type="button"
+        class="rounded border border-border p-2 text-text md:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Открыть меню"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <line x1="3" y1="5" x2="17" y2="5" />
+          <line x1="3" y1="10" x2="17" y2="10" />
+          <line x1="3" y1="15" x2="17" y2="15" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Мобильное меню -->
+  <div id="mobile-menu" class="hidden border-t border-border bg-surface md:hidden">
+    <nav class="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3" aria-label="Мобильная навигация">
+      {
+        settings!.data.nav.map((item) => (
+          <a
+            href={item.href}
+            class="rounded px-2 py-2 text-sm text-muted hover:bg-bg hover:text-text"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <a
+        href={telHref}
+        class="rounded px-2 py-2 text-sm font-semibold text-text hover:bg-bg"
+      >
+        {phone}
+      </a>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,138 @@
+---
+/**
+ * ContentBlocks — рендер массива гибких блоков контента.
+ *
+ * Маппинг `type` блока → Astro-компонент. Используется на generic-страницах
+ * линеек (`/lines/[slug]`) и моделей (`/products/[slug]`), а также в любых
+ * местах, где контент строится из `contentBlocks` (см. `content.config.ts`).
+ *
+ * Блоки задаются в CMS (Keystatic, `fields.blocks`), внешний вид — в CSS.
+ * Движок не содержит ни контента, ни стилей.
+ */
+import Hero from './Hero.astro';
+import RichText from './RichText.astro';
+import Image from './Image.astro';
+import ImageCarousel from './ImageCarousel.astro';
+import Video from './Video.astro';
+import VideoGif from './VideoGif.astro';
+import Gallery from './Gallery.astro';
+import Cta from './Cta.astro';
+import Faq from './Faq.astro';
+import Specs from './Specs.astro';
+import Banner from './Banner.astro';
+import Columns from './Columns.astro';
+import Quote from './Quote.astro';
+import Divider from './Divider.astro';
+
+type Block = {
+  type: string;
+  [key: string]: unknown;
+};
+
+interface Props {
+  blocks: Block[];
+}
+
+const { blocks } = Astro.props;
+---
+
+<div class="space-y-8">
+  {
+    blocks.map((block) => {
+      switch (block.type) {
+        case 'hero':
+          return (
+            <Hero
+              heading={block.heading as string}
+              subheading={block.subheading as string | undefined}
+              image={block.image as string | undefined}
+              ctaText={block.ctaText as string | undefined}
+              ctaHref={block.ctaHref as string | undefined}
+            />
+          );
+        case 'richText':
+          return <RichText content={block.content as string} />;
+        case 'image':
+          return (
+            <Image
+              image={block.image as string}
+              alt={block.alt as string}
+              caption={block.caption as string | undefined}
+              align={block.align as 'left' | 'center' | 'right' | undefined}
+            />
+          );
+        case 'imageCarousel':
+          return (
+            <ImageCarousel
+              images={block.images as { image: string; alt: string; caption?: string }[]}
+              autoplay={block.autoplay as boolean | undefined}
+            />
+          );
+        case 'video':
+          return (
+            <Video
+              src={block.src as string}
+              poster={block.poster as string | undefined}
+              controls={block.controls as boolean | undefined}
+              autoplay={block.autoplay as boolean | undefined}
+            />
+          );
+        case 'videoGif':
+          return (
+            <VideoGif
+              src={block.src as string}
+              poster={block.poster as string | undefined}
+            />
+          );
+        case 'gallery':
+          return (
+            <Gallery
+              images={block.images as { image: string; alt: string; caption?: string }[]}
+            />
+          );
+        case 'cta':
+          return (
+            <Cta
+              text={block.text as string}
+              href={block.href as string}
+              style={block.style as 'primary' | 'secondary' | 'outline' | undefined}
+            />
+          );
+        case 'faq':
+          return (
+            <Faq items={block.items as { question: string; answer: string }[]} />
+          );
+        case 'specs':
+          return (
+            <Specs items={block.items as { name: string; value: string }[]} />
+          );
+        case 'banner':
+          return (
+            <Banner
+              image={block.image as string | undefined}
+              heading={block.heading as string}
+              text={block.text as string | undefined}
+              href={block.href as string | undefined}
+            />
+          );
+        case 'columns':
+          return (
+            <Columns
+              columns={block.columns as { heading?: string; content?: string }[]}
+            />
+          );
+        case 'quote':
+          return (
+            <Quote
+              text={block.text as string}
+              author={block.author as string | undefined}
+            />
+          );
+        case 'divider':
+          return <Divider style={block.style as 'line' | 'space' | undefined} />;
+        default:
+          return null;
+      }
+    })
+  }
+</div>

@@ -1,0 +1,30 @@
+---
+/**
+ * Gallery — сетка изображений с лайтбоксом.
+ * Лайтбокс подключается в Фазе 5 (`lightbox.ts`).
+ */
+interface Props {
+  images: { image: string; alt: string; caption?: string }[];
+}
+
+const { images } = Astro.props;
+---
+
+<div class="gallery grid grid-cols-2 gap-3 sm:grid-cols-3">
+  {
+    images.map((img, i) => (
+      <a
+        href={img.image}
+        class="gallery-item group block overflow-hidden rounded border border-border"
+        data-caption={img.caption}
+      >
+        <img
+          src={img.image}
+          alt={img.alt}
+          loading="lazy"
+          class="h-full w-full object-cover transition group-hover:scale-105"
+        />
+      </a>
+    ))
+  }
+</div>

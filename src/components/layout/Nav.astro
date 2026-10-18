@@ -1,0 +1,24 @@
+---
+/**
+ * Nav — главное меню (Каталог, Линейки, Доставка, FAQ, Контакты).
+ * Пункты берутся из `site/settings.md` (единый источник правды).
+ */
+import { getEntry } from 'astro:content';
+
+const settings = await getEntry('site', 'settings');
+const nav = settings?.data.nav ?? [];
+---
+
+<nav aria-label="Основная навигация">
+  <ul class="flex items-center gap-4">
+    {
+      nav.map((item) => (
+        <li>
+          <a href={item.href} class="link-underline text-sm text-muted hover:text-text">
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

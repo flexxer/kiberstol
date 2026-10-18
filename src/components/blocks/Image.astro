@@ -1,0 +1,33 @@
+---
+/**
+ * Image — одиночное inline-изображение с подписью и выравниванием.
+ */
+interface Props {
+  image: string;
+  alt: string;
+  caption?: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+const { image, alt, caption, align = 'center' } = Astro.props;
+
+const alignClass = {
+  left: 'mr-auto',
+  center: 'mx-auto',
+  right: 'ml-auto',
+}[align];
+---
+
+<figure class={`max-w-3xl ${alignClass}`}>
+  <img
+    src={image}
+    alt={alt}
+    loading="lazy"
+    class="w-full rounded border border-border"
+  />
+  {
+    caption && (
+      <figcaption class="mt-2 text-center text-sm text-muted">{caption}</figcaption>
+    )
+  }
+</figure>

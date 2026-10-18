@@ -1,0 +1,46 @@
+---
+interface Props {
+  name: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+  url?: string;
+  image?: string;
+  brand?: string;
+  countryOfOrigin?: string;
+}
+
+const {
+  name,
+  description,
+  price,
+  currency = 'BYN',
+  url,
+  image,
+  brand,
+  countryOfOrigin,
+} = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name,
+  ...(description && { description }),
+  ...(url && { url }),
+  ...(image && { image }),
+  ...(brand && { brand: { '@type': 'Brand', name: brand } }),
+  ...(countryOfOrigin && {
+    countryOfOrigin: { '@type': 'Country', name: countryOfOrigin },
+  }),
+  ...(price !== undefined && {
+    offers: {
+      '@type': 'Offer',
+      price,
+      priceCurrency: currency,
+      availability: 'https://schema.org/InStock',
+    },
+  }),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

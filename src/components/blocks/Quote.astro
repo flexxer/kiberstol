@@ -1,0 +1,20 @@
+---
+/**
+ * Quote — цитата/отзыв-вставка.
+ */
+interface Props {
+  text: string;
+  author?: string;
+}
+
+const { text, author } = Astro.props;
+---
+
+<blockquote class="border-l-4 border-primary pl-4">
+  <p class="text-lg italic text-text">«{text}»</p>
+  {
+    author && (
+      <footer class="mt-2 text-sm text-muted">— {author}</footer>
+    )
+  }
+</blockquote>
