@@ -74,22 +74,22 @@
 
 ## Фаза 8 — SEO
 
-- [ ] 8.1 JSON-LD (`Product`, `Organization`, `ItemList`, `BreadcrumbList`, `FAQPage`)
-- [ ] 8.2 `@astrojs/sitemap` + `robots.txt`
-- [ ] 8.3 Семантика (один `h1`, `alt`)
-- [ ] 8.4 Коммит + пуш
+- [x] 8.1 JSON-LD (`Product`, `Organization`, `ItemList`, `BreadcrumbList`, `FAQPage`)
+- [x] 8.2 `@astrojs/sitemap` + `robots.txt`
+- [x] 8.3 Семантика (один `h1`, `alt`)
+- [x] 8.4 Коммит + пуш
 
 ## Фаза 9 — Юридический контент
 
-- [ ] 9.1 5 файлов `legal/*.md`
-- [ ] 9.2 `site/settings.md` (реквизиты)
-- [ ] 9.3 Коммит + пуш
+- [x] 9.1 5 файлов `legal/*.md`
+- [x] 9.2 `site/settings.md` (реквизиты)
+- [x] 9.3 Коммит + пуш
 
 ## Фаза 10 — Плейсхолдеры контента
 
-- [ ] 10.1 `lines/*.md` + `products/*.md`
-- [ ] 10.2 `sections/*.md` + `faq/*.md`
-- [ ] 10.3 Коммит + пуш
+- [x] 10.1 `lines/*.md` + `products/*.md`
+- [x] 10.2 `sections/*.md` + `faq/*.md`
+- [x] 10.3 Коммит + пуш
 
 ## Фаза 11 — Сборка и приёмка
 
@@ -111,3 +111,6 @@
 | 2026-10-18 | 5.1–5.6 | Реализованы функциональные модули Фазы 5: `form.ts` (honeypot + time-honeypot + маска `+375 XX XXX-XX-XX` → `POST /api/submit.php` → Telegram) + `public/api/submit.php` (серверная защита, токен через `getenv`); `consent.ts` + `cookie-consent.ts` (гранулярное согласие аналитика/маркетинг, баннер в `BaseLayout`); `analytics.ts` + `advertising.ts` (gated-загрузка GA4/Метрика/Ads/Директ после согласия, отзыв удаляет cookie); `carousel.ts` + `lightbox.ts`; `faq.ts`, `reveal.ts`, `menu.ts`, `app.ts` (bootstrap). Форма на главной дополнена чекбоксами ПД/реклама и honeypot-полями. `astro build` проходит (12 страниц). |
 | 2026-10-18 | 6.1–6.4 | Реализована Keystatic CMS (Фаза 6): `keystatic.config.ts` (коллекции `products`, `lines`, `site` (singleton), `legal`, `sections`, `faq` + гибкие блоки `contentBlocks` через `fields.blocks` с полем `type` для совместимости с Zod-схемой `discriminatedUnion`). Подключена интеграция `@keystatic/astro` (маршруты `/keystatic` и `/api/keystatic`). Медиа-слой `public/assets/uploads` (WebP, quality 80, ≤2000px). Для серверных маршрутов CMS добавлен адаптер `@astrojs/node` (`output: 'static'` + `mode: 'standalone'` — контентные страницы остаются статичными). `astro build` проходит (12 статичных страниц + серверные маршруты CMS). |
 | 2026-10-18 | 7.1–7.4 | Реализована тема cyberpunk (Фаза 7): `src/styles/themes/cyberpunk.css` — единственная фиксированная тема, адаптированная под бренд (голубой `#00d4ff` / фиолетовый `#8b5cf6` / белый на тёмном фоне). Определены семантические Tailwind-токены (`text-text`, `text-muted`, `text-primary`, `text-accent`, `bg-bg`, `bg-surface`, `bg-primary`, `bg-secondary`, `border-border`, `border-primary`) через `@theme`, неоновое свечение, кастомная утилита `link-underline`, адаптация `prose` под тёмную тему. `src/styles/fonts.css` — self-host шрифты (Manrope/Unbounded/Inter/JetBrains Mono, variable). `global.css` переведён на Tailwind v4 (`@plugin '@tailwindcss/typography'`). Свитчер тем отсутствует (ничего удалять не потребовалось). `astro build` проходит (12 страниц). |
+| 2026-10-18 | 8.1–8.4 | Завершена Фаза 8 (SEO): JSON-LD (`Product`+`Offer` BYN, `Organization`, `ItemList`, `BreadcrumbList`, `FAQPage`) уже встроены в страницы; добавлены `public/robots.txt` (закрыты `/keystatic`, `/api/`, юр. страницы) и `public/favicon.svg`; `@astrojs/sitemap` генерирует `sitemap-index.xml` с исключением служебных/юр. страниц. Семантика: один `h1` на страницу, `alt` у всех изображений. `astro build` проходит. |
+| 2026-10-18 | 9.1–9.3 | Завершена Фаза 9 (юридический контент): написаны 5 документов `legal/*.md` (privacy, cookie-policy, terms, returns, complaints) с полными текстами по закону РБ № 99-З и Пост. №778; `site/settings.md` дополнен полями `analytics`/`advertising` и уточнён `authorizedBodyPhone`. `astro build` проходит. |
+| 2026-10-18 | 10.1–10.3 | Завершена Фаза 10 (плейсхолдеры контента): наполнены `lines/*.md` (3 линейки «Старт»/«Про»/«Макс») и `products/*.md` (2 модели с юр. полями); созданы `sections/*.md` (hero, advantages, delivery, order, contact) и `faq/*.md` (4 вопроса). `astro build` проходит (12 страниц). |

@@ -11,7 +11,7 @@ email: kiberstol.by@gmail.com
 address: г. Минск, ул. Грушевская 17-14
 workHours: Заказы принимаются с 9:00 до 21:00 без выходных
 authorizedBody: ИП Суворов Александр Владимирович
-authorizedBodyPhone: "TODO: +375 212 XX-XX-XX"
+authorizedBodyPhone: "+375 212 XX-XX-XX (администрация Первомайского района г. Витебска)"
 brandColors:
   primary: "#00d4ff"
   secondary: "#8b5cf6"
@@ -34,6 +34,12 @@ nav:
     href: /#faq
   - label: Контакты
     href: /#contacts
+analytics:
+  ga4Id: ""
+  yandexMetrikaId: ""
+advertising:
+  googleAdsId: ""
+  yandexDirectId: ""
 seo:
   title: Kiberstol.by — игровые компьютерные столы
   description: Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol — доступное качество.

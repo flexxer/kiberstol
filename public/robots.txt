@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Служебные и юридические страницы закрыты от индексации
+Disallow: /keystatic
+Disallow: /api/
+Disallow: /privacy
+Disallow: /cookie-policy
+Disallow: /terms
+Disallow: /returns
+Disallow: /complaints
+
+Sitemap: https://kiberstol.by/sitemap-index.xml
