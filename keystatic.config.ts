@@ -6,8 +6,9 @@ import { config, collection, singleton, fields } from '@keystatic/core';
  * Git-based CMS (GitHub OAuth). Коллекции зеркалируют Zod-схемы из
  * `src/content.config.ts` (единый источник правды для контента).
  *
- * Медиа-слой: `fields.image`/`fields.file` пишут в `public/assets/uploads`
- * (WebP, quality 80, ≤ 2000px — ресайз выполняется на стороне CMS).
+ * Медиа-слой: `fields.image`/`fields.file` пишут в `src/assets/uploads`.
+ * Оптимизация (ресайз, WebP/AVIF, quality) выполняется на этапе сборки
+ * через `astro:assets` (см. `src/lib/image.ts`).
  *
  * Гибкие блоки контента (`contentBlocks`) задаются через `fields.blocks`.
  * Каждый блок — `object` с полем `type` (select с фиксированным значением),
@@ -29,7 +30,7 @@ const seoFields = {
   }),
   image: fields.image({
     label: 'SEO-изображение (og:image)',
-    directory: 'assets/uploads',
+    directory: 'src/assets/uploads',
     validation: { isRequired: false },
   }),
   noindex: fields.checkbox({
@@ -43,7 +44,7 @@ const imageItem = fields.object(
   {
     image: fields.image({
       label: 'Изображение',
-      directory: 'assets/uploads',
+      directory: 'src/assets/uploads',
       validation: { isRequired: true },
     }),
     alt: fields.text({ label: 'Alt-текст', validation: { isRequired: true } }),
@@ -90,7 +91,7 @@ const contentBlocks = fields.blocks(
         }),
         heading: fields.text({ label: 'Заголовок', validation: { isRequired: true } }),
         subheading: fields.text({ label: 'Подзаголовок', multiline: true }),
-        image: fields.image({ label: 'Фоновое изображение', directory: 'assets/uploads' }),
+        image: fields.image({ label: 'Фоновое изображение', directory: 'src/assets/uploads' }),
         ctaText: fields.text({ label: 'Текст кнопки' }),
         ctaHref: fields.text({ label: 'Ссылка кнопки' }),
       }),
@@ -120,7 +121,7 @@ const contentBlocks = fields.blocks(
         }),
         image: fields.image({
           label: 'Изображение',
-          directory: 'assets/uploads',
+          directory: 'src/assets/uploads',
           validation: { isRequired: true },
         }),
         alt: fields.text({ label: 'Alt-текст', validation: { isRequired: true } }),
@@ -157,7 +158,7 @@ const contentBlocks = fields.blocks(
           defaultValue: 'video',
         }),
         src: fields.text({ label: 'URL/файл видео', validation: { isRequired: true } }),
-        poster: fields.image({ label: 'Постер', directory: 'assets/uploads' }),
+        poster: fields.image({ label: 'Постер', directory: 'src/assets/uploads' }),
         controls: fields.checkbox({ label: 'Показывать контролы', defaultValue: true }),
         autoplay: fields.checkbox({ label: 'Автовоспроизведение', defaultValue: false }),
       }),
@@ -171,7 +172,7 @@ const contentBlocks = fields.blocks(
           defaultValue: 'videoGif',
         }),
         src: fields.text({ label: 'URL/файл видео', validation: { isRequired: true } }),
-        poster: fields.image({ label: 'Постер', directory: 'assets/uploads' }),
+        poster: fields.image({ label: 'Постер', directory: 'src/assets/uploads' }),
       }),
     },
     gallery: {
@@ -236,7 +237,7 @@ const contentBlocks = fields.blocks(
           options: [{ label: 'Баннер', value: 'banner' }],
           defaultValue: 'banner',
         }),
-        image: fields.image({ label: 'Изображение', directory: 'assets/uploads' }),
+        image: fields.image({ label: 'Изображение', directory: 'src/assets/uploads' }),
         heading: fields.text({ label: 'Заголовок', validation: { isRequired: true } }),
         text: fields.text({ label: 'Текст', multiline: true }),
         href: fields.text({ label: 'Ссылка' }),
@@ -305,8 +306,7 @@ const products = collection({
   label: 'Товары',
   path: 'src/content/products/*',
   slugField: 'title',
-  entryLayout: 'content',
-  format: { contentField: 'description' },
+  format: { data: 'yaml', contentField: 'description' },
   columns: ['title', 'line', 'price'],
   schema: {
     title: fields.slug({ name: { label: 'Наименование товара' } }),
@@ -314,7 +314,7 @@ const products = collection({
     price: fields.number({ label: 'Цена, BYN', validation: { isRequired: true } }),
     oldPrice: fields.number({ label: 'Старая цена, BYN' }),
     shortDescription: fields.text({ label: 'Краткое описание', multiline: true }),
-    description: fields.text({ label: 'Полное описание', multiline: true }),
+    description: fields.mdx({ label: 'Полное описание', extension: 'md' }),
 
     // Юридически обязательные поля карточки (закон РБ)
     manufacturer: fields.text({ label: 'Изготовитель', validation: { isRequired: true } }),
@@ -327,11 +327,11 @@ const products = collection({
     specs: fields.array(specItem, { label: 'Характеристики' }),
     image: fields.image({
       label: 'Главное фото',
-      directory: 'assets/uploads',
+      directory: 'src/assets/uploads',
       validation: { isRequired: true },
     }),
     gallery: fields.array(
-      fields.image({ label: 'Фото', directory: 'assets/uploads' }),
+      fields.image({ label: 'Фото', directory: 'src/assets/uploads' }),
       { label: 'Галерея' },
     ),
     badge: fields.text({ label: 'Бейдж' }),
@@ -347,15 +347,14 @@ const lines = collection({
   label: 'Линейки',
   path: 'src/content/lines/*',
   slugField: 'title',
-  entryLayout: 'content',
-  format: { contentField: 'description' },
+  format: { data: 'yaml', contentField: 'description' },
   columns: ['title', 'order'],
   schema: {
     title: fields.slug({ name: { label: 'Название линейки' } }),
-    description: fields.text({ label: 'Описание', multiline: true }),
+    description: fields.mdx({ label: 'Описание', extension: 'md' }),
     image: fields.image({
       label: 'Изображение',
-      directory: 'assets/uploads',
+      directory: 'src/assets/uploads',
       validation: { isRequired: true },
     }),
     features: fields.array(fields.text({ label: 'Особенность' }), { label: 'Особенности' }),
@@ -428,12 +427,12 @@ const legal = collection({
   label: 'Юридические документы',
   path: 'src/content/legal/*',
   slugField: 'title',
-  entryLayout: 'content',
-  format: { contentField: 'body' },
+  format: { data: 'yaml', contentField: 'body' },
   columns: ['title', 'updatedAt'],
   schema: {
     title: fields.slug({ name: { label: 'Название документа' } }),
     updatedAt: fields.date({ label: 'Дата обновления', defaultValue: { kind: 'today' } }),
+    body: fields.mdx({ label: 'Текст документа', extension: 'md' }),
     seo: fields.object(seoFields, { label: 'SEO' }),
   },
 });
@@ -443,14 +442,13 @@ const sections = collection({
   label: 'Секции главной',
   path: 'src/content/sections/*',
   slugField: 'title',
-  entryLayout: 'content',
-  format: { contentField: 'body' },
+  format: { data: 'yaml', contentField: 'body' },
   columns: ['title', 'order'],
   schema: {
     title: fields.slug({ name: { label: 'Название секции' } }),
     heading: fields.text({ label: 'Заголовок' }),
     subheading: fields.text({ label: 'Подзаголовок' }),
-    body: fields.text({ label: 'Текст', multiline: true }),
+    body: fields.mdx({ label: 'Текст', extension: 'md' }),
     ctaText: fields.text({ label: 'Текст кнопки' }),
     ctaHref: fields.text({ label: 'Ссылка кнопки' }),
     order: fields.number({ label: 'Порядок сортировки', defaultValue: 0 }),
@@ -462,12 +460,11 @@ const faq = collection({
   label: 'FAQ',
   path: 'src/content/faq/*',
   slugField: 'question',
-  entryLayout: 'content',
-  format: { contentField: 'answer' },
+  format: { data: 'yaml', contentField: 'answer' },
   columns: ['question', 'order'],
   schema: {
     question: fields.slug({ name: { label: 'Вопрос' } }),
-    answer: fields.text({ label: 'Ответ', multiline: true }),
+    answer: fields.mdx({ label: 'Ответ', extension: 'md' }),
     order: fields.number({ label: 'Порядок сортировки', defaultValue: 0 }),
   },
 });

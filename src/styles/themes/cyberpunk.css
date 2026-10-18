@@ -207,6 +207,96 @@
 }
 
 /* ============================================================================
+ * Hero-сцена (комната геймера) — интерактивная подсветка вентиляторов
+ * ========================================================================== */
+
+/* Корневой элемент сцены: задаёт hue подсветки (меняется из hero.ts) */
+.hero-scene {
+  --fan-hue: 190;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Плавный переход цвета подсветки при смене --fan-hue */
+.hero-scene .fan-glow,
+.hero-scene .fan-blades,
+.hero-scene .fan circle {
+  transition: fill 1.2s ease, stop-color 1.2s ease;
+}
+
+/* Вращение лопастей вентилятора */
+.hero-scene .fan-blades {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: fan-spin 0.6s linear infinite;
+}
+
+/* Пульсация свечения вентилятора */
+.hero-scene .fan-glow {
+  animation: fan-pulse 2.4s ease-in-out infinite;
+  filter: blur(6px);
+}
+
+@keyframes fan-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fan-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+ * Hero-видео (фоновый ролик комнаты геймера) + тонирующая маска
+ * ========================================================================== */
+
+/* Контейнер видео-фона */
+.hero-video {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Тонирующая маска: затемняет и подкрашивает видео в фирменные цвета */
+.hero-video-tint {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 7, 15, 0.55), rgba(5, 7, 15, 0.85)),
+    radial-gradient(circle at 30% 20%, rgba(0, 212, 255, 0.22), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.22), transparent 50%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Цветовой слой: сдвигает тёплые (жёлтые/оранжевые) тона в холодную гамму */
+.hero-video-color {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #00d4ff 0%, #8b5cf6 100%);
+  mix-blend-mode: color;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ============================================================================
  * Анимации
  * ========================================================================== */
 

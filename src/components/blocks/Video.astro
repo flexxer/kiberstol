@@ -1,7 +1,11 @@
 ---
 /**
  * Video — inline-видео с контролами.
+ * Постер оптимизируется через `astro:assets`.
  */
+import { getImage } from 'astro:assets';
+import { resolveImage } from '../../lib/image';
+
 interface Props {
   src: string;
   poster?: string;
@@ -10,11 +14,16 @@ interface Props {
 }
 
 const { src, poster, controls = true, autoplay = false } = Astro.props;
+
+const resolvedPoster = resolveImage(poster);
+const optimizedPoster = resolvedPoster
+  ? await getImage({ src: resolvedPoster, width: 1200, format: 'webp' })
+  : undefined;
 ---
 
 <video
   src={src}
-  poster={poster}
+  poster={optimizedPoster?.src}
   controls={controls}
   autoplay={autoplay}
   playsinline

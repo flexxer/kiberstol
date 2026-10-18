@@ -2,7 +2,11 @@
 /**
  * ImageCarousel — карусель изображений (слайдер).
  * Интерактив подключается в Фазе 5 (`carousel.ts`).
+ * Оптимизация через `astro:assets`.
  */
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../lib/image';
+
 interface Props {
   images: { image: string; alt: string; caption?: string }[];
   autoplay?: boolean;
@@ -17,23 +21,32 @@ const { images, autoplay = false } = Astro.props;
 >
   <div class="carousel-track flex transition-transform">
     {
-      images.map((img, i) => (
-        <figure class="carousel-slide w-full shrink-0">
-          <img
-            src={img.image}
-            alt={img.alt}
-            loading={i === 0 ? 'eager' : 'lazy'}
-            class="h-full w-full object-cover"
-          />
-          {
-            img.caption && (
-              <figcaption class="p-3 text-center text-sm text-muted">
-                {img.caption}
-              </figcaption>
-            )
-          }
-        </figure>
-      ))
+      images.map((img, i) => {
+        const resolved = resolveImage(img.image);
+        return (
+          <figure class="carousel-slide w-full shrink-0">
+            {
+              resolved && (
+                <Image
+                  src={resolved}
+                  alt={img.alt}
+                  width={1200}
+                  format="webp"
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  class="h-full w-full object-cover"
+                />
+              )
+            }
+            {
+              img.caption && (
+                <figcaption class="p-3 text-center text-sm text-muted">
+                  {img.caption}
+                </figcaption>
+              )
+            }
+          </figure>
+        );
+      })
     }
   </div>
 

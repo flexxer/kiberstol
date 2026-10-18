@@ -1,7 +1,11 @@
 ---
 /**
  * Banner — промо-баннер «важный момент».
+ * Оптимизация фонового изображения через `astro:assets`.
  */
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../lib/image';
+
 interface Props {
   image?: string;
   heading: string;
@@ -10,15 +14,19 @@ interface Props {
 }
 
 const { image, heading, text, href } = Astro.props;
+
+const resolved = resolveImage(image);
 ---
 
 <div class="relative overflow-hidden rounded border border-border bg-surface">
   {
-    image && (
-      <img
-        src={image}
+    resolved && (
+      <Image
+        src={resolved}
         alt=""
         aria-hidden="true"
+        width={1200}
+        format="webp"
         class="absolute inset-0 h-full w-full object-cover opacity-20"
         loading="lazy"
       />

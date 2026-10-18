@@ -1,7 +1,11 @@
 ---
 /**
  * Image — одиночное inline-изображение с подписью и выравниванием.
+ * Оптимизация через `astro:assets` (ресайз, WebP/AVIF, quality).
  */
+import { getImage } from 'astro:assets';
+import { resolveImage } from '../../lib/image';
+
 interface Props {
   image: string;
   alt: string;
@@ -11,6 +15,11 @@ interface Props {
 
 const { image, alt, caption, align = 'center' } = Astro.props;
 
+const resolved = resolveImage(image);
+const optimized = resolved
+  ? await getImage({ src: resolved, width: 1200, format: 'webp' })
+  : undefined;
+
 const alignClass = {
   left: 'mr-auto',
   center: 'mx-auto',
@@ -19,12 +28,18 @@ const alignClass = {
 ---
 
 <figure class={`max-w-3xl ${alignClass}`}>
-  <img
-    src={image}
-    alt={alt}
-    loading="lazy"
-    class="w-full rounded border border-border"
-  />
+  {
+    optimized && (
+      <img
+        src={optimized.src}
+        alt={alt}
+        width={optimized.attributes.width}
+        height={optimized.attributes.height}
+        loading="lazy"
+        class="w-full rounded border border-border"
+      />
+    )
+  }
   {
     caption && (
       <figcaption class="mt-2 text-center text-sm text-muted">{caption}</figcaption>

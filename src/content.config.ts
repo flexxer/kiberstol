@@ -137,7 +137,7 @@ const products = defineCollection({
     price: z.number(), // цена, BYN
     oldPrice: z.number().optional(),
     shortDescription: z.string(),
-    description: z.string(),
+    // `description` — контентное поле (markdown-тело, fields.mdx в Keystatic)
 
     // Юридически обязательные поля карточки
     manufacturer: z.string(), // наименование изготовителя
@@ -165,7 +165,7 @@ const lines = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/lines' }),
   schema: z.object({
     title: z.string(),
-    description: z.string(),
+    // `description` — контентное поле (markdown-тело, fields.mdx в Keystatic)
     image: z.string(),
     features: z.array(z.string()).optional(),
     order: z.number().default(0),
@@ -244,7 +244,7 @@ const sections = defineCollection({
     title: z.string(),
     heading: z.string().optional(),
     subheading: z.string().optional(),
-    body: z.string().optional(),
+    // `body` — контентное поле (markdown-тело, fields.mdx в Keystatic)
     ctaText: z.string().optional(),
     ctaHref: z.string().optional(),
     order: z.number().default(0),
@@ -258,7 +258,7 @@ const faq = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/faq' }),
   schema: z.object({
     question: z.string(),
-    answer: z.string(),
+    // `answer` — контентное поле (markdown-тело, fields.mdx в Keystatic)
     order: z.number().default(0),
   }),
 });

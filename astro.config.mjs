@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 import keystatic from '@keystatic/astro';
+import react from '@astrojs/react';
 import node from '@astrojs/node';
 
 // https://astro.build/config
@@ -21,6 +22,8 @@ export default defineConfig({
   },
 
   integrations: [
+    // React-рендерер для UI Keystatic CMS (client:only="react")
+    react(),
     // Keystatic CMS: инжектит маршруты /keystatic/[...params] и /api/keystatic/[...params]
     // и резолвит `virtual:keystatic-config` → ./keystatic.config.ts
     keystatic(),

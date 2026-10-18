@@ -12,6 +12,7 @@ import { initCarousel } from './carousel';
 import { initLightbox } from './lightbox';
 import { initFaq } from './faq';
 import { initReveal } from './reveal';
+import { initHero } from './hero';
 import { initCookieConsent } from './cookie-consent';
 import { initAnalytics } from './analytics';
 import { initAdvertising } from './advertising';
@@ -23,6 +24,7 @@ export function initPage(): void {
   initLightbox();
   initFaq();
   initReveal();
+  initHero();
   initCookieConsent();
   initAnalytics();
   initAdvertising();

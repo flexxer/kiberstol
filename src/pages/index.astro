@@ -11,7 +11,10 @@
  * Движок не содержит ни контента, ни стилей.
  */
 import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/blocks/Hero.astro';
+import { resolveImage } from '../lib/image';
 
 // Единый источник правды: реквизиты и глобальный SEO — из `site/settings.md`.
 const settings = await getEntry('site', 'settings');
@@ -37,7 +40,7 @@ const faq = (await getCollection('faq')).sort((a, b) => a.data.order - b.data.or
 const brand = s?.brand ?? 'Kiberstol.by';
 const tagline = s?.tagline ?? 'Игровые компьютерные столы';
 const seoTitle = s?.seo?.title ?? `${brand} — ${tagline}`;
-const seoDescription = s?.seo?.description ?? hero?.data.body ?? tagline;
+const seoDescription = s?.seo?.description ?? hero?.body ?? tagline;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.by';
 
@@ -72,7 +75,7 @@ const faqJsonLd = {
   mainEntity: faq.map((item) => ({
     '@type': 'Question',
     name: item.data.question,
-    acceptedAnswer: { '@type': 'Answer', text: item.data.answer },
+    acceptedAnswer: { '@type': 'Answer', text: item.body },
   })),
 };
 ---
@@ -83,28 +86,17 @@ const faqJsonLd = {
   type="website"
   jsonLd={[organizationJsonLd, itemListJsonLd, faqJsonLd]}
 >
-  <!-- 1. Hero — комната геймера -->
-  <section class="relative overflow-hidden border-b border-border bg-surface">
-    <div class="mx-auto max-w-6xl px-4 py-16 sm:py-24">
-      <h1 class="max-w-3xl text-3xl font-bold leading-tight text-text sm:text-5xl">
-        {hero?.data.heading ?? brand}
-      </h1>
-      {hero?.data.subheading && (
-        <p class="mt-4 max-w-2xl text-lg text-muted">{hero.data.subheading}</p>
-      )}
-      {hero?.data.body && (
-        <p class="mt-2 max-w-2xl text-muted">{hero.data.body}</p>
-      )}
-      {hero?.data.ctaText && hero?.data.ctaHref && (
-        <a
-          href={hero.data.ctaHref}
-          class="mt-8 inline-block rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
-        >
-          {hero.data.ctaText}
-        </a>
-      )}
-    </div>
-  </section>
+  <!-- 1. Hero — комната геймера (фоновое видео с тонирующей маской) -->
+  <Hero
+    heading={hero?.data.heading ?? brand}
+    subheading={hero?.data.subheading}
+    ctaText={hero?.data.ctaText}
+    ctaHref={hero?.data.ctaHref}
+    video
+  />
+  {hero?.body && (
+    <p class="mx-auto max-w-6xl px-4 pt-6 text-muted">{hero.body}</p>
+  )}
 
   <!-- 2. Каталог: линейки → модели -->
   <section id="catalog" class="mx-auto max-w-6xl px-4 py-12">
@@ -119,10 +111,12 @@ const faqJsonLd = {
                 href={`/lines/${line.id}`}
                 class="group mb-4 flex items-center gap-3"
               >
-                {line.data.image && (
-                  <img
-                    src={line.data.image}
+                {resolveImage(line.data.image) && (
+                  <Image
+                    src={resolveImage(line.data.image)!}
                     alt={line.data.title}
+                    width={96}
+                    format="webp"
                     loading="lazy"
                     class="h-12 w-12 rounded border border-border object-cover"
                   />
@@ -131,8 +125,8 @@ const faqJsonLd = {
                   <h3 class="text-xl font-semibold text-text group-hover:text-primary">
                     {line.data.title}
                   </h3>
-                  {line.data.description && (
-                    <p class="text-sm text-muted">{line.data.description}</p>
+                  {line.body && (
+                    <p class="text-sm text-muted">{line.body}</p>
                   )}
                 </div>
               </a>
@@ -143,10 +137,12 @@ const faqJsonLd = {
                       href={`/products/${product.id}`}
                       class="group block overflow-hidden rounded border border-border bg-surface transition hover:border-primary"
                     >
-                      {product.data.image && (
-                        <img
-                          src={product.data.image}
+                      {resolveImage(product.data.image) && (
+                        <Image
+                          src={resolveImage(product.data.image)!}
                           alt={product.data.title}
+                          width={640}
+                          format="webp"
                           loading="lazy"
                           class="h-40 w-full object-cover"
                         />
@@ -186,8 +182,8 @@ const faqJsonLd = {
       <h2 class="mb-6 text-2xl font-bold text-text">
         {delivery?.data.heading ?? 'Доставка и оплата'}
       </h2>
-      {delivery?.data.body && (
-        <p class="mb-6 max-w-3xl text-muted">{delivery.data.body}</p>
+      {delivery?.body && (
+        <p class="mb-6 max-w-3xl text-muted">{delivery.body}</p>
       )}
       <div class="grid gap-6 md:grid-cols-2">
         <div class="rounded border border-border p-5">
@@ -212,7 +208,7 @@ const faqJsonLd = {
       <h2 class="mb-4 text-2xl font-bold text-text">
         {order.data.heading ?? 'Оформление заказа'}
       </h2>
-      {order.data.body && <p class="mb-6 max-w-3xl text-muted">{order.data.body}</p>}
+      {order.body && <p class="mb-6 max-w-3xl text-muted">{order.body}</p>}
       {order.data.ctaText && order.data.ctaHref && (
         <a
           href={order.data.ctaHref}
@@ -231,8 +227,8 @@ const faqJsonLd = {
         <h2 class="mb-6 text-2xl font-bold text-text">
           {advantages.data.heading ?? 'Почему Kiberstol'}
         </h2>
-        {advantages.data.body && (
-          <p class="max-w-3xl text-muted">{advantages.data.body}</p>
+        {advantages.body && (
+          <p class="max-w-3xl text-muted">{advantages.body}</p>
         )}
       </div>
     </section>
@@ -256,7 +252,7 @@ const faqJsonLd = {
                 <span class="text-primary" aria-hidden="true">+</span>
               </button>
               <div id={`faq-answer-${i}`} class="hidden px-4 pb-4 text-muted">
-                {item.data.answer}
+                {item.body}
               </div>
             </div>
           ))
@@ -271,8 +267,8 @@ const faqJsonLd = {
       <h2 class="mb-4 text-2xl font-bold text-text">
         {contact?.data.heading ?? 'Оставить заявку'}
       </h2>
-      {contact?.data.body && (
-        <p class="mb-6 max-w-3xl text-muted">{contact.data.body}</p>
+      {contact?.body && (
+        <p class="mb-6 max-w-3xl text-muted">{contact.body}</p>
       )}
       <form
         id="order-form"
