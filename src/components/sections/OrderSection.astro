@@ -1,0 +1,27 @@
+---
+/**
+ * OrderSection — секция `order` главной страницы.
+ * Заголовок + markdown-текст + CTA-кнопка.
+ */
+import RichText from '../blocks/RichText.astro';
+import Cta from '../blocks/Cta.astro';
+
+interface Props {
+  heading?: string;
+  body?: string;
+  ctaText?: string;
+  ctaHref?: string;
+}
+
+const { heading = 'Оформление заказа', body, ctaText, ctaHref } = Astro.props;
+---
+
+<section id="order" class="mx-auto max-w-6xl px-4 py-12">
+  <h2 class="mb-4 text-2xl font-bold text-text">{heading}</h2>
+  {body && (
+    <div class="mb-6 max-w-3xl">
+      <RichText content={body} />
+    </div>
+  )}
+  {ctaText && ctaHref && <Cta text={ctaText} href={ctaHref} />}
+</section>

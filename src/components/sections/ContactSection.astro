@@ -1,0 +1,27 @@
+---
+/**
+ * ContactSection — секция `contact` главной страницы.
+ * Заголовок + markdown-текст + форма заказа (`ContactForm.astro`).
+ */
+import RichText from '../blocks/RichText.astro';
+import ContactForm from '../blocks/ContactForm.astro';
+
+interface Props {
+  heading?: string;
+  body?: string;
+}
+
+const { heading = 'Оставить заявку', body } = Astro.props;
+---
+
+<section id="contacts" class="border-t border-border bg-surface">
+  <div class="mx-auto max-w-6xl px-4 py-12">
+    <h2 class="mb-4 text-2xl font-bold text-text">{heading}</h2>
+    {body && (
+      <div class="mb-6 max-w-3xl">
+        <RichText content={body} />
+      </div>
+    )}
+    <ContactForm />
+  </div>
+</section>

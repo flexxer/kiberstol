@@ -1,0 +1,103 @@
+---
+/**
+ * HomeSections — рендерер секций главной страницы.
+ *
+ * Принимает массив секций (уже отсортированных по `order`) и динамические
+ * данные (`lines`, `products`, `faq`, `settings`), маппит `type` секции на
+ * соответствующий секционный компонент.
+ *
+ * Секции задаются в CMS (Keystatic, коллекция `sections`), порядок — полем
+ * `order`. Движок не содержит ни контента, ни стилей.
+ */
+import HeroSection from './HeroSection.astro';
+import CatalogSection from './CatalogSection.astro';
+import AdvantagesSection from './AdvantagesSection.astro';
+import DeliverySection from './DeliverySection.astro';
+import OrderSection from './OrderSection.astro';
+import FaqSection from './FaqSection.astro';
+import ContactSection from './ContactSection.astro';
+
+type Block = {
+  type: string;
+  [key: string]: unknown;
+};
+
+interface Section {
+  id: string;
+  data: {
+    type: string;
+    heading?: string;
+    subheading?: string;
+    body?: string;
+    ctaText?: string;
+    ctaHref?: string;
+    video?: boolean;
+    content?: Block[];
+  };
+}
+
+interface Props {
+  sections: Section[];
+  lines: any[];
+  products: any[];
+  faq: { question: string; answer: string }[];
+  paymentMethods?: string[];
+  deliveryMethods?: string[];
+}
+
+const { sections, lines, products, faq, paymentMethods, deliveryMethods } = Astro.props;
+---
+
+{
+  sections.map((section) => {
+    const { type, heading, subheading, body, ctaText, ctaHref, video, content } =
+      section.data;
+
+    switch (type) {
+      case 'hero':
+        return (
+          <HeroSection
+            heading={heading}
+            subheading={subheading}
+            ctaText={ctaText}
+            ctaHref={ctaHref}
+            video={video}
+            body={body}
+          />
+        );
+      case 'catalog':
+        return (
+          <CatalogSection
+            heading={heading}
+            subheading={subheading}
+            body={body}
+            ctaText={ctaText}
+            ctaHref={ctaHref}
+            lines={lines}
+            products={products}
+          />
+        );
+      case 'advantages':
+        return <AdvantagesSection heading={heading} content={content} />;
+      case 'delivery':
+        return (
+          <DeliverySection
+            heading={heading}
+            body={body}
+            paymentMethods={paymentMethods}
+            deliveryMethods={deliveryMethods}
+          />
+        );
+      case 'order':
+        return (
+          <OrderSection heading={heading} body={body} ctaText={ctaText} ctaHref={ctaHref} />
+        );
+      case 'faq':
+        return <FaqSection heading={heading} items={faq} />;
+      case 'contact':
+        return <ContactSection heading={heading} body={body} />;
+      default:
+        return null;
+    }
+  })
+}

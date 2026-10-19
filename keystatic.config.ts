@@ -31,6 +31,7 @@ const seoFields = {
   image: fields.image({
     label: 'SEO-изображение (og:image)',
     directory: 'src/assets/uploads',
+    publicPath: '/assets/uploads',
     validation: { isRequired: false },
   }),
   noindex: fields.checkbox({
@@ -45,6 +46,7 @@ const imageItem = fields.object(
     image: fields.image({
       label: 'Изображение',
       directory: 'src/assets/uploads',
+      publicPath: '/assets/uploads',
       validation: { isRequired: true },
     }),
     alt: fields.text({ label: 'Alt-текст', validation: { isRequired: true } }),
@@ -79,8 +81,196 @@ const faqItem = fields.object(
  * Каждый блок — `object` с полем `type` (select с единственным значением),
  * чтобы итоговая структура `{ type, ...поля }` совпадала с Zod-схемой.
  */
+/**
+ * Leaf-блоки — могут вкладываться внутрь блока `columns`.
+ * Исключены `hero` и `columns` (чтобы избежать бесконечной вложенности).
+ */
+const leafBlocks = {
+  richText: {
+    label: 'Текст (markdown)',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Rich text', value: 'richText' }],
+        defaultValue: 'richText',
+      }),
+      content: fields.text({
+        label: 'Содержимое',
+        description:
+          'Markdown: заголовки (#), списки (-), **жирный**, *курсив*, [ссылка](url).',
+        multiline: true,
+        validation: { isRequired: true },
+      }),
+    }),
+  },
+  image: {
+    label: 'Изображение',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Изображение', value: 'image' }],
+        defaultValue: 'image',
+      }),
+      image: fields.image({
+        label: 'Изображение',
+        directory: 'src/assets/uploads',
+        publicPath: '/assets/uploads',
+        validation: { isRequired: true },
+      }),
+      alt: fields.text({ label: 'Alt-текст', validation: { isRequired: true } }),
+      caption: fields.text({ label: 'Подпись', multiline: true }),
+      align: fields.select({
+        label: 'Выравнивание',
+        options: [
+          { label: 'По центру', value: 'center' },
+          { label: 'Слева', value: 'left' },
+          { label: 'Справа', value: 'right' },
+        ],
+        defaultValue: 'center',
+      }),
+    }),
+  },
+  imageCarousel: {
+    label: 'Карусель изображений',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Карусель', value: 'imageCarousel' }],
+        defaultValue: 'imageCarousel',
+      }),
+      images: fields.array(imageItem, { label: 'Изображения' }),
+      autoplay: fields.checkbox({ label: 'Автопрокрутка', defaultValue: false }),
+    }),
+  },
+  video: {
+    label: 'Видео',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Видео', value: 'video' }],
+        defaultValue: 'video',
+      }),
+      src: fields.text({ label: 'URL/файл видео', validation: { isRequired: true } }),
+      poster: fields.image({ label: 'Постер', directory: 'src/assets/uploads', publicPath: '/assets/uploads' }),
+      controls: fields.checkbox({ label: 'Показывать контролы', defaultValue: true }),
+      autoplay: fields.checkbox({ label: 'Автовоспроизведение', defaultValue: false }),
+    }),
+  },
+  videoGif: {
+    label: 'Видео (gif-режим)',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Видео-gif', value: 'videoGif' }],
+        defaultValue: 'videoGif',
+      }),
+      src: fields.text({ label: 'URL/файл видео', validation: { isRequired: true } }),
+      poster: fields.image({ label: 'Постер', directory: 'src/assets/uploads', publicPath: '/assets/uploads' }),
+    }),
+  },
+  gallery: {
+    label: 'Галерея',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Галерея', value: 'gallery' }],
+        defaultValue: 'gallery',
+      }),
+      images: fields.array(imageItem, { label: 'Изображения' }),
+    }),
+  },
+  cta: {
+    label: 'Кнопка (CTA)',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'CTA', value: 'cta' }],
+        defaultValue: 'cta',
+      }),
+      text: fields.text({ label: 'Текст', validation: { isRequired: true } }),
+      href: fields.text({ label: 'Ссылка', validation: { isRequired: true } }),
+      style: fields.select({
+        label: 'Стиль',
+        options: [
+          { label: 'Основная', value: 'primary' },
+          { label: 'Вторичная', value: 'secondary' },
+          { label: 'Контурная', value: 'outline' },
+        ],
+        defaultValue: 'primary',
+      }),
+    }),
+  },
+  faq: {
+    label: 'Аккордеон FAQ',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'FAQ', value: 'faq' }],
+        defaultValue: 'faq',
+      }),
+      items: fields.array(faqItem, { label: 'Вопросы-ответы' }),
+    }),
+  },
+  specs: {
+    label: 'Таблица характеристик',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Характеристики', value: 'specs' }],
+        defaultValue: 'specs',
+      }),
+      items: fields.array(specItem, { label: 'Характеристики' }),
+    }),
+  },
+  banner: {
+    label: 'Промо-баннер',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Баннер', value: 'banner' }],
+        defaultValue: 'banner',
+      }),
+      image: fields.image({ label: 'Изображение', directory: 'src/assets/uploads', publicPath: '/assets/uploads' }),
+      heading: fields.text({ label: 'Заголовок', validation: { isRequired: true } }),
+      text: fields.text({ label: 'Текст', multiline: true }),
+      href: fields.text({ label: 'Ссылка' }),
+    }),
+  },
+  quote: {
+    label: 'Цитата',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Цитата', value: 'quote' }],
+        defaultValue: 'quote',
+      }),
+      text: fields.text({ label: 'Текст', multiline: true, validation: { isRequired: true } }),
+      author: fields.text({ label: 'Автор' }),
+    }),
+  },
+  divider: {
+    label: 'Разделитель',
+    schema: fields.object({
+      type: fields.select({
+        label: 'Тип блока',
+        options: [{ label: 'Разделитель', value: 'divider' }],
+        defaultValue: 'divider',
+      }),
+      style: fields.select({
+        label: 'Стиль',
+        options: [
+          { label: 'Линия', value: 'line' },
+          { label: 'Отступ', value: 'space' },
+        ],
+        defaultValue: 'line',
+      }),
+    }),
+  },
+};
+
 const contentBlocks = fields.blocks(
   {
+    ...leafBlocks,
     hero: {
       label: 'Hero-баннер',
       schema: fields.object({
@@ -91,156 +281,9 @@ const contentBlocks = fields.blocks(
         }),
         heading: fields.text({ label: 'Заголовок', validation: { isRequired: true } }),
         subheading: fields.text({ label: 'Подзаголовок', multiline: true }),
-        image: fields.image({ label: 'Фоновое изображение', directory: 'src/assets/uploads' }),
+        image: fields.image({ label: 'Фоновое изображение', directory: 'src/assets/uploads', publicPath: '/assets/uploads' }),
         ctaText: fields.text({ label: 'Текст кнопки' }),
         ctaHref: fields.text({ label: 'Ссылка кнопки' }),
-      }),
-    },
-    richText: {
-      label: 'Текст (WYSIWYG)',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Rich text', value: 'richText' }],
-          defaultValue: 'richText',
-        }),
-        content: fields.text({
-          label: 'Содержимое',
-          multiline: true,
-          validation: { isRequired: true },
-        }),
-      }),
-    },
-    image: {
-      label: 'Изображение',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Изображение', value: 'image' }],
-          defaultValue: 'image',
-        }),
-        image: fields.image({
-          label: 'Изображение',
-          directory: 'src/assets/uploads',
-          validation: { isRequired: true },
-        }),
-        alt: fields.text({ label: 'Alt-текст', validation: { isRequired: true } }),
-        caption: fields.text({ label: 'Подпись', multiline: true }),
-        align: fields.select({
-          label: 'Выравнивание',
-          options: [
-            { label: 'По центру', value: 'center' },
-            { label: 'Слева', value: 'left' },
-            { label: 'Справа', value: 'right' },
-          ],
-          defaultValue: 'center',
-        }),
-      }),
-    },
-    imageCarousel: {
-      label: 'Карусель изображений',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Карусель', value: 'imageCarousel' }],
-          defaultValue: 'imageCarousel',
-        }),
-        images: fields.array(imageItem, { label: 'Изображения' }),
-        autoplay: fields.checkbox({ label: 'Автопрокрутка', defaultValue: false }),
-      }),
-    },
-    video: {
-      label: 'Видео',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Видео', value: 'video' }],
-          defaultValue: 'video',
-        }),
-        src: fields.text({ label: 'URL/файл видео', validation: { isRequired: true } }),
-        poster: fields.image({ label: 'Постер', directory: 'src/assets/uploads' }),
-        controls: fields.checkbox({ label: 'Показывать контролы', defaultValue: true }),
-        autoplay: fields.checkbox({ label: 'Автовоспроизведение', defaultValue: false }),
-      }),
-    },
-    videoGif: {
-      label: 'Видео (gif-режим)',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Видео-gif', value: 'videoGif' }],
-          defaultValue: 'videoGif',
-        }),
-        src: fields.text({ label: 'URL/файл видео', validation: { isRequired: true } }),
-        poster: fields.image({ label: 'Постер', directory: 'src/assets/uploads' }),
-      }),
-    },
-    gallery: {
-      label: 'Галерея',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Галерея', value: 'gallery' }],
-          defaultValue: 'gallery',
-        }),
-        images: fields.array(imageItem, { label: 'Изображения' }),
-      }),
-    },
-    cta: {
-      label: 'Кнопка (CTA)',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'CTA', value: 'cta' }],
-          defaultValue: 'cta',
-        }),
-        text: fields.text({ label: 'Текст', validation: { isRequired: true } }),
-        href: fields.text({ label: 'Ссылка', validation: { isRequired: true } }),
-        style: fields.select({
-          label: 'Стиль',
-          options: [
-            { label: 'Основная', value: 'primary' },
-            { label: 'Вторичная', value: 'secondary' },
-            { label: 'Контурная', value: 'outline' },
-          ],
-          defaultValue: 'primary',
-        }),
-      }),
-    },
-    faq: {
-      label: 'Аккордеон FAQ',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'FAQ', value: 'faq' }],
-          defaultValue: 'faq',
-        }),
-        items: fields.array(faqItem, { label: 'Вопросы-ответы' }),
-      }),
-    },
-    specs: {
-      label: 'Таблица характеристик',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Характеристики', value: 'specs' }],
-          defaultValue: 'specs',
-        }),
-        items: fields.array(specItem, { label: 'Характеристики' }),
-      }),
-    },
-    banner: {
-      label: 'Промо-баннер',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Баннер', value: 'banner' }],
-          defaultValue: 'banner',
-        }),
-        image: fields.image({ label: 'Изображение', directory: 'src/assets/uploads' }),
-        heading: fields.text({ label: 'Заголовок', validation: { isRequired: true } }),
-        text: fields.text({ label: 'Текст', multiline: true }),
-        href: fields.text({ label: 'Ссылка' }),
       }),
     },
     columns: {
@@ -255,42 +298,12 @@ const contentBlocks = fields.blocks(
           fields.object(
             {
               heading: fields.text({ label: 'Заголовок колонки' }),
-              content: fields.text({ label: 'Содержимое', multiline: true }),
+              content: fields.blocks(leafBlocks, { label: 'Блоки колонки' }),
             },
             { label: 'Колонка' },
           ),
           { label: 'Колонки' },
         ),
-      }),
-    },
-    quote: {
-      label: 'Цитата',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Цитата', value: 'quote' }],
-          defaultValue: 'quote',
-        }),
-        text: fields.text({ label: 'Текст', multiline: true, validation: { isRequired: true } }),
-        author: fields.text({ label: 'Автор' }),
-      }),
-    },
-    divider: {
-      label: 'Разделитель',
-      schema: fields.object({
-        type: fields.select({
-          label: 'Тип блока',
-          options: [{ label: 'Разделитель', value: 'divider' }],
-          defaultValue: 'divider',
-        }),
-        style: fields.select({
-          label: 'Стиль',
-          options: [
-            { label: 'Линия', value: 'line' },
-            { label: 'Отступ', value: 'space' },
-          ],
-          defaultValue: 'line',
-        }),
       }),
     },
   },
@@ -328,10 +341,11 @@ const products = collection({
     image: fields.image({
       label: 'Главное фото',
       directory: 'src/assets/uploads',
+      publicPath: '/assets/uploads',
       validation: { isRequired: true },
     }),
     gallery: fields.array(
-      fields.image({ label: 'Фото', directory: 'src/assets/uploads' }),
+      fields.image({ label: 'Фото', directory: 'src/assets/uploads', publicPath: '/assets/uploads' }),
       { label: 'Галерея' },
     ),
     badge: fields.text({ label: 'Бейдж' }),
@@ -355,6 +369,7 @@ const lines = collection({
     image: fields.image({
       label: 'Изображение',
       directory: 'src/assets/uploads',
+      publicPath: '/assets/uploads',
       validation: { isRequired: true },
     }),
     features: fields.array(fields.text({ label: 'Особенность' }), { label: 'Особенности' }),
@@ -443,14 +458,29 @@ const sections = collection({
   path: 'src/content/sections/*',
   slugField: 'title',
   format: { data: 'yaml', contentField: 'body' },
-  columns: ['title', 'order'],
+  columns: ['title', 'type', 'order'],
   schema: {
     title: fields.slug({ name: { label: 'Название секции' } }),
+    type: fields.select({
+      label: 'Тип секции',
+      options: [
+        { label: 'Hero', value: 'hero' },
+        { label: 'Каталог', value: 'catalog' },
+        { label: 'Преимущества', value: 'advantages' },
+        { label: 'Доставка и оплата', value: 'delivery' },
+        { label: 'Оформление заказа', value: 'order' },
+        { label: 'FAQ', value: 'faq' },
+        { label: 'Контакты', value: 'contact' },
+      ],
+      defaultValue: 'advantages',
+    }),
     heading: fields.text({ label: 'Заголовок' }),
     subheading: fields.text({ label: 'Подзаголовок' }),
     body: fields.mdx({ label: 'Текст', extension: 'md' }),
     ctaText: fields.text({ label: 'Текст кнопки' }),
     ctaHref: fields.text({ label: 'Ссылка кнопки' }),
+    video: fields.checkbox({ label: 'Фоновое видео (hero)', defaultValue: false }),
+    content: contentBlocks,
     order: fields.number({ label: 'Порядок сортировки', defaultValue: 0 }),
   },
 });

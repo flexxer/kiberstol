@@ -1,0 +1,76 @@
+---
+/**
+ * ContactForm — форма заказа (имя + телефон → Telegram).
+ *
+ * Вынесена из `index.astro` в отдельный компонент, чтобы переиспользоваться
+ * секцией `contact` на главной. Отправка — на `/api/submit.php` (PHP-обработчик).
+ *
+ * Защита от спама:
+ *  - honeypot-поле `website` (скрытое, люди его не видят);
+ *  - time-honeypot `ts` (unix-секунды показа формы, заполняется в `form.ts`).
+ */
+---
+
+<form
+  id="order-form"
+  class="max-w-md space-y-4"
+  action="/api/submit.php"
+  method="POST"
+>
+  <!-- Honeypot: скрытое поле-ловушка для ботов (люди его не видят) -->
+  <div class="hidden" aria-hidden="true">
+    <label for="website">Website</label>
+    <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <!-- Time-honeypot: время показа формы (unix-секунды) -->
+  <input type="hidden" name="ts" id="form-ts" />
+
+  <div>
+    <label for="name" class="mb-1 block text-sm font-semibold text-text">
+      Имя
+    </label>
+    <input
+      id="name"
+      name="name"
+      type="text"
+      required
+      autocomplete="name"
+      class="w-full rounded border border-border bg-bg px-3 py-2 text-text"
+    />
+  </div>
+  <div>
+    <label for="phone" class="mb-1 block text-sm font-semibold text-text">
+      Телефон
+    </label>
+    <input
+      id="phone"
+      name="phone"
+      type="tel"
+      required
+      autocomplete="tel"
+      placeholder="+375 XX XXX-XX-XX"
+      class="w-full rounded border border-border bg-bg px-3 py-2 text-text"
+    />
+  </div>
+
+  <!-- Чекбоксы согласия (обязательны, закон РБ № 99-З) -->
+  <label class="flex items-start gap-2 text-sm text-muted">
+    <input type="checkbox" name="consent-pd" required class="mt-0.5" />
+    <span>
+      Согласен на обработку персональных данных в соответствии с{' '}
+      <a href="/privacy" class="text-primary hover:underline">политикой конфиденциальности</a>
+    </span>
+  </label>
+  <label class="flex items-start gap-2 text-sm text-muted">
+    <input type="checkbox" name="consent-marketing" class="mt-0.5" />
+    <span>Согласен на получение рекламных сообщений</span>
+  </label>
+
+  <button
+    type="submit"
+    class="w-full rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
+  >
+    Отправить заявку
+  </button>
+</form>

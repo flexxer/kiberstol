@@ -1,9 +1,14 @@
 ---
 title: Hero
+type: hero
 heading: Kiberstol.by
-subheading: Игровые компьютерные столы
-ctaText: Смотреть столы
-ctaHref: /products
+subheading: >-
+  Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol - доступное
+  качество
+ctaText: Выбрать
+ctaHref: '#catalog'
+video: true
+content: []
 order: 0
 ---
-Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol — доступное качество. Lorem ipsum
+Игровые компьютерные столы бюджетного сегмента. Катай с **Kiberstol** — доступное качество

@@ -1,0 +1,33 @@
+---
+/**
+ * HeroSection — секция `hero` главной страницы.
+ * Переиспользует блок `Hero.astro` (заголовок, подзаголовок, CTA, видео)
+ * и `RichText.astro` для markdown-вводного текста.
+ */
+import Hero from '../blocks/Hero.astro';
+import RichText from '../blocks/RichText.astro';
+
+interface Props {
+  heading?: string;
+  subheading?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  video?: boolean;
+  body?: string;
+}
+
+const { heading, subheading, ctaText, ctaHref, video = false, body } = Astro.props;
+---
+
+<Hero
+  heading={heading ?? 'Kiberstol.by'}
+  subheading={subheading}
+  ctaText={ctaText}
+  ctaHref={ctaHref}
+  video={video}
+/>
+{body && (
+  <div class="mx-auto max-w-6xl px-4 pt-6">
+    <RichText content={body} />
+  </div>
+)}

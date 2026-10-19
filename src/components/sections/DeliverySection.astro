@@ -1,0 +1,46 @@
+---
+/**
+ * DeliverySection — секция `delivery` главной страницы.
+ * Заголовок + markdown-текст + карточки способов оплаты/доставки из `settings`.
+ */
+import RichText from '../blocks/RichText.astro';
+
+interface Props {
+  heading?: string;
+  body?: string;
+  paymentMethods?: string[];
+  deliveryMethods?: string[];
+}
+
+const {
+  heading = 'Доставка и оплата',
+  body,
+  paymentMethods = [],
+  deliveryMethods = [],
+} = Astro.props;
+---
+
+<section id="delivery" class="border-t border-border bg-surface">
+  <div class="mx-auto max-w-6xl px-4 py-12">
+    <h2 class="mb-6 text-2xl font-bold text-text">{heading}</h2>
+    {body && (
+      <div class="mb-6 max-w-3xl">
+        <RichText content={body} />
+      </div>
+    )}
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="rounded border border-border p-5">
+        <h3 class="mb-3 font-semibold text-text">Способы оплаты</h3>
+        <ul class="space-y-1 text-sm text-muted">
+          {paymentMethods.map((m) => <li>• {m}</li>)}
+        </ul>
+      </div>
+      <div class="rounded border border-border p-5">
+        <h3 class="mb-3 font-semibold text-text">Способы и сроки доставки</h3>
+        <ul class="space-y-1 text-sm text-muted">
+          {deliveryMethods.map((m) => <li>• {m}</li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

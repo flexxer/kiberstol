@@ -27,10 +27,14 @@ function normalizeKey(src: string): string {
   if (trimmed.startsWith('assets/uploads/')) {
     return `/src/${trimmed}`;
   }
-  // Голое имя файла — ищем по суффиксу.
+  // Точное совпадение с путём внутри `src/assets/uploads`.
+  const exact = `/src/assets/uploads/${trimmed}`;
+  if (images[exact]) return exact;
+  // Голое имя файла — ищем по суффиксу, но только при единственном совпадении,
+  // чтобы не подставлять чужое изображение при дублирующихся именах файлов.
   const suffix = `/${trimmed}`;
-  const match = Object.keys(images).find((key) => key.endsWith(suffix));
-  return match ?? `/src/assets/uploads/${trimmed}`;
+  const matches = Object.keys(images).filter((key) => key.endsWith(suffix));
+  return matches.length === 1 ? matches[0] : exact;
 }
 
 /**

@@ -23,7 +23,7 @@ const seoSchema = z
  *
  * Каждый блок — отдельный Astro-компонент в `src/components/blocks/`.
  */
-const contentBlocks = z.array(
+const contentBlocks: z.ZodType = z.array(
   z.discriminatedUnion('type', [
     // Hero-баннер страницы
     z.object({
@@ -107,7 +107,7 @@ const contentBlocks = z.array(
       columns: z.array(
         z.object({
           heading: z.string().optional(),
-          content: z.string().optional(),
+          content: z.lazy(() => contentBlocks).optional(),
         }),
       ),
     }),
@@ -242,11 +242,25 @@ const sections = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/sections' }),
   schema: z.object({
     title: z.string(),
+    // Тип секции определяет, какой компонент её рендерит (см. HomeSections.astro).
+    type: z.enum([
+      'hero',
+      'catalog',
+      'advantages',
+      'delivery',
+      'order',
+      'faq',
+      'contact',
+    ]),
     heading: z.string().optional(),
     subheading: z.string().optional(),
     // `body` — контентное поле (markdown-тело, fields.mdx в Keystatic)
     ctaText: z.string().optional(),
     ctaHref: z.string().optional(),
+    // Фоновое видео для секции `hero`.
+    video: z.boolean().default(false),
+    // Гибкие контент-блоки внутри секции (например, преимущества).
+    content: contentBlocks.optional(),
     order: z.number().default(0),
   }),
 });

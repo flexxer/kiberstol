@@ -1,13 +1,19 @@
 ---
 /**
- * RichText — WYSIWYG-текст (заголовки, списки, ссылки, жирный/курсив).
- * Рендерится через @tailwindcss/typography (класс `prose`).
+ * RichText — markdown-текст (заголовки, списки, ссылки, жирный/курсив).
+ *
+ * Контент хранится как markdown-строка (Keystatic `fields.text`), рендерится
+ * через `renderMarkdown` (marked + sanitize-html) и стилизуется классом `prose`
+ * из @tailwindcss/typography.
  */
+import { renderMarkdown } from '../../lib/markdown';
+
 interface Props {
   content: string;
 }
 
 const { content } = Astro.props;
+const html = renderMarkdown(content);
 ---
 
-<div class="prose prose-invert max-w-none" set:html={content} />
+<div class="prose prose-invert max-w-none" set:html={html} />
