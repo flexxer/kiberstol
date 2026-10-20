@@ -1,12 +1,17 @@
 ---
 /**
  * CatalogSection — секция `catalog` главной страницы.
- * Каталог: линейки → модели (вложенность линейка → модели).
- * Данные приходят из коллекций `lines` и `products`.
+ * Каталог: только линейки (баннеры). Модели — на странице линейки.
+ * Данные приходят из коллекции `lines`.
  */
-import { Image } from 'astro:assets';
-import { resolveImage } from '../../lib/image';
+import Banner from '../blocks/Banner.astro';
 import RichText from '../blocks/RichText.astro';
+import ContentBlocks from '../blocks/ContentBlocks.astro';
+
+type Block = {
+  discriminant: string;
+  value: Record<string, unknown>;
+};
 
 interface Line {
   id: string;
@@ -17,37 +22,17 @@ interface Line {
   body?: string;
 }
 
-interface Product {
-  id: string;
-  data: {
-    title: string;
-    line: string;
-    price: number;
-    image?: string;
-    badge?: string;
-    shortDescription?: string;
-  };
-}
-
 interface Props {
-  heading?: string;
+  heading: string;
   subheading?: string;
   body?: string;
   ctaText?: string;
   ctaHref?: string;
   lines: Line[];
-  products: Product[];
+  content?: Block[];
 }
 
-const {
-  heading = 'Каталог',
-  subheading,
-  body,
-  ctaText,
-  ctaHref,
-  lines,
-  products,
-} = Astro.props;
+const { heading, subheading, body, ctaText, ctaHref, lines, content } = Astro.props;
 ---
 
 <section id="catalog" class="mx-auto max-w-6xl px-4 py-12">
@@ -58,76 +43,17 @@ const {
       <RichText content={body} />
     </div>
   )}
-  <div class="space-y-10">
+  <div class="space-y-6">
     {
-      lines.map((line) => {
-        const lineProducts = products.filter((p) => p.data.line === line.id);
-        return (
-          <div>
-            <a href={`/lines/${line.id}`} class="group mb-4 flex items-center gap-3">
-              {resolveImage(line.data.image) && (
-                <Image
-                  src={resolveImage(line.data.image)!}
-                  alt={line.data.title}
-                  width={96}
-                  format="webp"
-                  loading="lazy"
-                  class="h-12 w-12 rounded border border-border object-cover"
-                />
-              )}
-              <div>
-                <h3 class="text-xl font-semibold text-text group-hover:text-primary">
-                  {line.data.title}
-                </h3>
-                {line.body && (
-                  <div class="text-sm text-muted">
-                    <RichText content={line.body} />
-                  </div>
-                )}
-              </div>
-            </a>
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {
-                lineProducts.map((product) => (
-                  <a
-                    href={`/products/${product.id}`}
-                    class="group block overflow-hidden rounded border border-border bg-surface transition hover:border-primary"
-                  >
-                    {resolveImage(product.data.image) && (
-                      <Image
-                        src={resolveImage(product.data.image)!}
-                        alt={product.data.title}
-                        width={640}
-                        format="webp"
-                        loading="lazy"
-                        class="h-40 w-full object-cover"
-                      />
-                    )}
-                    <div class="p-4">
-                      {product.data.badge && (
-                        <span class="mb-2 inline-block rounded bg-secondary px-2 py-0.5 text-xs font-semibold text-bg">
-                          {product.data.badge}
-                        </span>
-                      )}
-                      <h4 class="font-semibold text-text group-hover:text-primary">
-                        {product.data.title}
-                      </h4>
-                      {product.data.shortDescription && (
-                        <p class="mt-1 text-sm text-muted">
-                          {product.data.shortDescription}
-                        </p>
-                      )}
-                      <p class="mt-2 font-bold text-primary">
-                        {product.data.price.toLocaleString('ru-BY')} BYN
-                      </p>
-                    </div>
-                  </a>
-                ))
-              }
-            </div>
-          </div>
-        );
-      })
+      lines.map((line) => (
+        <Banner
+          image={line.data.image}
+          heading={line.data.title}
+          text={line.body}
+          href={`/lines/${line.id}`}
+          gradient="right"
+        />
+      ))
     }
   </div>
   {ctaText && ctaHref && (
@@ -138,6 +64,11 @@ const {
       >
         {ctaText}
       </a>
+    </div>
+  )}
+  {content && content.length > 0 && (
+    <div class="mt-8">
+      <ContentBlocks blocks={content} />
     </div>
   )}
 </section>

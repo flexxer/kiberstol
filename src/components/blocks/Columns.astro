@@ -9,8 +9,8 @@
 import ContentBlocks from './ContentBlocks.astro';
 
 type Block = {
-  type: string;
-  [key: string]: unknown;
+  discriminant: string;
+  value: Record<string, unknown>;
 };
 
 interface Props {

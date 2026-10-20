@@ -23,104 +23,142 @@ const seoSchema = z
  *
  * Каждый блок — отдельный Astro-компонент в `src/components/blocks/`.
  */
+/**
+ * Блоки контента сериализуются Keystatic'ом (`fields.blocks`) в формате
+ * `{ discriminant, value }`, где `discriminant` — тип блока, а `value` — его
+ * поля. Схема ниже зеркалит этот формат, чтобы данные из CMS проходили
+ * валидацию без ошибок.
+ *
+ * ВАЖНО: `fields.blocks` всегда пишет `{ discriminant, value }`. Поле `type`
+ * внутри `value` — это UI-select Keystatic, который НЕ попадает в сериализацию
+ * (Keystatic отбрасывает его и оставляет только `discriminant` + `value`).
+ */
 const contentBlocks: z.ZodType = z.array(
-  z.discriminatedUnion('type', [
+  z.discriminatedUnion('discriminant', [
     // Hero-баннер страницы
     z.object({
-      type: z.literal('hero'),
-      heading: z.string(),
-      subheading: z.string().optional(),
-      image: z.string().optional(),
-      ctaText: z.string().optional(),
-      ctaHref: z.string().optional(),
+      discriminant: z.literal('hero'),
+      value: z.object({
+        heading: z.string(),
+        subheading: z.string().optional(),
+        image: z.string().optional(),
+        ctaText: z.string().optional(),
+        ctaHref: z.string().optional(),
+      }),
     }),
     // WYSIWYG-текст (заголовки, списки, ссылки, жирный/курсив)
     z.object({
-      type: z.literal('richText'),
-      content: z.string(),
+      discriminant: z.literal('richText'),
+      value: z.object({
+        content: z.string(),
+      }),
     }),
     // Одиночное inline-изображение
     z.object({
-      type: z.literal('image'),
-      image: z.string(),
-      alt: z.string(),
-      caption: z.string().optional(),
-      align: z.enum(['left', 'center', 'right']).default('center'),
+      discriminant: z.literal('image'),
+      value: z.object({
+        image: z.string(),
+        alt: z.string(),
+        caption: z.string().optional(),
+        align: z.enum(['left', 'center', 'right']).default('center'),
+      }),
     }),
     // Карусель изображений
     z.object({
-      type: z.literal('imageCarousel'),
-      images: z.array(
-        z.object({ image: z.string(), alt: z.string(), caption: z.string().optional() }),
-      ),
-      autoplay: z.boolean().default(false),
+      discriminant: z.literal('imageCarousel'),
+      value: z.object({
+        images: z.array(
+          z.object({ image: z.string(), alt: z.string(), caption: z.string().optional() }),
+        ),
+        autoplay: z.boolean().default(false),
+      }),
     }),
     // Inline-видео
     z.object({
-      type: z.literal('video'),
-      src: z.string(),
-      poster: z.string().optional(),
-      controls: z.boolean().default(true),
-      autoplay: z.boolean().default(false),
+      discriminant: z.literal('video'),
+      value: z.object({
+        src: z.string(),
+        poster: z.string().optional(),
+        controls: z.boolean().default(true),
+        autoplay: z.boolean().default(false),
+      }),
     }),
     // Видео в режиме «gif» (без звука, зациклено, без контролов)
     z.object({
-      type: z.literal('videoGif'),
-      src: z.string(),
-      poster: z.string().optional(),
+      discriminant: z.literal('videoGif'),
+      value: z.object({
+        src: z.string(),
+        poster: z.string().optional(),
+      }),
     }),
     // Сетка/лайтбокс изображений
     z.object({
-      type: z.literal('gallery'),
-      images: z.array(
-        z.object({ image: z.string(), alt: z.string(), caption: z.string().optional() }),
-      ),
+      discriminant: z.literal('gallery'),
+      value: z.object({
+        images: z.array(
+          z.object({ image: z.string(), alt: z.string(), caption: z.string().optional() }),
+        ),
+      }),
     }),
     // Кнопка/призыв к действию
     z.object({
-      type: z.literal('cta'),
-      text: z.string(),
-      href: z.string(),
-      style: z.enum(['primary', 'secondary', 'outline']).default('primary'),
+      discriminant: z.literal('cta'),
+      value: z.object({
+        text: z.string(),
+        href: z.string(),
+        style: z.enum(['primary', 'secondary', 'outline']).default('primary'),
+      }),
     }),
     // Аккордеон вопросов-ответов
     z.object({
-      type: z.literal('faq'),
-      items: z.array(z.object({ question: z.string(), answer: z.string() })),
+      discriminant: z.literal('faq'),
+      value: z.object({
+        items: z.array(z.object({ question: z.string(), answer: z.string() })),
+      }),
     }),
     // Таблица характеристик
     z.object({
-      type: z.literal('specs'),
-      items: z.array(z.object({ name: z.string(), value: z.string() })),
+      discriminant: z.literal('specs'),
+      value: z.object({
+        items: z.array(z.object({ name: z.string(), value: z.string() })),
+      }),
     }),
     // Промо-баннер «важный момент»
     z.object({
-      type: z.literal('banner'),
-      image: z.string().optional(),
-      heading: z.string(),
-      text: z.string().optional(),
-      href: z.string().optional(),
+      discriminant: z.literal('banner'),
+      value: z.object({
+        image: z.string().optional(),
+        heading: z.string(),
+        text: z.string().optional(),
+        href: z.string().optional(),
+      }),
     }),
     // Многоколоночный блок (каждая колонка — вложенные блоки)
     z.object({
-      type: z.literal('columns'),
-      columns: z.array(
-        z.object({
-          heading: z.string().optional(),
-          content: z.lazy(() => contentBlocks).optional(),
-        }),
-      ),
+      discriminant: z.literal('columns'),
+      value: z.object({
+        columns: z.array(
+          z.object({
+            heading: z.string().optional(),
+            content: z.lazy(() => contentBlocks).optional(),
+          }),
+        ),
+      }),
     }),
     // Цитата/отзыв-вставка
     z.object({
-      type: z.literal('quote'),
-      text: z.string(),
-      author: z.string().optional(),
+      discriminant: z.literal('quote'),
+      value: z.object({
+        text: z.string(),
+        author: z.string().optional(),
+      }),
     }),
     // Разделитель/спейсер
     z.object({
-      type: z.literal('divider'),
-      style: z.enum(['line', 'space']).default('line'),
+      discriminant: z.literal('divider'),
+      value: z.object({
+        style: z.enum(['line', 'space']).default('line'),
+      }),
     }),
   ]),
 );
@@ -179,7 +217,7 @@ const lines = defineCollection({
  * навигации, аналитики/рекламы и глобальных SEO-полей.
  */
 const site = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/site' }),
+  loader: glob({ pattern: '**/*.{md,yaml}', base: './src/content/site' }),
   schema: z.object({
     brand: z.string(),
     tagline: z.string(),
@@ -190,20 +228,12 @@ const site = defineCollection({
     tradeRegistryDate: z.string(),
     phone: z.string(),
     email: z.string(),
+    viber: z.string().optional(),
+    instagram: z.string().optional(),
     address: z.string(),
     workHours: z.string(),
     authorizedBody: z.string(),
     authorizedBodyPhone: z.string(),
-    brandColors: z
-      .object({
-        primary: z.string(),
-        secondary: z.string(),
-        neutral: z.string(),
-        accent: z.array(z.string()).optional(),
-      })
-      .optional(),
-    paymentMethods: z.array(z.string()),
-    deliveryMethods: z.array(z.string()),
     nav: z.array(z.object({ label: z.string(), href: z.string() })),
     analytics: z
       .object({
@@ -237,44 +267,72 @@ const legal = defineCollection({
 /**
  * `sections` — тексты секций главной страницы.
  * Каждая секция — отдельный файл; тексты редактируются в CMS.
+ *
+ * Поля, специфичные для типа секции, задаются условно через `variant`
+ * (дискриминант — `type`). Keystatic сериализует `fields.conditional` в
+ * `{ discriminant, value }`, поэтому схема зеркалит этот формат.
  */
 const sections = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/sections' }),
   schema: z.object({
     title: z.string(),
-    // Тип секции определяет, какой компонент её рендерит (см. HomeSections.astro).
-    type: z.enum([
-      'hero',
-      'catalog',
-      'advantages',
-      'delivery',
-      'order',
-      'faq',
-      'contact',
-    ]),
-    heading: z.string().optional(),
-    subheading: z.string().optional(),
-    // `body` — контентное поле (markdown-тело, fields.mdx в Keystatic)
-    ctaText: z.string().optional(),
-    ctaHref: z.string().optional(),
-    // Фоновое видео для секции `hero`.
-    video: z.boolean().default(false),
-    // Гибкие контент-блоки внутри секции (например, преимущества).
+    heading: z.string(),
+    // `body` — контентное поле (markdown-тело, fields.mdx в Keystatic).
+    // Гибкие контент-блоки — доступны для всех типов секций.
     content: contentBlocks.optional(),
+    variant: z.discriminatedUnion('discriminant', [
+      z.object({
+        discriminant: z.literal('hero'),
+        value: z.object({
+          subheading: z.string().optional(),
+          ctaText: z.string().optional(),
+          ctaHref: z.string().optional(),
+          video: z.boolean().default(false),
+        }),
+      }),
+      z.object({
+        discriminant: z.literal('catalog'),
+        value: z.object({
+          subheading: z.string().optional(),
+          ctaText: z.string().optional(),
+          ctaHref: z.string().optional(),
+        }),
+      }),
+      z.object({
+        discriminant: z.literal('advantages'),
+        value: z.null().optional(),
+      }),
+      z.object({
+        discriminant: z.literal('delivery'),
+        value: z
+          .object({
+            paymentMethods: z.array(z.string()).optional(),
+            deliveryMethods: z.array(z.string()).optional(),
+          })
+          .optional(),
+      }),
+      z.object({
+        discriminant: z.literal('order'),
+        value: z.object({
+          ctaText: z.string().optional(),
+          ctaHref: z.string().optional(),
+        }),
+      }),
+      z.object({
+        discriminant: z.literal('faq'),
+        value: z
+          .object({
+            items: z.array(z.object({ question: z.string(), answer: z.string() })).optional(),
+          })
+          .optional(),
+      }),
+      z.object({
+        discriminant: z.literal('contact'),
+        value: z.null().optional(),
+      }),
+    ]),
     order: z.number().default(0),
   }),
 });
 
-/**
- * `faq` — вопросы-ответы (аккордеон на главной).
- */
-const faq = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/faq' }),
-  schema: z.object({
-    question: z.string(),
-    // `answer` — контентное поле (markdown-тело, fields.mdx в Keystatic)
-    order: z.number().default(0),
-  }),
-});
-
-export const collections = { products, lines, site, legal, sections, faq };
+export const collections = { products, lines, site, legal, sections };

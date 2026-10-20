@@ -5,15 +5,22 @@
  */
 import RichText from '../blocks/RichText.astro';
 import Cta from '../blocks/Cta.astro';
+import ContentBlocks from '../blocks/ContentBlocks.astro';
+
+type Block = {
+  discriminant: string;
+  value: Record<string, unknown>;
+};
 
 interface Props {
-  heading?: string;
+  heading: string;
   body?: string;
   ctaText?: string;
   ctaHref?: string;
+  content?: Block[];
 }
 
-const { heading = 'Оформление заказа', body, ctaText, ctaHref } = Astro.props;
+const { heading, body, ctaText, ctaHref, content } = Astro.props;
 ---
 
 <section id="order" class="mx-auto max-w-6xl px-4 py-12">
@@ -24,4 +31,9 @@ const { heading = 'Оформление заказа', body, ctaText, ctaHref } 
     </div>
   )}
   {ctaText && ctaHref && <Cta text={ctaText} href={ctaHref} />}
+  {content && content.length > 0 && (
+    <div class="mt-8">
+      <ContentBlocks blocks={content} />
+    </div>
+  )}
 </section>

@@ -1,18 +1,36 @@
 brand: Kiberstol.by
-tagline: Катай с Kiberstol.by!
-fullName: Суворов Александр Владимирович
+tagline: Игровые компьютерные столы
+fullName: ИП Суворов Александр Владимирович
 unp: '391946770'
 registrationDate: 14.04.2025
 tradeRegistryNumber: '765426'
 tradeRegistryDate: 30.12.2025
 phone: +375 29 637-76-63
 email: kiberstol.by@gmail.com
-brandColors:
-  accent: []
-paymentMethods: []
-deliveryMethods: []
-nav: []
+viber: viber://chat?number=%2B375296377663
+instagram: https://www.instagram.com/kiberstol
+address: г. Минск, ул. Грушевская 17-14
+workHours: Заказы принимаются с 9:00 до 21:00 без выходных
+authorizedBody: ИП Суворов Александр Владимирович
+authorizedBodyPhone: +375 212 XX-XX-XX (администрация Первомайского района г. Витебска)
+nav:
+  - label: Главная
+    href: /
+  - label: Почему мы
+    href: /#advantages
+  - label: Каталог
+    href: /products
+  - label: Доставка и оплата
+    href: /terms
+  - label: FAQ
+    href: /#faq
+  - label: Контакты
+    href: /#contacts
 analytics: {}
 advertising: {}
 seo:
+  title: Kiberstol.by — игровые компьютерные столы
+  description: >-
+    Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol —
+    доступное качество.
   noindex: false

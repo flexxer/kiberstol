@@ -38,6 +38,7 @@ if ($ts > 0 && (time() - $ts) < 3) {
 
 $name = trim((string) ($_POST['name'] ?? ''));
 $phone = trim((string) ($_POST['phone'] ?? ''));
+$message = trim((string) ($_POST['message'] ?? ''));
 
 if ($name === '' || $phone === '') {
     http_response_code(422);
@@ -57,6 +58,7 @@ if (!$token || !$chatId) {
 $text = "Новая заявка с сайта Kiberstol.by\n\n"
     . "Имя: {$name}\n"
     . "Телефон: {$phone}\n"
+    . ($message !== '' ? "Сообщение: {$message}\n" : '')
     . 'Дата: ' . date('d.m.Y H:i:s');
 
 $url = 'https://api.telegram.org/bot' . $token . '/sendMessage';

@@ -6,21 +6,29 @@
  */
 import Hero from '../blocks/Hero.astro';
 import RichText from '../blocks/RichText.astro';
+import ContentBlocks from '../blocks/ContentBlocks.astro';
+
+type Block = {
+  discriminant: string;
+  value: Record<string, unknown>;
+};
 
 interface Props {
-  heading?: string;
+  heading: string;
   subheading?: string;
   ctaText?: string;
   ctaHref?: string;
   video?: boolean;
   body?: string;
+  content?: Block[];
 }
 
-const { heading, subheading, ctaText, ctaHref, video = false, body } = Astro.props;
+const { heading, subheading, ctaText, ctaHref, video = false, body, content } =
+  Astro.props;
 ---
 
 <Hero
-  heading={heading ?? 'Kiberstol.by'}
+  heading={heading}
   subheading={subheading}
   ctaText={ctaText}
   ctaHref={ctaHref}
@@ -29,5 +37,10 @@ const { heading, subheading, ctaText, ctaHref, video = false, body } = Astro.pro
 {body && (
   <div class="mx-auto max-w-6xl px-4 pt-6">
     <RichText content={body} />
+  </div>
+)}
+{content && content.length > 0 && (
+  <div class="mx-auto max-w-6xl px-4 pt-6">
+    <ContentBlocks blocks={content} />
   </div>
 )}

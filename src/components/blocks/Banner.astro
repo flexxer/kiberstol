@@ -1,24 +1,50 @@
 ---
 /**
- * Banner — промо-баннер «важный момент».
+ * Banner — промо-баннер «важный момент» / баннер линейки.
  * Оптимизация фонового изображения через `astro:assets`.
+ *
+ * Пропсы:
+ *  - `image`   — фоновое изображение;
+ *  - `heading` — заголовок;
+ *  - `text`    — опциональный текст;
+ *  - `href`    — если задан, весь баннер становится ссылкой;
+ *  - `gradient` — направление затемнения фона: 'right' (плавно вправо),
+ *                'left', 'none' (по умолчанию — лёгкое затемнение `opacity-20`).
  */
 import { Image } from 'astro:assets';
 import { resolveImage } from '../../lib/image';
+import { renderMarkdown } from '../../lib/markdown';
 
 interface Props {
   image?: string;
   heading: string;
   text?: string;
   href?: string;
+  gradient?: 'right' | 'left' | 'none';
 }
 
-const { image, heading, text, href } = Astro.props;
+const { image, heading, text, href, gradient = 'none' } = Astro.props;
 
 const resolved = resolveImage(image);
+
+// Tailwind v4: градиент — `bg-linear-to-*` (не `bg-gradient-to-*`).
+// Полностью чёрный фон начинается на 60% от левого края и тянется вправо.
+const gradientClass = {
+  right: 'bg-linear-to-r from-transparent to-black to-75%',
+  left: 'bg-linear-to-l from-transparent to-black to-75%',
+  none: '',
+}[gradient];
+
+const Wrapper = href ? 'a' : 'div';
 ---
 
-<div class="relative overflow-hidden rounded border border-border bg-surface">
+<Wrapper
+  {...(href ? { href } : {})}
+  class:list={[
+    'relative block overflow-hidden rounded border border-border bg-surface',
+    href && 'transition hover:border-primary',
+  ]}
+>
   {
     resolved && (
       <Image
@@ -27,23 +53,30 @@ const resolved = resolveImage(image);
         aria-hidden="true"
         width={1200}
         format="webp"
-        class="absolute inset-0 h-full w-full object-cover opacity-20"
+        class:list={[
+          'absolute inset-0 h-full w-full object-cover',
+          gradient === 'none' ? 'opacity-40' : 'opacity-50',
+        ]}
         loading="lazy"
       />
     )
   }
+  {
+    gradient !== 'none' && (
+      <div class:list={['absolute inset-0', gradientClass]} aria-hidden="true"></div>
+    )
+  }
   <div class="relative px-6 py-8">
-    <h2 class="text-xl font-bold text-text">{heading}</h2>
-    {text && <p class="mt-2 text-muted">{text}</p>}
+    <h2 class="text-xl font-bold text-white">{heading}</h2>
+    {text && (
+      <div class="prose prose-invert mt-2 max-w-none text-white/80" set:html={renderMarkdown(text)} />
+    )}
     {
       href && (
-        <a
-          href={href}
-          class="mt-4 inline-block font-semibold text-primary hover:underline"
-        >
+        <span class="mt-4 inline-block font-semibold text-primary">
           Подробнее →
-        </a>
+        </span>
       )
     }
   </div>
-</div>
+</Wrapper>

@@ -10,6 +10,7 @@ import { initMenu } from './menu';
 import { initForm } from './form';
 import { initCarousel } from './carousel';
 import { initLightbox } from './lightbox';
+import { initProductGallery } from './product-gallery';
 import { initFaq } from './faq';
 import { initReveal } from './reveal';
 import { initHero } from './hero';
@@ -22,6 +23,7 @@ export function initPage(): void {
   initForm();
   initCarousel();
   initLightbox();
+  initProductGallery();
   initFaq();
   initReveal();
   initHero();

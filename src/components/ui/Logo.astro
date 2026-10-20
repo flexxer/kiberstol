@@ -3,7 +3,7 @@
  * Kiberstol — логотип (плейсхолдер до получения фирменного логотипа).
  *
  * Использует currentColor → наследует цвет текста и адаптируется
- * к теме без доп. стилей. Бренд берётся из `site/settings.md`.
+ * к теме без доп. стилей. Бренд берётся из `site/settings.yaml`.
  *
  * Пропсы:
  *  - withWordmark: показывать ли текстовую часть «KiberStol»
@@ -19,7 +19,7 @@ interface Props {
 const { withWordmark = true, size = 28 } = Astro.props;
 
 const settings = await getEntry('site', 'settings');
-const brand = settings?.data.brand ?? 'Kiberstol.by';
+const brand = settings!.data.brand;
 ---
 
 <a

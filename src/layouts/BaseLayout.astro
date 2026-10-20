@@ -15,7 +15,6 @@ interface Props {
   noindex?: boolean;
   type?: 'website' | 'article' | 'product';
   keywords?: string[];
-  jsonLd?: object;
 }
 
 const {
@@ -27,10 +26,9 @@ const {
   noindex,
   type,
   keywords,
-  jsonLd,
 } = Astro.props;
 
-// Идентификаторы аналитики/рекламы — из `site/settings.md` (единый источник правды).
+// Идентификаторы аналитики/рекламы — из `site/settings.yaml` (единый источник правды).
 // Передаются на клиент через data-атрибуты <body> и подставляются в
 // analytics.ts / advertising.ts только после согласия пользователя.
 const settings = await getEntry('site', 'settings');
@@ -57,10 +55,12 @@ const advertising = settings?.data.advertising;
       noindex={noindex}
       type={type}
       keywords={keywords}
-      jsonLd={jsonLd}
     />
 
     <ClientRouter />
+
+    <!-- Слот для JSON-LD компонентов (Organization, Product, ItemList, …) -->
+    <slot name="head" />
   </head>
   <body
     data-ga4-id={analytics?.ga4Id}

@@ -1,7 +1,7 @@
 ---
 /**
  * LegalBlock — обязательные сведения ИП (закон РБ, §4.2 ТЗ).
- * Размещается в самом низу футера. Данные — из `site/settings.md`.
+ * Размещается в самом низу футера. Данные — из `site/settings.yaml`.
  *
  * Место жительства ИП НЕ указывается (требование ТЗ).
  */
@@ -9,6 +9,15 @@ import { getEntry } from 'astro:content';
 
 const settings = await getEntry('site', 'settings');
 const s = settings!.data;
+
+// Способы оплаты/доставки теперь редактируются в секции «Доставка и оплата»
+// (коллекция `sections`), а не в настройках сайта.
+const delivery = await getEntry('sections', 'delivery');
+const deliveryValue = delivery?.data.variant.value as
+  | { paymentMethods?: string[]; deliveryMethods?: string[] }
+  | undefined;
+const paymentMethods = deliveryValue?.paymentMethods ?? [];
+const deliveryMethods = deliveryValue?.deliveryMethods ?? [];
 ---
 
 <section class="border-t border-border py-6 text-xs text-muted" aria-label="Сведения о продавце">
@@ -46,11 +55,11 @@ const s = settings!.data;
     {s.authorizedBodyPhone && (
       <p>Телефоны работников местного исполнительного органа: {s.authorizedBodyPhone}</p>
     )}
-    {s.paymentMethods.length > 0 && (
-      <p>Способы оплаты: {s.paymentMethods.join('; ')}</p>
+    {paymentMethods.length > 0 && (
+      <p>Способы оплаты: {paymentMethods.join('; ')}</p>
     )}
-    {s.deliveryMethods.length > 0 && (
-      <p>Способы и сроки доставки: {s.deliveryMethods.join('; ')}</p>
+    {deliveryMethods.length > 0 && (
+      <p>Способы и сроки доставки: {deliveryMethods.join('; ')}</p>
     )}
   </div>
 </section>

@@ -6,17 +6,23 @@
  * тип — полем `type`. Рендер — через `HomeSections.astro`, который маппит
  * `type` на секционный компонент.
  *
- * Все тексты, реквизиты и SEO берутся из CMS (`site/settings.md`,
+ * Все тексты, реквизиты и SEO берутся из CMS (`site/settings.yaml`,
  * `sections/*.md`, `lines/*.md`, `products/*.md`, `faq/*.md`).
  * Движок не содержит ни контента, ни стилей.
+ *
+ * JSON-LD рендерится переиспользуемыми компонентами `seo/jsonld/*`
+ * через слот `head` (см. BaseLayout.astro).
  */
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HomeSections from '../components/sections/HomeSections.astro';
+import Organization from '../components/seo/jsonld/Organization.astro';
+import ItemList from '../components/seo/jsonld/ItemList.astro';
+import FaqPage from '../components/seo/jsonld/FaqPage.astro';
 
-// Единый источник правды: реквизиты и глобальный SEO — из `site/settings.md`.
+// Единый источник правды: реквизиты и глобальный SEO — из `site/settings.yaml`.
 const settings = await getEntry('site', 'settings');
-const s = settings?.data;
+const s = settings!.data;
 
 // Секции главной — из коллекции `sections`, сортировка по `order`.
 const sections = (await getCollection('sections')).sort(
@@ -27,70 +33,43 @@ const sections = (await getCollection('sections')).sort(
 const lines = (await getCollection('lines')).sort((a, b) => a.data.order - b.data.order);
 const products = (await getCollection('products')).sort((a, b) => a.data.order - b.data.order);
 
-// FAQ — вопросы-ответы (аккордеон).
-const faq = (await getCollection('faq')).sort((a, b) => a.data.order - b.data.order);
-
-const brand = s?.brand ?? 'Kiberstol.by';
-const tagline = s?.tagline ?? 'Игровые компьютерные столы';
-const seoTitle = s?.seo?.title ?? `${brand} — ${tagline}`;
-const seoDescription = s?.seo?.description ?? tagline;
+const brand = s.brand;
+const tagline = s.tagline;
+const seoTitle = s.seo?.title ?? `${brand} — ${tagline}`;
+const seoDescription = s.seo?.description ?? tagline;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.by';
 
-// JSON-LD: Organization (реквизиты ИП) + ItemList (каталог) + FAQPage.
-const organizationJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: s?.fullName ?? brand,
-  ...(s?.unp && { taxID: s.unp }),
-  url: siteUrl,
-  ...(s?.phone && { telephone: s.phone }),
-  ...(s?.email && { email: s.email }),
-  ...(s?.address && {
-    address: { '@type': 'PostalAddress', streetAddress: s.address },
-  }),
-};
-
-const itemListJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'ItemList',
-  itemListElement: lines.map((line, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    name: line.data.title,
-    url: `${siteUrl}/lines/${line.id}`,
-  })),
-};
-
-const faqJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faq.map((item) => ({
-    '@type': 'Question',
-    name: item.data.question,
-    acceptedAnswer: { '@type': 'Answer', text: item.body },
-  })),
-};
-
-// FAQ-элементы для секции `faq` (вопрос → ответ).
-const faqItems = faq.map((item) => ({
-  question: item.data.question,
-  answer: item.body ?? '',
-}));
+// FAQ-элементы для секции `faq` (вопрос → ответ) — из варианта секции.
+const faqSection = sections.find((s) => s.data.variant.discriminant === 'faq');
+const faqItems: { question: string; answer: string }[] =
+  (faqSection?.data.variant.value as { items?: { question: string; answer: string }[] } | undefined)?.items ??
+  [];
 ---
 
-<BaseLayout
-  title={seoTitle}
-  description={seoDescription}
-  type="website"
-  jsonLd={[organizationJsonLd, itemListJsonLd, faqJsonLd]}
->
+<BaseLayout title={seoTitle} description={seoDescription} type="website">
+  <Organization
+    slot="head"
+    name={s.fullName}
+    unp={s.unp}
+    url={siteUrl}
+    telephone={s.phone}
+    email={s.email}
+    address={s.address}
+  />
+  <ItemList
+    slot="head"
+    items={lines.map((line, i) => ({
+      name: line.data.title,
+      url: `${siteUrl}/lines/${line.id}`,
+      position: i + 1,
+    }))}
+  />
+  <FaqPage slot="head" items={faqItems} />
+
   <HomeSections
     sections={sections}
     lines={lines}
     products={products}
-    faq={faqItems}
-    paymentMethods={s?.paymentMethods}
-    deliveryMethods={s?.deliveryMethods}
   />
 </BaseLayout>

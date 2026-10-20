@@ -4,20 +4,28 @@
  * Заголовок + аккордеон через блок `Faq.astro` (данные из коллекции `faq`).
  */
 import Faq from '../blocks/Faq.astro';
+import ContentBlocks from '../blocks/ContentBlocks.astro';
+
+type Block = {
+  discriminant: string;
+  value: Record<string, unknown>;
+};
 
 interface Props {
-  heading?: string;
+  heading: string;
   items: { question: string; answer: string }[];
+  content?: Block[];
 }
 
-const { heading = 'Частые вопросы', items } = Astro.props;
+const { heading, items, content } = Astro.props;
 ---
 
 {
-  items.length > 0 && (
+  (items.length > 0 || (content && content.length > 0)) && (
     <section id="faq" class="mx-auto max-w-6xl px-4 py-12">
       <h2 class="mb-6 text-2xl font-bold text-text">{heading}</h2>
       <Faq items={items} />
+      {content && content.length > 0 && <ContentBlocks blocks={content} />}
     </section>
   )
 }

@@ -35,9 +35,14 @@
 | `@fontsource-variable/*` | Self-host шрифты (OFL, кириллица) |
 | `@keystatic/core` | Ядро CMS |
 | `@keystatic/astro` | Интеграция Keystatic с Astro |
+| `@astrojs/react` | React-рендерер для UI Keystatic |
+| `@astrojs/node` | Node-адаптер — только для серверных маршрутов Keystatic (`/keystatic`, `/api/keystatic`) |
 | `react` + `react-dom` | Peer-зависимости Keystatic (UI админки) |
+| `marked` + `sanitize-html` | Рендер markdown для `richText`-блоков (см. §3) |
 
 > **Отличие от FastPage:** `@sveltia/cms` заменяется на `@keystatic/core` + `@keystatic/astro` + `react`/`react-dom`.
+
+> **Почему `@astrojs/node` при `output: 'static'`:** Keystatic нужен на проде, поэтому node-адаптер обслуживает только серверные маршруты `/keystatic` и `/api/keystatic`. Все контентные страницы остаются статичными (SSG).
 
 ### 1.2. Скрипты
 
@@ -60,17 +65,18 @@
 /
 ├── public/
 │   ├── assets/                    # Статические ресурсы (логотип, og-баннеры)
-│   │   └── uploads/               # Контент-медиа (фото товаров, WebP ≤2000px)
 │   ├── api/
 │   │   └── submit.php             # Приём заявок → Telegram
 │   ├── favicon.svg
 │   └── robots.txt
 ├── src/
 │   ├── content.config.ts          # Zod-схемы всех коллекций
+│   ├── assets/
+│   │   └── uploads/               # Контент-медиа (фото товаров, WebP ≤2000px)
 │   ├── content/
 │   │   ├── products/              # Модели столов (.md)
 │   │   ├── lines/                 # Линейки столов (.md)
-│   │   ├── site/                  # settings.md — реквизиты, nav, аналитика
+│   │   ├── site/                  # settings.yaml — реквизиты, nav, аналитика
 │   │   ├── legal/                 # privacy, cookie-policy, terms, returns, complaints
 │   │   ├── sections/              # Тексты секций главной
 │   │   └── faq/                   # Вопросы-ответы
@@ -126,7 +132,7 @@
 |---|---|---|
 | `products` | Модели столов | `title`, `line`, `price`, юр. поля (manufacturer, supplier, countryOfOrigin, warranty, used), `specs`, `image`, `gallery`, `badge`, `content` (blocks), `seo` |
 | `lines` | Линейки столов | `title`, `description`, `image`, `features`, `content` (blocks), `seo` |
-| `site` | Реквизиты ИП (единый источник правды) | `brand`, `tagline`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `brandColors`, `paymentMethods`, `deliveryMethods`, `nav`, `analytics`, `advertising`, `seo` |
+| `site` | Реквизиты ИП (единый источник правды) | `brand`, `tagline`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `paymentMethods`, `deliveryMethods`, `nav`, `analytics`, `advertising`, `seo` |
 | `legal` | Юр. документы | `title`, `updatedAt`, `seo` |
 | `sections` | Тексты секций главной | переиспользуется из FastPage |
 | `faq` | Вопросы-ответы | `question`, `answer`, `order` |
@@ -136,6 +142,18 @@
 ### Гибкие блоки контента (`contentBlocks`)
 
 Блоки: `hero`, `richText`, `image`, `imageCarousel`, `video`, `videoGif`, `gallery`, `cta`, `faq`, `specs`, `banner`, `columns`, `quote`, `divider`. Каждый — отдельный Astro-компонент в `src/components/blocks/`, рендерятся через `ContentBlocks.astro`.
+
+> **Формат сериализации `fields.blocks`:**
+> Keystatic сериализует `fields.blocks` как `{ discriminant, value }`, где
+> `discriminant` — ключ блока, а `value` — его поля. Zod-схема:
+> `z.discriminatedUnion('discriminant', ...)`. Поле `type` внутри `value` — это
+> UI-select Keystatic, который НЕ попадает в сериализацию (Keystatic отбрасывает
+> его и оставляет только `discriminant` + `value`).
+
+> **Разделение markdown-рендера (два разных слоя, не дублирование):**
+> - Контентные поля документа (`description`, `body`, `answer`) — `fields.mdx` (нативный Keystatic), рендер через `astro:content` `render()`/`Content`.
+> - Блочный `richText` внутри `contentBlocks` — `fields.text` + `marked`/`sanitize-html` (см. `src/lib/markdown.ts`), рендер через `RichText.astro`.
+> `fields.mdx` несовместим с вложенными `fields.blocks`, поэтому `richText`-блоки используют `marked`.
 
 ### Разделение слоёв: контент / движок / UI
 

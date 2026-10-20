@@ -11,7 +11,7 @@
 const MIN_FILL_SECONDS = 3;
 
 function applyPhoneMask(input: HTMLInputElement): void {
-  input.addEventListener('input', () => {
+  const format = (): void => {
     let digits = input.value.replace(/\D/g, '');
     if (digits.startsWith('375')) digits = digits.slice(3);
     digits = digits.slice(0, 9);
@@ -23,6 +23,18 @@ function applyPhoneMask(input: HTMLInputElement): void {
     if (digits.length > 7) result += `-${digits.slice(7, 9)}`;
 
     input.value = result;
+  };
+
+  input.addEventListener('input', format);
+
+  // Показываем «+375» сразу при фокусе, даже если пользователь ещё ничего не вводил.
+  input.addEventListener('focus', () => {
+    if (input.value === '') input.value = '+375';
+  });
+
+  // Убираем неполный «+375» при потере фокуса, чтобы не скрывать пустой ввод.
+  input.addEventListener('blur', () => {
+    if (input.value === '+375') input.value = '';
   });
 }
 

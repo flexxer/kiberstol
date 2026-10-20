@@ -1,0 +1,60 @@
+---
+/**
+ * ProductCard — карточка товара (изображение, бейдж, название, цена).
+ *
+ * Переиспользуется в каталоге главной (`CatalogSection`), на странице
+ * `/products` и на странице линейки `/lines/[slug]`. Устраняет дублирование
+ * разметки карточки. Данные приходят из коллекции `products` (CMS).
+ */
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../lib/image';
+
+interface Props {
+  product: {
+    id: string;
+    data: {
+      title: string;
+      image?: string;
+      price: number;
+      badge?: string;
+      shortDescription?: string;
+    };
+  };
+  headingTag?: 'h3' | 'h4';
+}
+
+const { product, headingTag = 'h3' } = Astro.props;
+const Heading = headingTag;
+---
+
+<a
+  href={`/products/${product.id}`}
+  class="group block overflow-hidden rounded border border-border bg-surface transition hover:border-primary"
+>
+  {resolveImage(product.data.image) && (
+    <Image
+      src={resolveImage(product.data.image)!}
+      alt={product.data.title}
+      width={640}
+      format="webp"
+      loading="lazy"
+      class="h-40 w-full object-cover"
+    />
+  )}
+  <div class="p-4">
+    {product.data.badge && (
+      <span class="mb-2 inline-block rounded bg-secondary px-2 py-0.5 text-xs font-semibold text-bg">
+        {product.data.badge}
+      </span>
+    )}
+    <Heading class="font-semibold text-text group-hover:text-primary">
+      {product.data.title}
+    </Heading>
+    {product.data.shortDescription && (
+      <p class="mt-1 text-sm text-muted">{product.data.shortDescription}</p>
+    )}
+    <p class="mt-2 font-bold text-primary">
+      {product.data.price.toLocaleString('ru-BY')} BYN
+    </p>
+  </div>
+</a>

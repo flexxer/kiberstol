@@ -18,21 +18,20 @@ import FaqSection from './FaqSection.astro';
 import ContactSection from './ContactSection.astro';
 
 type Block = {
-  type: string;
-  [key: string]: unknown;
+  discriminant: string;
+  value: Record<string, unknown>;
 };
 
 interface Section {
   id: string;
+  body?: string;
   data: {
-    type: string;
-    heading?: string;
-    subheading?: string;
-    body?: string;
-    ctaText?: string;
-    ctaHref?: string;
-    video?: boolean;
+    heading: string;
     content?: Block[];
+    variant: {
+      discriminant: string;
+      value?: Record<string, unknown> | null | undefined;
+    };
   };
 }
 
@@ -40,41 +39,42 @@ interface Props {
   sections: Section[];
   lines: any[];
   products: any[];
-  faq: { question: string; answer: string }[];
-  paymentMethods?: string[];
-  deliveryMethods?: string[];
 }
 
-const { sections, lines, products, faq, paymentMethods, deliveryMethods } = Astro.props;
+const { sections, lines, products } = Astro.props;
 ---
 
 {
   sections.map((section) => {
-    const { type, heading, subheading, body, ctaText, ctaHref, video, content } =
-      section.data;
+    const { heading, content, variant } = section.data;
+    const type = variant.discriminant;
+    const value = variant.value ?? {};
+    // markdown-тело секции лежит в `section.body` (contentField), а не в `data`.
+    const body = section.body;
 
     switch (type) {
       case 'hero':
         return (
           <HeroSection
             heading={heading}
-            subheading={subheading}
-            ctaText={ctaText}
-            ctaHref={ctaHref}
-            video={video}
+            subheading={value.subheading as string | undefined}
+            ctaText={value.ctaText as string | undefined}
+            ctaHref={value.ctaHref as string | undefined}
+            video={value.video as boolean | undefined}
             body={body}
+            content={content}
           />
         );
       case 'catalog':
         return (
           <CatalogSection
             heading={heading}
-            subheading={subheading}
+            subheading={value.subheading as string | undefined}
             body={body}
-            ctaText={ctaText}
-            ctaHref={ctaHref}
+            ctaText={value.ctaText as string | undefined}
+            ctaHref={value.ctaHref as string | undefined}
             lines={lines}
-            products={products}
+            content={content}
           />
         );
       case 'advantages':
@@ -84,18 +84,31 @@ const { sections, lines, products, faq, paymentMethods, deliveryMethods } = Astr
           <DeliverySection
             heading={heading}
             body={body}
-            paymentMethods={paymentMethods}
-            deliveryMethods={deliveryMethods}
+            paymentMethods={(value.paymentMethods as string[] | undefined) ?? []}
+            deliveryMethods={(value.deliveryMethods as string[] | undefined) ?? []}
+            content={content}
           />
         );
       case 'order':
         return (
-          <OrderSection heading={heading} body={body} ctaText={ctaText} ctaHref={ctaHref} />
+          <OrderSection
+            heading={heading}
+            body={body}
+            ctaText={value.ctaText as string | undefined}
+            ctaHref={value.ctaHref as string | undefined}
+            content={content}
+          />
         );
       case 'faq':
-        return <FaqSection heading={heading} items={faq} />;
+        return (
+          <FaqSection
+            heading={heading}
+            items={(value.items as { question: string; answer: string }[] | undefined) ?? []}
+            content={content}
+          />
+        );
       case 'contact':
-        return <ContactSection heading={heading} body={body} />;
+        return <ContactSection heading={heading} body={body} content={content} />;
       default:
         return null;
     }

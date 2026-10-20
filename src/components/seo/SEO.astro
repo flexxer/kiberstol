@@ -11,7 +11,6 @@ interface Props {
   noindex?: boolean;
   type?: 'website' | 'article' | 'product';
   keywords?: string[];
-  jsonLd?: object;
 }
 
 const {
@@ -23,7 +22,6 @@ const {
   noindex = false,
   type = 'website',
   keywords,
-  jsonLd,
 } = Astro.props;
 
 const site = Astro.site;
@@ -69,6 +67,3 @@ const ogImageAlt = imageAlt ?? title;
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImageUrl} />
 <meta name="twitter:image:alt" content={ogImageAlt} />
-
-<!-- JSON-LD структурированные данные -->
-{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}

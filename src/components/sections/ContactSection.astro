@@ -3,15 +3,27 @@
  * ContactSection — секция `contact` главной страницы.
  * Заголовок + markdown-текст + форма заказа (`ContactForm.astro`).
  */
+import { getEntry } from 'astro:content';
 import RichText from '../blocks/RichText.astro';
 import ContactForm from '../blocks/ContactForm.astro';
+import ContentBlocks from '../blocks/ContentBlocks.astro';
+
+type Block = {
+  discriminant: string;
+  value: Record<string, unknown>;
+};
 
 interface Props {
-  heading?: string;
+  heading: string;
   body?: string;
+  content?: Block[];
 }
 
-const { heading = 'Оставить заявку', body } = Astro.props;
+const { heading, body, content } = Astro.props;
+
+const settings = await getEntry('site', 'settings');
+const { phone, viber, instagram } = settings!.data;
+const telHref = `tel:${phone.replace(/[^+\d]/g, '')}`;
 ---
 
 <section id="contacts" class="border-t border-border bg-surface">
@@ -22,6 +34,46 @@ const { heading = 'Оставить заявку', body } = Astro.props;
         <RichText content={body} />
       </div>
     )}
-    <ContactForm />
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+      <ContactForm />
+      <aside class="w-full lg:w-64 lg:pt-1">
+        <p class="mb-3 text-sm font-semibold text-text">
+          Или свяжитесь с нами напрямую:
+        </p>
+        <div class="flex flex-col gap-2 text-sm">
+          <a
+            href={telHref}
+            class="link-underline self-start text-muted hover:text-primary"
+          >
+            {phone}
+          </a>
+          {viber && (
+            <a
+              href={viber}
+              target="_blank"
+              rel="noopener"
+              class="link-underline self-start text-muted hover:text-primary"
+            >
+              Viber
+            </a>
+          )}
+          {instagram && (
+            <a
+              href={instagram}
+              target="_blank"
+              rel="noopener"
+              class="link-underline self-start text-muted hover:text-primary"
+            >
+              Instagram
+            </a>
+          )}
+        </div>
+      </aside>
+    </div>
+    {content && content.length > 0 && (
+      <div class="mt-8">
+        <ContentBlocks blocks={content} />
+      </div>
+    )}
   </div>
 </section>

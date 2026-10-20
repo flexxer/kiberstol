@@ -1,14 +1,24 @@
 ---
 title: Hero
-type: hero
 heading: Kiberstol.by
-subheading: >-
-  Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol - доступное
-  качество
-ctaText: Выбрать
-ctaHref: '#catalog'
-video: true
-content: []
+content:
+  - discriminant: divider
+    value:
+      style: line
+  - discriminant: richText
+    value:
+      content: |-
+        опа, опа, **зеленая** *ограда*!
+        А **ДЕВКИ** выебли *попа*, так ему и **НАДО**
+variant:
+  discriminant: hero
+  value:
+    subheading: >-
+      Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol -
+      доступное качество
+    ctaText: Выбрать
+    ctaHref: '#catalog'
+    video: true
 order: 0
 ---
-Игровые компьютерные столы бюджетного сегмента. Катай с **Kiberstol** — доступное качество
+> раз два три, ёлочка гори

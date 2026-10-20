@@ -7,16 +7,16 @@
 import ContentBlocks from '../blocks/ContentBlocks.astro';
 
 type Block = {
-  type: string;
-  [key: string]: unknown;
+  discriminant: string;
+  value: Record<string, unknown>;
 };
 
 interface Props {
-  heading?: string;
+  heading: string;
   content?: Block[];
 }
 
-const { heading = 'Почему Kiberstol', content } = Astro.props;
+const { heading, content } = Astro.props;
 ---
 
 <section id="advantages" class="border-t border-border bg-surface">

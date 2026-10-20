@@ -13,7 +13,11 @@ import { config, collection, singleton, fields } from '@keystatic/core';
  * Гибкие блоки контента (`contentBlocks`) задаются через `fields.blocks`.
  * Каждый блок — `object` с полем `type` (select с фиксированным значением),
  * чтобы сериализованная структура совпадала с Zod-схемой
- * `z.discriminatedUnion('type', ...)` и читалась `ContentBlocks.astro`.
+ * `z.discriminatedUnion('discriminant', ...)` и читалась `ContentBlocks.astro`.
+ *
+ * ВАЖНО: `fields.blocks` сериализует блоки как `{ discriminant, value }`,
+ * где `discriminant` — ключ блока, а `value` — его поля. Поле `type` внутри
+ * `value` — это UI-select Keystatic, который НЕ попадает в сериализацию.
  */
 
 // ---------------------------------------------------------------------------
@@ -138,7 +142,10 @@ const leafBlocks = {
         options: [{ label: 'Карусель', value: 'imageCarousel' }],
         defaultValue: 'imageCarousel',
       }),
-      images: fields.array(imageItem, { label: 'Изображения' }),
+      images: fields.array(imageItem, {
+        label: 'Изображения',
+        itemLabel: (props) => props.fields.alt.value || 'Изображение',
+      }),
       autoplay: fields.checkbox({ label: 'Автопрокрутка', defaultValue: false }),
     }),
   },
@@ -176,7 +183,10 @@ const leafBlocks = {
         options: [{ label: 'Галерея', value: 'gallery' }],
         defaultValue: 'gallery',
       }),
-      images: fields.array(imageItem, { label: 'Изображения' }),
+      images: fields.array(imageItem, {
+        label: 'Изображения',
+        itemLabel: (props) => props.fields.alt.value || 'Изображение',
+      }),
     }),
   },
   cta: {
@@ -208,7 +218,10 @@ const leafBlocks = {
         options: [{ label: 'FAQ', value: 'faq' }],
         defaultValue: 'faq',
       }),
-      items: fields.array(faqItem, { label: 'Вопросы-ответы' }),
+      items: fields.array(faqItem, {
+        label: 'Вопросы-ответы',
+        itemLabel: (props) => props.fields.question.value || 'Вопрос',
+      }),
     }),
   },
   specs: {
@@ -219,7 +232,10 @@ const leafBlocks = {
         options: [{ label: 'Характеристики', value: 'specs' }],
         defaultValue: 'specs',
       }),
-      items: fields.array(specItem, { label: 'Характеристики' }),
+      items: fields.array(specItem, {
+        label: 'Характеристики',
+        itemLabel: (props) => props.fields.name.value || 'Характеристика',
+      }),
     }),
   },
   banner: {
@@ -302,7 +318,7 @@ const contentBlocks = fields.blocks(
             },
             { label: 'Колонка' },
           ),
-          { label: 'Колонки' },
+          { label: 'Колонки', itemLabel: (props) => props.fields.heading.value || 'Колонка' },
         ),
       }),
     },
@@ -337,7 +353,10 @@ const products = collection({
     warranty: fields.text({ label: 'Гарантийный срок' }),
     used: fields.checkbox({ label: 'Б/у или конфискованный товар', defaultValue: false }),
 
-    specs: fields.array(specItem, { label: 'Характеристики' }),
+    specs: fields.array(specItem, {
+      label: 'Характеристики',
+      itemLabel: (props) => props.fields.name.value || 'Характеристика',
+    }),
     image: fields.image({
       label: 'Главное фото',
       directory: 'src/assets/uploads',
@@ -346,7 +365,10 @@ const products = collection({
     }),
     gallery: fields.array(
       fields.image({ label: 'Фото', directory: 'src/assets/uploads', publicPath: '/assets/uploads' }),
-      { label: 'Галерея' },
+      {
+        label: 'Галерея',
+        itemLabel: (props) => props.value?.filename || 'Фото',
+      },
     ),
     badge: fields.text({ label: 'Бейдж' }),
     ctaText: fields.text({ label: 'Текст кнопки заказа' }),
@@ -372,7 +394,10 @@ const lines = collection({
       publicPath: '/assets/uploads',
       validation: { isRequired: true },
     }),
-    features: fields.array(fields.text({ label: 'Особенность' }), { label: 'Особенности' }),
+    features: fields.array(fields.text({ label: 'Особенность' }), {
+      label: 'Особенности',
+      itemLabel: (props) => props.value || 'Особенность',
+    }),
     order: fields.number({ label: 'Порядок сортировки', defaultValue: 0 }),
     content: contentBlocks,
     seo: fields.object(seoFields, { label: 'SEO' }),
@@ -394,21 +419,12 @@ const site = singleton({
     tradeRegistryDate: fields.text({ label: 'Дата включения в торговый реестр' }),
     phone: fields.text({ label: 'Телефон' }),
     email: fields.text({ label: 'Email' }),
+    viber: fields.text({ label: 'Viber (ссылка)' }),
+    instagram: fields.text({ label: 'Instagram (ссылка)' }),
     address: fields.text({ label: 'Адрес' }),
     workHours: fields.text({ label: 'Режим работы' }),
     authorizedBody: fields.text({ label: 'Уполномоченный орган' }),
     authorizedBodyPhone: fields.text({ label: 'Телефон уполномоченного органа' }),
-    brandColors: fields.object(
-      {
-        primary: fields.text({ label: 'Основной цвет' }),
-        secondary: fields.text({ label: 'Вторичный цвет' }),
-        neutral: fields.text({ label: 'Нейтральный цвет' }),
-        accent: fields.array(fields.text({ label: 'Акцентный цвет' }), { label: 'Акцентные цвета' }),
-      },
-      { label: 'Фирменные цвета' },
-    ),
-    paymentMethods: fields.array(fields.text({ label: 'Способ оплаты' }), { label: 'Способы оплаты' }),
-    deliveryMethods: fields.array(fields.text({ label: 'Способ доставки' }), { label: 'Способы доставки' }),
     nav: fields.array(
       fields.object(
         {
@@ -417,7 +433,7 @@ const site = singleton({
         },
         { label: 'Пункт меню' },
       ),
-      { label: 'Навигация' },
+      { label: 'Навигация', itemLabel: (props) => props.fields.label.value || 'Пункт меню' },
     ),
     analytics: fields.object(
       {
@@ -458,43 +474,66 @@ const sections = collection({
   path: 'src/content/sections/*',
   slugField: 'title',
   format: { data: 'yaml', contentField: 'body' },
-  columns: ['title', 'type', 'order'],
+  columns: ['title', 'order'],
   schema: {
     title: fields.slug({ name: { label: 'Название секции' } }),
-    type: fields.select({
-      label: 'Тип секции',
-      options: [
-        { label: 'Hero', value: 'hero' },
-        { label: 'Каталог', value: 'catalog' },
-        { label: 'Преимущества', value: 'advantages' },
-        { label: 'Доставка и оплата', value: 'delivery' },
-        { label: 'Оформление заказа', value: 'order' },
-        { label: 'FAQ', value: 'faq' },
-        { label: 'Контакты', value: 'contact' },
-      ],
-      defaultValue: 'advantages',
-    }),
-    heading: fields.text({ label: 'Заголовок' }),
-    subheading: fields.text({ label: 'Подзаголовок' }),
+    heading: fields.text({ label: 'Заголовок', validation: { isRequired: true } }),
     body: fields.mdx({ label: 'Текст', extension: 'md' }),
-    ctaText: fields.text({ label: 'Текст кнопки' }),
-    ctaHref: fields.text({ label: 'Ссылка кнопки' }),
-    video: fields.checkbox({ label: 'Фоновое видео (hero)', defaultValue: false }),
+    // Гибкие контент-блоки (картинки, видео, кнопки и т.д.) — доступны
+    // для всех типов секций.
     content: contentBlocks,
-    order: fields.number({ label: 'Порядок сортировки', defaultValue: 0 }),
-  },
-});
-
-/** `faq` — вопросы-ответы. */
-const faq = collection({
-  label: 'FAQ',
-  path: 'src/content/faq/*',
-  slugField: 'question',
-  format: { data: 'yaml', contentField: 'answer' },
-  columns: ['question', 'order'],
-  schema: {
-    question: fields.slug({ name: { label: 'Вопрос' } }),
-    answer: fields.mdx({ label: 'Ответ', extension: 'md' }),
+    // Поля, специфичные для типа секции, задаются условно по `type`.
+    // Сериализуется в `{ discriminant, value }` (см. zod-схему `variant`).
+    variant: fields.conditional(
+      fields.select({
+        label: 'Тип секции',
+        options: [
+          { label: 'Hero', value: 'hero' },
+          { label: 'Каталог', value: 'catalog' },
+          { label: 'Преимущества', value: 'advantages' },
+          { label: 'Доставка и оплата', value: 'delivery' },
+          { label: 'Оформление заказа', value: 'order' },
+          { label: 'FAQ', value: 'faq' },
+          { label: 'Контакты', value: 'contact' },
+        ],
+        defaultValue: 'advantages',
+      }),
+      {
+        hero: fields.object({
+          subheading: fields.text({ label: 'Подзаголовок' }),
+          ctaText: fields.text({ label: 'Текст кнопки' }),
+          ctaHref: fields.text({ label: 'Ссылка кнопки' }),
+          video: fields.checkbox({ label: 'Фоновое видео', defaultValue: false }),
+        }),
+        catalog: fields.object({
+          subheading: fields.text({ label: 'Подзаголовок' }),
+          ctaText: fields.text({ label: 'Текст кнопки' }),
+          ctaHref: fields.text({ label: 'Ссылка кнопки' }),
+        }),
+        advantages: fields.empty(),
+        delivery: fields.object({
+          paymentMethods: fields.array(fields.text({ label: 'Способ оплаты' }), {
+            label: 'Способы оплаты',
+            itemLabel: (props) => props.value || 'Способ оплаты',
+          }),
+          deliveryMethods: fields.array(fields.text({ label: 'Способ и срок доставки' }), {
+            label: 'Способы и сроки доставки',
+            itemLabel: (props) => props.value || 'Способ доставки',
+          }),
+        }),
+        order: fields.object({
+          ctaText: fields.text({ label: 'Текст кнопки' }),
+          ctaHref: fields.text({ label: 'Ссылка кнопки' }),
+        }),
+        faq: fields.object({
+          items: fields.array(faqItem, {
+            label: 'Вопросы-ответы',
+            itemLabel: (props) => props.fields.question.value || 'Вопрос',
+          }),
+        }),
+        contact: fields.empty(),
+      },
+    ),
     order: fields.number({ label: 'Порядок сортировки', defaultValue: 0 }),
   },
 });
@@ -515,7 +554,6 @@ export default config({
     lines,
     legal,
     sections,
-    faq,
   },
   singletons: {
     site,

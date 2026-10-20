@@ -8,33 +8,33 @@
 import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ItemList from '../../components/seo/jsonld/ItemList.astro';
+import ProductCard from '../../components/ui/ProductCard.astro';
 import { resolveImage } from '../../lib/image';
+import { renderMarkdown } from '../../lib/markdown';
 
 const settings = await getEntry('site', 'settings');
-const s = settings?.data;
+const s = settings!.data;
 
 const lines = (await getCollection('lines')).sort((a, b) => a.data.order - b.data.order);
 const products = (await getCollection('products')).sort((a, b) => a.data.order - b.data.order);
 
-const brand = s?.brand ?? 'Kiberstol.by';
+const brand = s.brand;
 const title = `Каталог — ${brand}`;
 const description = 'Каталог игровых компьютерных столов: линейки и модели.';
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.by';
-
-const itemListJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'ItemList',
-  itemListElement: lines.map((line, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    name: line.data.title,
-    url: `${siteUrl}/lines/${line.id}`,
-  })),
-};
 ---
 
-<BaseLayout title={title} description={description} type="website" jsonLd={[itemListJsonLd]}>
+<BaseLayout title={title} description={description} type="website">
+  <ItemList
+    slot="head"
+    items={lines.map((line, i) => ({
+      name: line.data.title,
+      url: `${siteUrl}/lines/${line.id}`,
+      position: i + 1,
+    }))}
+  />
   <section class="mx-auto max-w-6xl px-4 py-12">
     <h1 class="mb-6 text-3xl font-bold text-text">Каталог</h1>
 
@@ -60,7 +60,7 @@ const itemListJsonLd = {
                     {line.data.title}
                   </h2>
                   {line.body && (
-                    <p class="text-sm text-muted">{line.body}</p>
+                    <div class="prose prose-invert max-w-none text-sm text-muted" set:html={renderMarkdown(line.body)} />
                   )}
                 </div>
               </a>
@@ -68,39 +68,7 @@ const itemListJsonLd = {
               <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {
                   lineProducts.map((product) => (
-                    <a
-                      href={`/products/${product.id}`}
-                      class="group block overflow-hidden rounded border border-border bg-surface transition hover:border-primary"
-                    >
-                      {resolveImage(product.data.image) && (
-                        <Image
-                          src={resolveImage(product.data.image)!}
-                          alt={product.data.title}
-                          width={640}
-                          format="webp"
-                          loading="lazy"
-                          class="h-40 w-full object-cover"
-                        />
-                      )}
-                      <div class="p-4">
-                        {product.data.badge && (
-                          <span class="mb-2 inline-block rounded bg-secondary px-2 py-0.5 text-xs font-semibold text-bg">
-                            {product.data.badge}
-                          </span>
-                        )}
-                        <h3 class="font-semibold text-text group-hover:text-primary">
-                          {product.data.title}
-                        </h3>
-                        {product.data.shortDescription && (
-                          <p class="mt-1 text-sm text-muted">
-                            {product.data.shortDescription}
-                          </p>
-                        )}
-                        <p class="mt-2 font-bold text-primary">
-                          {product.data.price.toLocaleString('ru-BY')} BYN
-                        </p>
-                      </div>
-                    </a>
+                    <ProductCard product={product} />
                   ))
                 }
               </div>

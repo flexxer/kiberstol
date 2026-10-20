@@ -25,8 +25,8 @@ import Quote from './Quote.astro';
 import Divider from './Divider.astro';
 
 type Block = {
-  type: string;
-  [key: string]: unknown;
+  discriminant: string;
+  value: Record<string, unknown>;
 };
 
 interface Props {
@@ -39,97 +39,98 @@ const { blocks } = Astro.props;
 <div class="space-y-8">
   {
     blocks.map((block) => {
-      switch (block.type) {
+      const v = block.value;
+      switch (block.discriminant) {
         case 'hero':
           return (
             <Hero
-              heading={block.heading as string}
-              subheading={block.subheading as string | undefined}
-              image={block.image as string | undefined}
-              ctaText={block.ctaText as string | undefined}
-              ctaHref={block.ctaHref as string | undefined}
+              heading={v.heading as string}
+              subheading={v.subheading as string | undefined}
+              image={v.image as string | undefined}
+              ctaText={v.ctaText as string | undefined}
+              ctaHref={v.ctaHref as string | undefined}
             />
           );
         case 'richText':
-          return <RichText content={block.content as string} />;
+          return <RichText content={v.content as string} />;
         case 'image':
           return (
             <Image
-              image={block.image as string}
-              alt={block.alt as string}
-              caption={block.caption as string | undefined}
-              align={block.align as 'left' | 'center' | 'right' | undefined}
+              image={v.image as string}
+              alt={v.alt as string}
+              caption={v.caption as string | undefined}
+              align={v.align as 'left' | 'center' | 'right' | undefined}
             />
           );
         case 'imageCarousel':
           return (
             <ImageCarousel
-              images={block.images as { image: string; alt: string; caption?: string }[]}
-              autoplay={block.autoplay as boolean | undefined}
+              images={v.images as { image: string; alt: string; caption?: string }[]}
+              autoplay={v.autoplay as boolean | undefined}
             />
           );
         case 'video':
           return (
             <Video
-              src={block.src as string}
-              poster={block.poster as string | undefined}
-              controls={block.controls as boolean | undefined}
-              autoplay={block.autoplay as boolean | undefined}
+              src={v.src as string}
+              poster={v.poster as string | undefined}
+              controls={v.controls as boolean | undefined}
+              autoplay={v.autoplay as boolean | undefined}
             />
           );
         case 'videoGif':
           return (
             <VideoGif
-              src={block.src as string}
-              poster={block.poster as string | undefined}
+              src={v.src as string}
+              poster={v.poster as string | undefined}
             />
           );
         case 'gallery':
           return (
             <Gallery
-              images={block.images as { image: string; alt: string; caption?: string }[]}
+              images={v.images as { image: string; alt: string; caption?: string }[]}
             />
           );
         case 'cta':
           return (
             <Cta
-              text={block.text as string}
-              href={block.href as string}
-              style={block.style as 'primary' | 'secondary' | 'outline' | undefined}
+              text={v.text as string}
+              href={v.href as string}
+              style={v.style as 'primary' | 'secondary' | 'outline' | undefined}
             />
           );
         case 'faq':
           return (
-            <Faq items={block.items as { question: string; answer: string }[]} />
+            <Faq items={v.items as { question: string; answer: string }[]} />
           );
         case 'specs':
           return (
-            <Specs items={block.items as { name: string; value: string }[]} />
+            <Specs items={v.items as { name: string; value: string }[]} />
           );
         case 'banner':
           return (
             <Banner
-              image={block.image as string | undefined}
-              heading={block.heading as string}
-              text={block.text as string | undefined}
-              href={block.href as string | undefined}
+              image={v.image as string | undefined}
+              heading={v.heading as string}
+              text={v.text as string | undefined}
+              href={v.href as string | undefined}
             />
           );
         case 'columns':
           return (
             <Columns
-              columns={block.columns as { heading?: string; content?: string }[]}
+              columns={v.columns as { heading?: string; content?: Block[] }[]}
             />
           );
         case 'quote':
           return (
             <Quote
-              text={block.text as string}
-              author={block.author as string | undefined}
+              text={v.text as string}
+              author={v.author as string | undefined}
             />
           );
         case 'divider':
-          return <Divider style={block.style as 'line' | 'space' | undefined} />;
+          return <Divider style={v.style as 'line' | 'space' | undefined} />;
         default:
           return null;
       }
