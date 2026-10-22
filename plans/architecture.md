@@ -39,6 +39,8 @@
 | `@astrojs/node` | Node-адаптер — только для серверных маршрутов Keystatic (`/keystatic`, `/api/keystatic`) |
 | `react` + `react-dom` | Peer-зависимости Keystatic (UI админки) |
 | `marked` + `sanitize-html` | Рендер markdown для `richText`-блоков (см. §3) |
+| `sharp` | Оптимизация изображений на этапе сборки (WebP/AVIF, ресайз) |
+| `typescript` + `@astrojs/check` | Проверка типов (`npm run check`) |
 
 > **Отличие от FastPage:** `@sveltia/cms` заменяется на `@keystatic/core` + `@keystatic/astro` + `react`/`react-dom`.
 
@@ -51,11 +53,15 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check": "astro check",
     "preview": "astro preview",
     "astro": "astro"
   }
 }
 ```
+
+> `npm run check` (`astro check`) — обязательная проверка типов перед коммитом.
+> `npm run build` — статическая сборка; `sharp` собирает responsive-изображения.
 
 ---
 
@@ -64,7 +70,8 @@
 ```text
 /
 ├── public/
-│   ├── assets/                    # Статические ресурсы (логотип, og-баннеры)
+│   ├── assets/                    # Статические ресурсы (og-default.png, hero-видео)
+│   │   └── uploads/               # legacy-заглушка (не используется CMS, см. README)
 │   ├── api/
 │   │   └── submit.php             # Приём заявок → Telegram
 │   ├── favicon.svg
@@ -72,7 +79,7 @@
 ├── src/
 │   ├── content.config.ts          # Zod-схемы всех коллекций
 │   ├── assets/
-│   │   └── uploads/               # Контент-медиа (фото товаров, WebP ≤2000px)
+│   │   └── uploads/               # Актуальный медиа-слой Keystatic (фото товаров)
 │   ├── content/
 │   │   ├── products/              # Модели столов (.md)
 │   │   ├── lines/                 # Линейки столов (.md)
@@ -119,6 +126,13 @@
 └── package.json
 ```
 
+> **Маршруты Keystatic:** отдельного файла `src/pages/keystatic/[...params].astro`
+> нет. Интеграция `@keystatic/astro` сама инжектит маршруты `/keystatic` и
+> `/api/keystatic` при сборке (см. `astro.config.mjs`).
+>
+> **Медиа:** актуальные загрузки — `src/assets/uploads/**`; `public/assets/uploads`
+> сохранён как legacy-заглушка для старых ссылок и не используется CMS.
+
 ---
 
 ## 3. Контентная модель (коллекции)
@@ -127,13 +141,27 @@
 
 | Коллекция | Назначение | Ключевые поля |
 |---|---|---|
-| `products` | Модели столов | `title`, `line`, `price`, юр. поля (manufacturer, supplier, countryOfOrigin, warranty, used), `specs`, `image`, `gallery`, `badge`, `content` (blocks), `seo` |
+| `products` | Модели столов | `title`, `line` (relationship → `lines`), `price`, юр. поля (manufacturer, supplier, countryOfOrigin, warranty, used), `specs`, `image`, `gallery`, `badge`, `ctaText`, `content` (blocks), `seo` |
 | `lines` | Линейки столов | `title`, `description`, `image`, `features`, `content` (blocks), `seo` |
 | `site` | Реквизиты ИП (единый источник правды) | `brand`, `tagline`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `viber`, `instagram`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `labels`, `nav`, `analytics`, `advertising`, `seo` |
 | `legal` | Юр. документы | `title`, `updatedAt`, `seo` |
 | `sections` | Тексты секций главной | `heading`, `body`, `content` (blocks), `variant` (утверждено: hero/advantages/catalog/delivery/faq/contact; `order` — зарезервирован), `order` |
 
 > **Исключено из FastPage:** `blog`, `showcase`, `testimonials`, `instagram`, `integrations`, `products` (услуги). Добавлено: `lines`.
+>
+> **`site` — singleton `settings.yaml`:** реквизиты, навигация, аналитика/реклама,
+> подписи интерфейса (`labels`) и глобальный SEO хранятся в
+> [`src/content/site/settings.yaml`](../src/content/site/settings.yaml). Поля
+> `brandColors`, `paymentMethods`, `deliveryMethods` из `site` удалены: цвета
+> задаются только в CSS, а способы оплаты/доставки — в
+> [`sections/delivery.md`](../src/content/sections/delivery.md) (`variant.delivery`).
+>
+> **`products.line` — relationship:** в Keystatic поле `line` — это
+> `fields.relationship({ collection: 'lines' })`, а в Zod — строка (id линейки).
+> Свободный текст линейки больше не используется.
+>
+> **Коллекции `faq` нет:** вопросы-ответы редактируются в секции `faq`
+> (`sections/faq.md`, `variant.discriminant === 'faq'`).
 
 ### Гибкие блоки контента (`contentBlocks`)
 
@@ -197,6 +225,22 @@
 - **Навигация и якоря** задаются в [`site/settings.yaml`](../src/content/site/settings.yaml)
   (`nav`) и соответствуют перечисленным секциям.
 
+### Фактическое состояние реализации (после рефакторинга v2)
+
+Сводка расхождений, устранённых в документации:
+
+| Область | Фактическое состояние |
+|---|---|
+| Настройки сайта | Единственный источник — `src/content/site/settings.yaml` (singleton `site`). `settings.md` отсутствует. |
+| Медиа | Актуальные загрузки — `src/assets/uploads/**`; `public/assets/uploads` — legacy-заглушка. |
+| Маршруты Keystatic | Отдельного `src/pages/keystatic/[...params].astro` нет; маршруты инжектит `@keystatic/astro`. |
+| FAQ | Отдельной коллекции `faq` нет; вопросы-ответы — в `sections/faq.md` (`variant.discriminant === 'faq'`). |
+| Формат блоков | `{ discriminant, value }`; поле `type` внутри `value` — legacy и отбрасывается Zod. |
+| `brandColors` | Удалено из схемы, CMS и контента; цвета — только в CSS-теме. |
+| Оплата/доставка | Не в `site`, а в `sections/delivery.md` (`variant.delivery.paymentMethods/deliveryMethods`). |
+| Главная | Утверждённый эталон: hero → advantages → catalog → delivery → faq → contact. |
+| `order`/`banners`/модели на главной | Вне рефакторинга v2 (будущее развитие); на главной не используются. |
+
 ---
 
 ## 4. Поэтапный план реализации
@@ -216,7 +260,7 @@
 
 | # | Шаг | Результат |
 |---|---|---|
-| 1.1 | `src/content.config.ts` — схемы `products`, `lines`, `site`, `legal`, `sections`, `faq` + `contentBlocks` + `seoSchema` | валидация контента |
+| 1.1 | `src/content.config.ts` — схемы `products`, `lines`, `site`, `legal`, `sections` + `contentBlocks` + `seoSchema` | валидация контента |
 | 1.2 | Создать структуру `src/content/*` с плейсхолдер-файлами | коллекции читаются |
 | 1.3 | Коммит + пуш | — |
 
@@ -265,8 +309,8 @@
 | # | Шаг | Результат |
 |---|---|---|
 | 6.1 | `keystatic.config.ts` (коллекции, `fields.blocks`, медиа) | конфиг CMS |
-| 6.2 | `src/pages/keystatic/[...params].astro` | маршрут `/keystatic` |
-| 6.3 | Настройка медиа-слоя (`public/assets/uploads`, WebP ≤2000px) | загрузка медиа |
+| 6.2 | Маршруты `/keystatic` и `/api/keystatic` инжектятся интеграцией `@keystatic/astro` (отдельный page-файл не нужен) | маршрут `/keystatic` |
+| 6.3 | Настройка медиа-слоя (`src/assets/uploads`, WebP ≤2000px через `astro:assets`) | загрузка медиа |
 | 6.4 | Коммит + пуш | — |
 
 ### Фаза 7 — Тема cyberpunk
@@ -292,7 +336,7 @@
 | # | Шаг | Результат |
 |---|---|---|
 | 9.1 | `legal/privacy.md`, `cookie-policy.md`, `terms.md`, `returns.md`, `complaints.md` | юр. тексты |
-| 9.2 | `site/settings.md` — реквизиты ИП, реестр, оплата/доставка | реквизиты |
+| 9.2 | `site/settings.yaml` — реквизиты ИП, реестр; оплата/доставка — в `sections/delivery.md` | реквизиты |
 | 9.3 | Коммит + пуш | — |
 
 ### Фаза 10 — Плейсхолдеры контента
@@ -300,7 +344,7 @@
 | # | Шаг | Результат |
 |---|---|---|
 | 10.1 | `lines/*.md` (3 линейки) + `products/*.md` (модели) с плейсхолдерами | каталог |
-| 10.2 | `sections/*.md` + `faq/*.md` | тексты главной |
+| 10.2 | `sections/*.md` (FAQ — в `sections/faq.md`) | тексты главной |
 | 10.3 | Коммит + пуш | — |
 
 ### Фаза 11 — Сборка и приёмка

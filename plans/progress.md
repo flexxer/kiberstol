@@ -12,7 +12,7 @@
 - [x] Фаза 4 — формы, согласие, аналитика
 - [x] Фаза 5 — SEO и медиа
 - [x] Фаза 6 — очистка контента товаров и линеек
-- [ ] Фаза 7 — актуализация документации и ТЗ
+- [x] Фаза 7 — актуализация документации и ТЗ
 - [ ] Фаза 8 — тесты, CI, аудит качества
 
 ## Базовая линия
@@ -66,6 +66,10 @@
 | 2026-10-22 | 6 | Уникальные SEO-заголовки и описания для товаров и линеек; исправлены неверные названия «Макс»/«Про» | `npm run build` |
 | 2026-10-22 | 6 | `authorizedBodyPhone` помечен как плейсхолдер в `settings.yaml` и `complaints.md` | — |
 | 2026-10-22 | 6 | Проверены обязательные юр. поля, alt, изображения, `ctaText` и полнота `settings.yaml` | `npm run check` |
+| 2026-10-22 | 7 | `architecture.md`: `settings.yaml`, `src/assets/uploads`, маршруты Keystatic без page-файла, отсутствие `faq`, `discriminant`, отсутствие `brandColors`, оплата/доставка в `sections`, эталон главной | — |
+| 2026-10-22 | 7 | `kiberstol-tz.md`: обновлены `site`-схема, relationship `line`, медиа-путь, SEO `Product`, оплата/доставка | — |
+| 2026-10-22 | 7 | `refactoring.md` помечен как superseded со ссылкой на `refactoring-v2.md` | — |
+| 2026-10-22 | 7 | Добавлены `docs/deployment.md` и `docs/cms.md` | — |
 
 ## Примечания
 
@@ -83,3 +87,4 @@
 - Контент товаров: гарантийный срок указан как «24 месяца» — требует подтверждения у заказчика.
 - `authorizedBodyPhone` — плейсхолдер `+375 212 XX-XX-XX`, помечен TODO в `settings.yaml` и `complaints.md`; заменить перед публикацией.
 - SEO товаров и линеек уникальны; изображения присутствуют в `src/assets/uploads/**`, alt формируется из названия товара/линейки.
+- Документация фазы 7: [`architecture.md`](architecture.md), [`kiberstol-tz.md`](../requirements/kiberstol-tz.md), [`docs/deployment.md`](../docs/deployment.md), [`docs/cms.md`](../docs/cms.md). Старый [`refactoring.md`](refactoring.md) — superseded.

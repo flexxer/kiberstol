@@ -69,7 +69,7 @@ flowchart TB
 | `/terms` | Порядок оформления заказа + условия оплаты и доставки | `legal/terms.md` |
 | `/returns` | Возвраты надлежащего/ненадлежащего качества | `legal/returns.md` |
 | `/complaints` | Порядок подачи обращения о нарушении прав | `legal/complaints.md` |
-| `/keystatic` | Keystatic CMS (git-based, GitHub OAuth) | `keystatic.config.ts` + `src/pages/keystatic/[...params].astro` |
+| `/keystatic` | Keystatic CMS (git-based, GitHub OAuth) | `keystatic.config.ts`; маршруты инжектит `@keystatic/astro` |
 
 > Шаблон [`index.astro`](src/pages/index.astro) переиспользуется; добавляются страницы `/products`, `/products/[slug]`, `/lines/[slug]` и 5 юридических. Страницы `/lines/[slug]` и `/products/[slug]` — generic: рендерятся из массива гибких блоков контента (см. §6.6). Все страницы оборачиваются в единый [`BaseLayout.astro`](src/layouts/BaseLayout.astro) с общими `Header`/`Nav`/`Footer` (см. §8.1).
 
@@ -160,7 +160,7 @@ const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
   schema: z.object({
     title: z.string(),               // наименование товара
-    line: z.string(),                // id линейки (родитель)
+    line: z.string(),                // id линейки (родитель); в Keystatic — relationship → lines
     price: z.number(),               // цена, BYN
     oldPrice: z.number().optional(),
     shortDescription: z.string(),
@@ -207,9 +207,11 @@ const lines = defineCollection({
 
 ```ts
 const site = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/site' }),
+  // Единственный источник — settings.yaml (singleton `site` в Keystatic).
+  loader: glob({ pattern: '**/*.{md,yaml}', base: './src/content/site' }),
   schema: z.object({
     brand: z.string(),
+    tagline: z.string(),
     fullName: z.string(),            // ИП Суворов Александр Владимирович
     unp: z.string(),                 // 391946770
     registrationDate: z.string(),    // 14.04.2025 (госрегистрация ИП)
@@ -217,18 +219,23 @@ const site = defineCollection({
     tradeRegistryDate: z.string(),   // 30.12.2025 (торговый реестр)
     phone: z.string(),               // +375 29 637-76-63
     email: z.string(),               // kiberstol.by@gmail.com
+    viber: z.string().optional(),    // ссылка Viber
+    instagram: z.string().optional(),// ссылка Instagram
     address: z.string(),             // г. Минск, ул. Грушевская 17-14 (книга замечаний)
     workHours: z.string(),           // «заказы принимаются с 9:00 до 21:00 без выходных»
     authorizedBody: z.string(),      // уполномоченный по обращениям покупателей — ИП Суворов Александр Владимирович
     authorizedBodyPhone: z.string(), // телефоны администрации Первомайского района г. Витебска
-    brandColors: z.object({          // фирменные цвета (точные коды — позже)
-      primary: z.string(),           // голубой
-      secondary: z.string(),         // фиолетовый
-      neutral: z.string(),           // белый
-      accent: z.array(z.string()).optional(), // контрастные дополнительные
+    labels: z.object({               // подписи интерфейса (микротексты)
+      specs: z.string(),
+      productInfo: z.string(),
+      relatedProducts: z.string(),
+      lineModels: z.string(),
+      catalogTitle: z.string(),
+      catalogDescription: z.string(),
+      breadcrumbsHome: z.string(),
+      breadcrumbsCatalog: z.string(),
+      cookieSettings: z.string(),
     }).optional(),
-    paymentMethods: z.array(z.string()), // способы оплаты (только при доставке, онлайн-оплаты нет)
-    deliveryMethods: z.array(z.string()),// способы и сроки доставки
     nav: z.array(z.object({ label: z.string(), href: z.string() })),
 
     // Аналитика и реклама (Яндекс + Google)
@@ -240,9 +247,14 @@ const site = defineCollection({
       googleAdsId: z.string().optional(),  // Google Ads (конверсии)
       yandexDirectId: z.string().optional(), // Яндекс.Директ (конверсии)
     }).optional(),
+    seo: seoSchema,
   }),
 });
 ```
+
+> **Удалено из `site`:** `brandColors` (цвета — только в CSS-теме),
+> `paymentMethods`/`deliveryMethods` (перенесены в `sections/delivery.md`,
+> `variant.delivery`). Файл `settings.md` не используется — только `settings.yaml`.
 
 ### 6.4. `legal` — юридические документы
 
@@ -439,7 +451,9 @@ flowchart TB
 | Sitemap / robots | `@astrojs/sitemap` (исключить `/keystatic`, юридические) + [`public/robots.txt`](public/robots.txt) |
 | Семантика | Один `h1`, `header/main/footer/section`, `alt` у всех фото |
 
-> **Важно:** `Product.astro` в шаблоне адаптируется — тип товара (физический), валюта BYN, поля `brand`, `countryOfOrigin`, `gtin` не нужны, но обязательно `price` + `priceCurrency: BYN`.
+> **Важно:** `Product.astro` адаптирован под физический товар: валюта BYN,
+> обязательны `price` + `priceCurrency: BYN`; дополнительно выводятся `sku`,
+> `brand`, `countryOfOrigin`, `itemCondition` и `offers.url`. `gtin` не используется.
 
 ---
 
@@ -458,7 +472,7 @@ flowchart TB
 ## 11. CMS и медиа-слой
 
 - `/keystatic` — Keystatic CMS, авторизация GitHub OAuth (git-based), конфиг [`keystatic.config.ts`](keystatic.config.ts).
-- Медиа: `storage` (local/github) → `public/assets/uploads` (WebP, quality 80, ≤ 2000px).
+- Медиа: `storage` (local/github) → `src/assets/uploads` (WebP/AVIF, ресайз ≤ 2000px через `astro:assets`). `public/assets/uploads` — legacy-заглушка.
 - Коллекции `lines` и `products` — с `entryLayout: 'content'` и автогенерацией новых записей.
 - Гибкие блоки контента — через `fields.blocks` (см. §6.6).
 
@@ -474,7 +488,7 @@ flowchart TB
 |---|---|---|---|
 | 1 | Названия, описания, цены, фото линеек и моделей | `lines`, `products` | `TODO: <название>` / `0` / `placeholder.webp` |
 | 2 | Логотип | `public/assets` | `logo-placeholder.svg` |
-| 3 | Точные color codes фирменных цветов | тема `cyberpunk.css` | `--color-primary` (голубой), `--color-secondary` (фиолетовый) — коды уточнить |
+| 3 | Точные color codes фирменных цветов | тема `cyberpunk.css` (не CMS) | `--color-primary` (голубой), `--color-secondary` (фиолетовый) — коды уточнить |
 | 4 | Гарантийный срок производителя | `products.warranty` | `TODO` (опционально) |
 | 5 | ID аналитики (GA4, Яндекс.Метрика) | `site.analytics` | `G-XXXXXXXXXX` / `XXXXXXXX` |
 | 6 | ID рекламы (Google Ads, Яндекс.Директ) | `site.advertising` | `AW-XXXXXXXXX` / `XXXXXXXX` |
@@ -483,7 +497,7 @@ flowchart TB
 
 ### 12.2. Решённые вопросы
 
-- **Оплата и доставка:**
+- **Оплата и доставка:** редактируются в `sections/delivery.md` (`variant.delivery`), не в `site`.
   - Оплата: **только при доставке** (на сайте оплаты нет — только сбор заявок). Наличными и картой; при доставке через Белпочту — наложенный платёж.
   - Сроки: по Минску (при наличии) — от 1 часа до 2 дней; по РБ через Белпочту — 3–5 дней.
 - **Режим работы:** «Заказы принимаются с 9:00 до 21:00 без выходных».
