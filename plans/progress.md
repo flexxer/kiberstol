@@ -9,7 +9,7 @@
 - [x] Фаза 1 — контракты, Keystatic production storage, схемы
 - [x] Фаза 2 — фиксация утвержденного контента главной (только документация)
 - [x] Фаза 3 — карточка товара и страница линейки
-- [ ] Фаза 4 — формы, согласие, аналитика
+- [x] Фаза 4 — формы, согласие, аналитика
 - [ ] Фаза 5 — SEO и медиа
 - [ ] Фаза 6 — очистка контента товаров и линеек
 - [ ] Фаза 7 — актуализация документации и ТЗ
@@ -50,10 +50,17 @@
 | 2026-10-22 | 3 | `Product` JSON-LD: `sku`, `availability`, `brand`, `countryOfOrigin`, `offers.url` | `npm run build` |
 | 2026-10-22 | 3 | Удалён неиспользуемый `Image`; устранено дублирование `getImage`/`resolveImage` в карточке | `npm run check` |
 | 2026-10-22 | 3 | `noindex` из CMS передаётся на главную, каталог, линейку и карточку; canonical — из `Astro.url` | `npm run check` |
+| 2026-10-22 | 4 | Добавлены `clearConsent` и `openConsentBanner`; в футере — «Настройки cookie» | `npm run check` |
+| 2026-10-22 | 4 | Баннер cookie скрыт по умолчанию (`hidden`), показывается из `cookie-consent.ts` — без FOUC | `npm run build` |
+| 2026-10-22 | 4 | Отзыв согласия выгружает аналитику и рекламу через `onConsentChange` | `npm run check` |
+| 2026-10-22 | 4 | `submit.php`: серверная проверка `consent-pd`, валидация телефона, экранирование HTML, rate limiting | `npm run build` |
+| 2026-10-22 | 4 | `form.ts`: `ts` обновляется после `form.reset()`; статус формы получил `aria-live="polite"` | `npm run check` |
 
 ## Примечания
 
 - `site.labels` используются в каталоге, линейке и карточке товара (фаза 3).
+- Cookie-баннер не удаляется из DOM, а скрывается атрибутом `hidden`; ссылка «Настройки cookie» в футере открывает его повторно.
+- `submit.php` отклоняет заявку без `consent-pd` (422), проверяет телефон `+375 XX XXX-XX-XX` и ограничивает 5 заявок за 10 минут с одного IP.
 - Keystatic routes проверены: в `dist/server/chunks` присутствуют `keystatic-api` и `keystatic-astro-page`.
 - Для production CMS нужно задать `PUBLIC_KEYSTATIC_STORAGE=github`, `PUBLIC_KEYSTATIC_GITHUB_REPO_OWNER`, `PUBLIC_KEYSTATIC_GITHUB_REPO_NAME` и OAuth-переменные.
 - Утвержденный эталон главной: hero, advantages, catalog (только линейки), delivery, faq, contact. Секции `order`/`banners` и модели на главной — вне рефакторинга v2.

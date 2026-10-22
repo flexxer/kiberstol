@@ -74,12 +74,15 @@ const advertising = settings?.data.advertising;
     </main>
     <Footer />
 
-    <!-- Cookie-баннер (гранулярное согласие: аналитика / маркетинг) -->
+    <!-- Cookie-баннер (гранулярное согласие: аналитика / маркетинг).
+         Скрыт по умолчанию (`hidden`), чтобы не было FOUC; показывается из
+         cookie-consent.ts, если решение ещё не принято. -->
     <div
       id="cookie-banner"
       class="fixed bottom-0 left-0 right-0 z-[90] border-t border-border bg-surface p-4 shadow-lg"
       role="dialog"
       aria-label="Согласие на использование cookie"
+      hidden
     >
       <div class="mx-auto max-w-6xl">
         <p class="mb-3 text-sm text-muted">

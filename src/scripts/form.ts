@@ -44,6 +44,7 @@ function setStatus(form: HTMLFormElement, message: string, ok: boolean): void {
     status = document.createElement('p');
     status.setAttribute('data-form-status', '');
     status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
     form.appendChild(status);
   }
   status.textContent = message;
@@ -58,9 +59,20 @@ export function initForm(): void {
   if (phoneInput) applyPhoneMask(phoneInput);
 
   // Фиксируем время показа формы для time-honeypot (клиент + сервер).
+  // `shownAt` — момент инициализации формы; `ts` — unix-секунды, которые
+  // проверяет сервер. После `form.reset()` значение `ts` нужно обновить,
+  // иначе повторная отправка будет отклонена как слишком быстрая.
   const shownAt = Date.now();
   const tsInput = form.querySelector<HTMLInputElement>('input[name="ts"]');
-  if (tsInput) tsInput.value = String(Math.floor(shownAt / 1000));
+  const stampTs = (): void => {
+    if (tsInput) tsInput.value = String(Math.floor(Date.now() / 1000));
+  };
+  stampTs();
+
+  const resetForm = (): void => {
+    form.reset();
+    stampTs();
+  };
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -69,7 +81,7 @@ export function initForm(): void {
     const honeypot = form.querySelector<HTMLInputElement>('input[name="website"]');
     if (honeypot && honeypot.value !== '') {
       // Бот — молча «принимаем», но ничего не отправляем.
-      form.reset();
+      resetForm();
       return;
     }
 
@@ -91,7 +103,7 @@ export function initForm(): void {
 
       if (response.ok) {
         setStatus(form, 'Заявка отправлена! Мы свяжемся с вами.', true);
-        form.reset();
+        resetForm();
       } else {
         setStatus(form, 'Не удалось отправить заявку. Попробуйте ещё раз.', false);
       }

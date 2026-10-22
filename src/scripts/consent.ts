@@ -45,6 +45,20 @@ export function setConsent(state: ConsentState): void {
   listeners.forEach((fn) => fn(state));
 }
 
+/**
+ * Отзывает согласие: удаляет сохранённое состояние и уведомляет подписчиков
+ * пустым состоянием. Трекеры, подписанные на изменения, выгружаются.
+ */
+export function clearConsent(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* localStorage может быть недоступен (private mode) — игнорируем */
+  }
+  listeners.forEach((fn) => fn({}));
+}
+
 /** Проверяет, дано ли согласие по конкретной категории. */
 export function hasConsent(category: ConsentCategory): boolean {
   return getConsent()[category] === true;
