@@ -10,7 +10,15 @@
     "build": "astro build",
     "check": "astro check",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "validate:content": "tsx scripts/validate-content.ts",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "audit:a11y": "playwright test tests/e2e/accessibility.spec.ts",
+    "audit:lighthouse": "node scripts/lighthouse-audit.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.8",
@@ -34,7 +42,14 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
     "@types/sanitize-html": "^2.16.2",
-    "typescript": "^6.0.3"
+    "chrome-launcher": "^1.2.2",
+    "lighthouse": "^13.5.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.4"
   }
 }

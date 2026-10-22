@@ -13,15 +13,19 @@
 - [x] Фаза 5 — SEO и медиа
 - [x] Фаза 6 — очистка контента товаров и линеек
 - [x] Фаза 7 — актуализация документации и ТЗ
-- [ ] Фаза 8 — тесты, CI, аудит качества
+- [x] Фаза 8 — тесты, CI, аудит качества
 
 ## Базовая линия
 
 | Проверка | Команда | Статус | Примечание |
 |---|---|---|---|
 | Сборка | `npm run build` | ✅ | `output: static`, node adapter, Keystatic server chunks в `dist/server` |
-| Типы | `npm run check` | ✅ | 0 ошибок, 4 hints (неиспользуемые переменные/импорт) |
-| Контент | ручная проверка | ✅ | фаза 6: плейсхолдеры и SEO проверены |
+| Типы | `npm run check` | ✅ | 0 ошибок, 3 hints (неиспользуемые переменные/импорт) |
+| Контент | `npm run validate:content` | ✅ | 3 товара, 3 линейки, 6 секций, 5 документов |
+| Unit-тесты | `npm run test:unit` | ✅ | 25 тестов (Vitest) |
+| E2E | `npm run test:e2e` | ✅ | 14 тестов (Playwright, Chromium) |
+| Доступность | `npm run audit:a11y` | ✅ | 0 critical-нарушений (axe) |
+| Lighthouse | `npm run audit:lighthouse` | ✅ | performance 84, accessibility 89, best-practices 100, SEO 100 |
 
 ## Журнал
 
@@ -70,6 +74,13 @@
 | 2026-10-22 | 7 | `kiberstol-tz.md`: обновлены `site`-схема, relationship `line`, медиа-путь, SEO `Product`, оплата/доставка | — |
 | 2026-10-22 | 7 | `refactoring.md` помечен как superseded со ссылкой на `refactoring-v2.md` | — |
 | 2026-10-22 | 7 | Добавлены `docs/deployment.md` и `docs/cms.md` | — |
+| 2026-10-22 | 8 | Схемы вынесены в `src/lib/content-schemas.ts`; добавлены `content-validation.ts` и `scripts/validate-content.ts` | `npm run validate:content` |
+| 2026-10-22 | 8 | Vitest: 25 unit-тестов (схемы, обязательные поля, SEO, изображения) | `npm run test:unit` |
+| 2026-10-22 | 8 | Playwright: 14 e2e-тестов (навигация, каталог, форма, cookie-согласие) | `npm run test:e2e` |
+| 2026-10-22 | 8 | axe-core: 0 critical-нарушений на `/`, `/products`, `/products/meta-w` | `npm run audit:a11y` |
+| 2026-10-22 | 8 | Lighthouse: performance 84, accessibility 89, best-practices 100, SEO 100 | `npm run audit:lighthouse` |
+| 2026-10-22 | 8 | GitHub Actions: install → check → validate → build → unit → e2e | CI |
+| 2026-10-22 | 8 | Добавлен `docs/quality.md` | — |
 
 ## Примечания
 
@@ -88,3 +99,7 @@
 - `authorizedBodyPhone` — плейсхолдер `+375 212 XX-XX-XX`, помечен TODO в `settings.yaml` и `complaints.md`; заменить перед публикацией.
 - SEO товаров и линеек уникальны; изображения присутствуют в `src/assets/uploads/**`, alt формируется из названия товара/линейки.
 - Документация фазы 7: [`architecture.md`](architecture.md), [`kiberstol-tz.md`](../requirements/kiberstol-tz.md), [`docs/deployment.md`](../docs/deployment.md), [`docs/cms.md`](../docs/cms.md). Старый [`refactoring.md`](refactoring.md) — superseded.
+- Качество фазы 8: [`docs/quality.md`](../docs/quality.md). Unit-тесты — `npm run test:unit`, e2e — `npm run test:e2e` (нужен `npm run build`), доступность — `npm run audit:a11y`, Lighthouse — `npm run audit:lighthouse`.
+- Playwright поднимает `astro preview` на порту `4322`, чтобы не конфликтовать с локальным dev-сервером на `4321`.
+- CI: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — `check` → `validate:content` → `build` → `test:unit`, затем отдельный job с Playwright.
+- Отчёты Lighthouse сохраняются в `reports/` (исключён из git); Playwright — в `playwright-report/` и `test-results/`.

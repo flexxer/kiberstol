@@ -3,6 +3,11 @@ dist/
 # generated types
 .astro/
 
+# test and audit artifacts
+playwright-report/
+test-results/
+reports/
+
 # Keystatic CMS (локальный медиа-слой и служебные файлы)
 .keystatic/
 
