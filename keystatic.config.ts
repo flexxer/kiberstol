@@ -11,13 +11,14 @@ import { config, collection, singleton, fields } from '@keystatic/core';
  * через `astro:assets` (см. `src/lib/image.ts`).
  *
  * Гибкие блоки контента (`contentBlocks`) задаются через `fields.blocks`.
- * Каждый блок — `object` с полем `type` (select с фиксированным значением),
- * чтобы сериализованная структура совпадала с Zod-схемой
- * `z.discriminatedUnion('discriminant', ...)` и читалась `ContentBlocks.astro`.
+ * `fields.blocks` сериализует блоки как `{ discriminant, value }`, где
+ * `discriminant` — ключ блока, а `value` — его поля. Это совпадает с
+ * Zod-схемой `z.discriminatedUnion('discriminant', ...)` и читается
+ * `ContentBlocks.astro`.
  *
- * ВАЖНО: `fields.blocks` сериализует блоки как `{ discriminant, value }`,
- * где `discriminant` — ключ блока, а `value` — его поля. Поле `type` внутри
- * `value` — это UI-select Keystatic, который НЕ попадает в сериализацию.
+ * Поле `type` внутри `value` — legacy: оно осталось от ранней конфигурации,
+ * не участвует в рендере и отбрасывается Zod как неизвестное. Новые блоки
+ * можно создавать без него. См. `plans/adr-001-content-blocks.md`.
  */
 
 // ---------------------------------------------------------------------------
@@ -82,8 +83,10 @@ const faqItem = fields.object(
 // ---------------------------------------------------------------------------
 
 /**
- * Каждый блок — `object` с полем `type` (select с единственным значением),
- * чтобы итоговая структура `{ type, ...поля }` совпадала с Zod-схемой.
+ * Каждый блок — `object` с полями конкретного блока. Дискриминант
+ * (`discriminant`) задаётся самим `fields.blocks`, поэтому отдельное поле
+ * `type` не требуется. Оставшиеся `type`-select — legacy для совместимости
+ * с уже созданным контентом.
  */
 /**
  * Leaf-блоки — могут вкладываться внутрь блока `columns`.
@@ -339,17 +342,34 @@ const products = collection({
   columns: ['title', 'line', 'price'],
   schema: {
     title: fields.slug({ name: { label: 'Наименование товара' } }),
-    line: fields.text({ label: 'ID линейки (родитель)', validation: { isRequired: true } }),
+    line: fields.relationship({
+      label: 'Линейка',
+      collection: 'lines',
+      validation: { isRequired: true },
+    }),
     price: fields.number({ label: 'Цена, BYN', validation: { isRequired: true } }),
     oldPrice: fields.number({ label: 'Старая цена, BYN' }),
-    shortDescription: fields.text({ label: 'Краткое описание', multiline: true }),
+    shortDescription: fields.text({
+      label: 'Краткое описание',
+      multiline: true,
+      validation: { isRequired: true },
+    }),
     description: fields.mdx({ label: 'Полное описание', extension: 'md' }),
 
     // Юридически обязательные поля карточки (закон РБ)
     manufacturer: fields.text({ label: 'Изготовитель', validation: { isRequired: true } }),
-    manufacturerLocation: fields.text({ label: 'Местонахождение изготовителя' }),
-    supplier: fields.text({ label: 'Поставщик (наименование + местонахождение)' }),
-    countryOfOrigin: fields.text({ label: 'Страна происхождения' }),
+    manufacturerLocation: fields.text({
+      label: 'Местонахождение изготовителя',
+      validation: { isRequired: true },
+    }),
+    supplier: fields.text({
+      label: 'Поставщик (наименование + местонахождение)',
+      validation: { isRequired: true },
+    }),
+    countryOfOrigin: fields.text({
+      label: 'Страна происхождения',
+      validation: { isRequired: true },
+    }),
     warranty: fields.text({ label: 'Гарантийный срок' }),
     used: fields.checkbox({ label: 'Б/у или конфискованный товар', defaultValue: false }),
 
@@ -425,6 +445,20 @@ const site = singleton({
     workHours: fields.text({ label: 'Режим работы' }),
     authorizedBody: fields.text({ label: 'Уполномоченный орган' }),
     authorizedBodyPhone: fields.text({ label: 'Телефон уполномоченного органа' }),
+    labels: fields.object(
+      {
+        specs: fields.text({ label: 'Характеристики' }),
+        productInfo: fields.text({ label: 'Сведения о товаре' }),
+        relatedProducts: fields.text({ label: 'Другие модели линейки' }),
+        lineModels: fields.text({ label: 'Модели линейки' }),
+        catalogTitle: fields.text({ label: 'Заголовок каталога' }),
+        catalogDescription: fields.text({ label: 'Описание каталога', multiline: true }),
+        breadcrumbsHome: fields.text({ label: 'Хлебные крошки: главная' }),
+        breadcrumbsCatalog: fields.text({ label: 'Хлебные крошки: каталог' }),
+        cookieSettings: fields.text({ label: 'Ссылка «Настройки cookie»' }),
+      },
+      { label: 'Подписи интерфейса' },
+    ),
     nav: fields.array(
       fields.object(
         {
@@ -542,10 +576,19 @@ const sections = collection({
 // Конфиг
 // ---------------------------------------------------------------------------
 
+// Production: GitHub storage (git-based CMS, GitHub OAuth).
+// Local development: local storage, чтобы не требовать OAuth.
+// В production задайте PUBLIC_KEYSTATIC_STORAGE=github и параметры репозитория.
+const useGitHubStorage = import.meta.env.PUBLIC_KEYSTATIC_STORAGE === 'github';
+const githubRepo = {
+  owner: import.meta.env.PUBLIC_KEYSTATIC_GITHUB_REPO_OWNER ?? 'OWNER',
+  name: import.meta.env.PUBLIC_KEYSTATIC_GITHUB_REPO_NAME ?? 'kiberstol',
+};
+
 export default config({
-  storage: {
-    kind: 'local',
-  },
+  storage: useGitHubStorage
+    ? { kind: 'github', repo: githubRepo }
+    : { kind: 'local' },
   ui: {
     brand: { name: 'Kiberstol.by' },
   },

@@ -13,6 +13,16 @@ address: г. Минск, ул. Грушевская 17-14
 workHours: Заказы принимаются с 9:00 до 21:00 без выходных
 authorizedBody: ИП Суворов Александр Владимирович
 authorizedBodyPhone: +375 212 XX-XX-XX (администрация Первомайского района г. Витебска)
+labels:
+  specs: Характеристики
+  productInfo: Сведения о товаре
+  relatedProducts: Другие модели линейки
+  lineModels: Модели линейки
+  catalogTitle: Каталог
+  catalogDescription: 'Каталог игровых компьютерных столов: линейки и модели.'
+  breadcrumbsHome: Главная
+  breadcrumbsCatalog: Каталог
+  cookieSettings: Настройки cookie
 nav:
   - label: Главная
     href: /
@@ -29,8 +39,8 @@ nav:
 analytics: {}
 advertising: {}
 seo:
-  title: Kiberstol.by — игровые компьютерные столы
+  title: Kiberstol.by - игровые компьютерные столы
   description: >-
-    Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol —
+    Игровые компьютерные столы бюджетного сегмента. Катай с Kiberstol -
     доступное качество.
   noindex: false

@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check": "astro check",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -28,9 +29,12 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "sanitize-html": "^2.18.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@types/sanitize-html": "^2.16.2"
+    "@astrojs/check": "^0.9.12",
+    "@types/sanitize-html": "^2.16.2",
+    "typescript": "^6.0.3"
   }
 }

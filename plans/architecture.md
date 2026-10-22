@@ -78,12 +78,11 @@
 │   │   ├── lines/                 # Линейки столов (.md)
 │   │   ├── site/                  # settings.yaml — реквизиты, nav, аналитика
 │   │   ├── legal/                 # privacy, cookie-policy, terms, returns, complaints
-│   │   ├── sections/              # Тексты секций главной
-│   │   └── faq/                   # Вопросы-ответы
+│   │   └── sections/              # Тексты секций главной (FAQ — в variant секции)
 │   ├── components/
 │   │   ├── layout/                # Header, Nav, Footer, LegalBlock
 │   │   ├── blocks/                # Гибкие блоки контента + ContentBlocks.astro
-│   │   ├── ui/                    # Carousel, Lightbox, CookieBanner, Logo
+│   │   ├── ui/                    # Logo, ProductCard (карусель/лайтбокс — в scripts)
 │   │   └── seo/                   # SEO.astro + jsonld/*
 │   ├── layouts/
 │   │   └── BaseLayout.astro
@@ -114,9 +113,7 @@
 │       ├── cookie-policy.astro
 │       ├── terms.astro
 │       ├── returns.astro
-│       ├── complaints.astro
-│       └── keystatic/
-│           └── [...params].astro  # /keystatic — CMS
+│       └── complaints.astro
 ├── keystatic.config.ts            # Конфиг Keystatic
 ├── astro.config.mjs               # output: static, sitemap, Tailwind, Keystatic
 └── package.json
@@ -132,10 +129,9 @@
 |---|---|---|
 | `products` | Модели столов | `title`, `line`, `price`, юр. поля (manufacturer, supplier, countryOfOrigin, warranty, used), `specs`, `image`, `gallery`, `badge`, `content` (blocks), `seo` |
 | `lines` | Линейки столов | `title`, `description`, `image`, `features`, `content` (blocks), `seo` |
-| `site` | Реквизиты ИП (единый источник правды) | `brand`, `tagline`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `paymentMethods`, `deliveryMethods`, `nav`, `analytics`, `advertising`, `seo` |
+| `site` | Реквизиты ИП (единый источник правды) | `brand`, `tagline`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `viber`, `instagram`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `labels`, `nav`, `analytics`, `advertising`, `seo` |
 | `legal` | Юр. документы | `title`, `updatedAt`, `seo` |
-| `sections` | Тексты секций главной | переиспользуется из FastPage |
-| `faq` | Вопросы-ответы | `question`, `answer`, `order` |
+| `sections` | Тексты секций главной | `heading`, `body`, `content` (blocks), `variant` (hero/catalog/advantages/delivery/order/faq/contact), `order` |
 
 > **Исключено из FastPage:** `blog`, `showcase`, `testimonials`, `instagram`, `integrations`, `products` (услуги). Добавлено: `lines`.
 
@@ -146,9 +142,9 @@
 > **Формат сериализации `fields.blocks`:**
 > Keystatic сериализует `fields.blocks` как `{ discriminant, value }`, где
 > `discriminant` — ключ блока, а `value` — его поля. Zod-схема:
-> `z.discriminatedUnion('discriminant', ...)`. Поле `type` внутри `value` — это
-> UI-select Keystatic, который НЕ попадает в сериализацию (Keystatic отбрасывает
-> его и оставляет только `discriminant` + `value`).
+> `z.discriminatedUnion('discriminant', ...)`. Поле `type` внутри `value` —
+> legacy: оно может присутствовать в старом контенте, но не участвует в
+> рендере и отбрасывается Zod. См. [`plans/adr-001-content-blocks.md`](adr-001-content-blocks.md).
 
 > **Разделение markdown-рендера (два разных слоя, не дублирование):**
 > - Контентные поля документа (`description`, `body`, `answer`) — `fields.mdx` (нативный Keystatic), рендер через `astro:content` `render()`/`Content`.
@@ -161,7 +157,7 @@
 
 | Слой | Что содержит | Где настраивается | Пример |
 |---|---|---|---|
-| **Контент** | Тексты, изображения, цены, реквизиты, блоки, FAQ, SEO-поля | **Только Keystatic CMS** (`src/content/*`) | `site/settings.md`, `sections/*.md`, `lines`, `products`, `faq`, `legal` |
+| **Контент** | Тексты, изображения, цены, реквизиты, блоки, FAQ, SEO-поля | **Только Keystatic CMS** (`src/content/*`) | `site/settings.yaml`, `sections/*.md`, `lines`, `products`, `legal` |
 | **Движок** | Структура, логика, рендер, маршруты, скрипты | **Только код** (`src/components`, `src/layouts`, `src/pages`, `src/scripts`) | `BaseLayout`, `ContentBlocks`, `form.ts` |
 | **UI** | Цвета, шрифты, отступы, анимации, адаптивность | **Только CSS** (`src/styles/*`) | `cyberpunk.css`, Tailwind-утилиты |
 
@@ -170,10 +166,10 @@
 - **Контент не хардкодится** в компонентах: все видимые тексты, цены, реквизиты, изображения и блоки берутся из CMS-коллекций. Изменение контента в CMS не требует правки кода.
 - **UI не задаётся в контенте:** CMS не управляет цветами, шрифтами, отступами и анимациями. Визуальное оформление определяется только CSS-темой и Tailwind-классами в компонентах.
 - **Движок не содержит стилей и контента:** Astro-компоненты описывают структуру и логику, но не встраивают inline-стили и не дублируют тексты.
-- **Единый источник правды:** реквизиты, навигация, аналитика/реклама и глобальный SEO — в `site/settings.md`; тексты секций — в `sections`; товары/линейки — в `products`/`lines`.
+- **Единый источник правды:** реквизиты, навигация, аналитика/реклама и глобальный SEO — в `site/settings.yaml`; тексты секций — в `sections`; товары/линейки — в `products`/`lines`.
 - **Смена темы = смена CSS:** ребрендинг (цвета, шрифты) выполняется правкой CSS-темы без изменения контента и движка.
 
-> **Реализовано на старте:** [`index.astro`](../src/pages/index.astro) не содержит захардкоженных текстов — заголовок, описание и SEO-мета берутся из [`site/settings.md`](../src/content/site/settings.md) и [`sections/home.md`](../src/content/sections/home.md) через `getEntry`/`getCollection`.
+> **Реализовано на старте:** [`index.astro`](../src/pages/index.astro) не содержит захардкоженных текстов — заголовок, описание и SEO-мета берутся из [`site/settings.yaml`](../src/content/site/settings.yaml) и [`sections/*.md`](../src/content/sections) через `getEntry`/`getCollection`.
 
 ---
 

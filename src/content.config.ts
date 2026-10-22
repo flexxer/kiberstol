@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
 /**
@@ -33,7 +34,13 @@ const seoSchema = z
  * внутри `value` — это UI-select Keystatic, который НЕ попадает в сериализацию
  * (Keystatic отбрасывает его и оставляет только `discriminant` + `value`).
  */
-const contentBlocks: z.ZodType = z.array(
+/** Универсальный тип блока контента (дискриминант + поля). */
+type ContentBlock = {
+  discriminant: string;
+  value: Record<string, unknown>;
+};
+
+const contentBlocks: z.ZodType<ContentBlock[]> = z.array(
   z.discriminatedUnion('discriminant', [
     // Hero-баннер страницы
     z.object({
@@ -234,6 +241,22 @@ const site = defineCollection({
     workHours: z.string(),
     authorizedBody: z.string(),
     authorizedBodyPhone: z.string(),
+    // Подписи интерфейса (микротексты), чтобы не хардкодить их в компонентах.
+    labels: z
+      .object({
+        specs: z.string().default('Характеристики'),
+        productInfo: z.string().default('Сведения о товаре'),
+        relatedProducts: z.string().default('Другие модели линейки'),
+        lineModels: z.string().default('Модели линейки'),
+        catalogTitle: z.string().default('Каталог'),
+        catalogDescription: z
+          .string()
+          .default('Каталог игровых компьютерных столов: линейки и модели.'),
+        breadcrumbsHome: z.string().default('Главная'),
+        breadcrumbsCatalog: z.string().default('Каталог'),
+        cookieSettings: z.string().default('Настройки cookie'),
+      })
+      .optional(),
     nav: z.array(z.object({ label: z.string(), href: z.string() })),
     analytics: z
       .object({
