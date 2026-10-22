@@ -13,6 +13,11 @@ export function initFaq(): void {
     const icon = item.querySelector<HTMLElement>('.faq-icon');
     if (!question || !answer) return;
 
+    // Защита от повторной инициализации (ClientRouter может вызвать initPage
+    // несколько раз для одного и того же DOM).
+    if (question.dataset.bound === 'true') return;
+    question.dataset.bound = 'true';
+
     question.addEventListener('click', () => {
       const isOpen = !answer.classList.contains('hidden');
 
@@ -21,6 +26,7 @@ export function initFaq(): void {
       container?.querySelectorAll<HTMLElement>('.faq-item').forEach((other) => {
         other.querySelector('.faq-answer')?.classList.add('hidden');
         other.querySelector('.faq-question')?.setAttribute('aria-expanded', 'false');
+        other.dataset.open = 'false';
         const otherIcon = other.querySelector<HTMLElement>('.faq-icon');
         if (otherIcon) otherIcon.textContent = '+';
       });
@@ -28,6 +34,7 @@ export function initFaq(): void {
       // Открываем/закрываем текущий.
       answer.classList.toggle('hidden', isOpen);
       question.setAttribute('aria-expanded', String(!isOpen));
+      item.dataset.open = String(!isOpen);
       if (icon) icon.textContent = isOpen ? '+' : '−';
     });
   });
