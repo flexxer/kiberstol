@@ -10,7 +10,7 @@
 - [x] Фаза 2 — фиксация утвержденного контента главной (только документация)
 - [x] Фаза 3 — карточка товара и страница линейки
 - [x] Фаза 4 — формы, согласие, аналитика
-- [ ] Фаза 5 — SEO и медиа
+- [x] Фаза 5 — SEO и медиа
 - [ ] Фаза 6 — очистка контента товаров и линеек
 - [ ] Фаза 7 — актуализация документации и ТЗ
 - [ ] Фаза 8 — тесты, CI, аудит качества
@@ -55,6 +55,13 @@
 | 2026-10-22 | 4 | Отзыв согласия выгружает аналитику и рекламу через `onConsentChange` | `npm run check` |
 | 2026-10-22 | 4 | `submit.php`: серверная проверка `consent-pd`, валидация телефона, экранирование HTML, rate limiting | `npm run build` |
 | 2026-10-22 | 4 | `form.ts`: `ts` обновляется после `form.reset()`; статус формы получил `aria-live="polite"` | `npm run check` |
+| 2026-10-22 | 5 | Сгенерирован `public/assets/og-default.png` (1200×630) и скрипт `scripts/generate-og-default.mjs` | `npm run build` |
+| 2026-10-22 | 5 | `SEO.astro`: `og:site_name` из `site.brand`; fallback `og:image` — `site.seo.image` → `og-default.png` | `npm run build` |
+| 2026-10-22 | 5 | `Organization` JSON-LD: добавлены `logo` и `sameAs` (Viber, Instagram из CMS) | `npm run build` |
+| 2026-10-22 | 5 | `Product` JSON-LD: `availability` = InStock, состояние товара — в `itemCondition` | `npm run build` |
+| 2026-10-22 | 5 | Удалены пустые `src/assets/uploads/catalog/**`; `public/assets/uploads` задокументирован как legacy | — |
+| 2026-10-22 | 5 | `<img>` карточки товара получили `width`/`height` (CLS); `sharp` собирает 23 WebP без ошибок | `npm run build` |
+| 2026-10-22 | 5 | `robots.txt`: юридические страницы не закрыты `Disallow` — работают `noindex` + исключение из sitemap | `npm run build` |
 
 ## Примечания
 
@@ -64,3 +71,8 @@
 - Keystatic routes проверены: в `dist/server/chunks` присутствуют `keystatic-api` и `keystatic-astro-page`.
 - Для production CMS нужно задать `PUBLIC_KEYSTATIC_STORAGE=github`, `PUBLIC_KEYSTATIC_GITHUB_REPO_OWNER`, `PUBLIC_KEYSTATIC_GITHUB_REPO_NAME` и OAuth-переменные.
 - Утвержденный эталон главной: hero, advantages, catalog (только линейки), delivery, faq, contact. Секции `order`/`banners` и модели на главной — вне рефакторинга v2.
+- OG-изображение по умолчанию: `public/assets/og-default.png` (1200×630), пересоздаётся командой `node scripts/generate-og-default.mjs`. Приоритет: `og:image` страницы → `site.seo.image` → дефолтный баннер.
+- `og:site_name` берётся из `site.brand`; `Organization.logo` — `/favicon.svg`, `sameAs` — `viber`/`instagram` из `settings.yaml`.
+- `Product` JSON-LD: `availability` всегда `InStock`, признак б/у вынесен в `itemCondition` (`UsedCondition`/`NewCondition`).
+- Медиа: актуальные загрузки — `src/assets/uploads/**`; `public/assets/uploads` — legacy-заглушка (см. README внутри).
+- Юридические страницы: `noindex,nofollow` + исключение из sitemap; в `robots.txt` не закрываются, чтобы поисковики видели `noindex`.

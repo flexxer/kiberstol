@@ -40,6 +40,9 @@ const seoDescription = s.seo?.description ?? tagline;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.by';
 
+// Соцпрофили для `Organization.sameAs` (только заданные в CMS).
+const sameAs = [s.viber, s.instagram].filter((url): url is string => Boolean(url));
+
 // FAQ-элементы для секции `faq` (вопрос → ответ) — из варианта секции.
 const faqSection = sections.find((s) => s.data.variant.discriminant === 'faq');
 const faqItems: { question: string; answer: string }[] =
@@ -58,9 +61,11 @@ const faqItems: { question: string; answer: string }[] =
     name={s.fullName}
     unp={s.unp}
     url={siteUrl}
+    logo={`${siteUrl}/favicon.svg`}
     telephone={s.phone}
     email={s.email}
     address={s.address}
+    sameAs={sameAs}
   />
   <ItemList
     slot="head"

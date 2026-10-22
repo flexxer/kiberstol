@@ -11,6 +11,8 @@ interface Props {
   noindex?: boolean;
   type?: 'website' | 'article' | 'product';
   keywords?: string[];
+  /** Название сайта для `og:site_name` (из `site.brand`). */
+  siteName?: string;
 }
 
 const {
@@ -22,6 +24,7 @@ const {
   noindex = false,
   type = 'website',
   keywords,
+  siteName = 'Kiberstol.by',
 } = Astro.props;
 
 const site = Astro.site;
@@ -54,7 +57,7 @@ const ogImageAlt = imageAlt ?? title;
 <meta property="og:description" content={description} />
 <meta property="og:type" content={type} />
 <meta property="og:url" content={url} />
-<meta property="og:site_name" content="Kiberstol.by" />
+<meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content="ru_BY" />
 <meta property="og:image" content={ogImageUrl} />
 <meta property="og:image:width" content="1200" />

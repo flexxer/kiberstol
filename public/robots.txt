@@ -1,13 +1,12 @@
 User-agent: *
 Allow: /
 
-# Служебные и юридические страницы закрыты от индексации
+# Служебные маршруты CMS и API закрыты от индексации.
 Disallow: /keystatic
 Disallow: /api/
-Disallow: /privacy
-Disallow: /cookie-policy
-Disallow: /terms
-Disallow: /returns
-Disallow: /complaints
+
+# Юридические страницы НЕ закрываются в robots.txt: они отдают
+# <meta name="robots" content="noindex,nofollow"> и исключены из sitemap.
+# Disallow мешал бы поисковикам увидеть noindex.
 
 Sitemap: https://kiberstol.by/sitemap-index.xml

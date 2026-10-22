@@ -34,6 +34,11 @@ const {
 const settings = await getEntry('site', 'settings');
 const analytics = settings?.data.analytics;
 const advertising = settings?.data.advertising;
+
+// Бренд и глобальное OG-изображение — из CMS. Страница может переопределить
+// `image`; иначе используется `site.seo.image`, а затем — дефолтный баннер.
+const siteName = settings?.data.brand;
+const ogImage = image ?? settings?.data.seo?.image;
 ---
 
 <!doctype html>
@@ -49,12 +54,13 @@ const advertising = settings?.data.advertising;
     <SEO
       title={title}
       description={description}
-      image={image}
+      image={ogImage}
       imageAlt={imageAlt}
       canonical={canonical}
       noindex={noindex}
       type={type}
       keywords={keywords}
+      siteName={siteName}
     />
 
     <ClientRouter />

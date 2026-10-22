@@ -57,9 +57,13 @@ const galleryImages = [
 ];
 
 // Оптимизированные URL для главного фото и миниатюр.
+// Ширина/высота передаются в `<img>` для предотвращения layout shift (CLS).
 const mainImage = resolveImage(p.image);
 const mainImageUrl = mainImage
   ? (await getImage({ src: mainImage, width: 1200, format: 'webp' })).src
+  : undefined;
+const mainImageHeight = mainImage
+  ? Math.round((1200 * mainImage.height) / mainImage.width)
   : undefined;
 const productImageUrl = mainImageUrl;
 
@@ -68,7 +72,8 @@ const thumbnails = await Promise.all(
     const resolved = resolveImage(img.src);
     if (!resolved) return null;
     const url = (await getImage({ src: resolved, width: 400, format: 'webp' })).src;
-    return { ...img, url };
+    const height = Math.round((400 * resolved.height) / resolved.width);
+    return { ...img, url, width: 400, height };
   }),
 );
 const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !== null);
@@ -92,7 +97,8 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
     brand={brand}
     countryOfOrigin={p.countryOfOrigin}
     sku={product.id}
-    availability={p.used ? 'https://schema.org/UsedCondition' : 'https://schema.org/InStock'}
+    availability="https://schema.org/InStock"
+    itemCondition={p.used ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition'}
   />
   <BreadcrumbList
     slot="head"
@@ -124,13 +130,15 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
             <img
               src={mainImageUrl}
               alt={p.title}
+              width="1200"
+              height={mainImageHeight}
               class="product-gallery-main h-full w-full object-cover transition group-hover:scale-105"
             />
           </a>
         )}
         {validThumbnails.length > 1 && (
           <div class="mt-3 grid grid-cols-4 gap-3">
-            {validThumbnails.map((img, i) => (
+            {validThumbnails.map((img) => (
               <button
                 type="button"
                 class="product-gallery-thumb overflow-hidden rounded border border-border transition hover:border-primary"
@@ -141,6 +149,8 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
                 <img
                   src={img.url}
                   alt={img.alt}
+                  width={img.width}
+                  height={img.height}
                   loading="lazy"
                   class="h-20 w-full object-cover"
                 />

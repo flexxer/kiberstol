@@ -11,6 +11,8 @@ interface Props {
   sku?: string;
   /** schema.org availability URL; по умолчанию — InStock. */
   availability?: string;
+  /** schema.org itemCondition URL; по умолчанию — NewCondition. */
+  itemCondition?: string;
 }
 
 const {
@@ -24,6 +26,7 @@ const {
   countryOfOrigin,
   sku,
   availability = 'https://schema.org/InStock',
+  itemCondition = 'https://schema.org/NewCondition',
 } = Astro.props;
 
 const jsonLd = {
@@ -44,6 +47,7 @@ const jsonLd = {
       price,
       priceCurrency: currency,
       availability,
+      itemCondition,
       ...(url && { url }),
     },
   }),
