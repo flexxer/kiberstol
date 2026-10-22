@@ -32,4 +32,3 @@ variant:
   discriminant: advantages
 order: 1
 ---
-test paragraph

@@ -1,12 +1,7 @@
 ---
 title: Доставка и оплата
 heading: Доставка и оплата
-content:
-  - discriminant: quote
-    value:
-      type: quote
-      text: Другие не влезут, а мой влезет
-      author: Феофан
+content: []
 variant:
   discriminant: delivery
   value:

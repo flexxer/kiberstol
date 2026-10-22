@@ -1,11 +1,7 @@
 ---
 title: FAQ
 heading: Частые вопросы
-content:
-  - discriminant: videoGif
-    value:
-      type: videoGif
-      src: /assets/hero.webm
+content: []
 variant:
   discriminant: faq
   value:

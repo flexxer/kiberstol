@@ -1,15 +1,7 @@
 ---
 title: Hero
 heading: Kiberstol.by
-content:
-  - discriminant: divider
-    value:
-      style: line
-  - discriminant: richText
-    value:
-      content: |-
-        опа, опа, **зеленая** *ограда*!
-        А **ДЕВКИ** выебли *попа*, так ему и **НАДО**
+content: []
 variant:
   discriminant: hero
   value:
@@ -21,4 +13,3 @@ variant:
     video: true
 order: 0
 ---
-> раз два три, ёлочка гори
