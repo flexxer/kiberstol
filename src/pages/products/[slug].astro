@@ -10,11 +10,12 @@
  * Гибкие блоки контента рендерятся через `ContentBlocks.astro`.
  */
 import { getCollection, getEntry } from 'astro:content';
-import { Image, getImage } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ContentBlocks from '../../components/blocks/ContentBlocks.astro';
 import Specs from '../../components/blocks/Specs.astro';
 import ProductCard from '../../components/ui/ProductCard.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import Product from '../../components/seo/jsonld/Product.astro';
 import BreadcrumbList from '../../components/seo/jsonld/BreadcrumbList.astro';
 import { resolveImage } from '../../lib/image';
@@ -41,17 +42,13 @@ const relatedProducts = (await getCollection('products'))
 
 const settings = await getEntry('site', 'settings');
 const brand = settings!.data.brand;
+const labels = settings!.data.labels;
 
 const title = p.seo?.title ?? p.title;
 const description = p.seo?.description ?? p.shortDescription;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.by';
 const productUrl = `${siteUrl}/products/${product.id}`;
-
-const resolvedProductImage = resolveImage(p.image);
-const productImageUrl = resolvedProductImage
-  ? (await getImage({ src: resolvedProductImage, width: 1200, format: 'webp' })).src
-  : undefined;
 
 // Галерея: главное фото + миниатюры (для кликабельной галереи).
 const galleryImages = [
@@ -64,6 +61,7 @@ const mainImage = resolveImage(p.image);
 const mainImageUrl = mainImage
   ? (await getImage({ src: mainImage, width: 1200, format: 'webp' })).src
   : undefined;
+const productImageUrl = mainImageUrl;
 
 const thumbnails = await Promise.all(
   galleryImages.map(async (img) => {
@@ -81,6 +79,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
   description={description}
   image={p.image}
   imageAlt={p.title}
+  noindex={p.seo?.noindex}
   type="product"
 >
   <Product
@@ -92,6 +91,8 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
     image={productImageUrl ? `${siteUrl}${productImageUrl}` : undefined}
     brand={brand}
     countryOfOrigin={p.countryOfOrigin}
+    sku={product.id}
+    availability={p.used ? 'https://schema.org/UsedCondition' : 'https://schema.org/InStock'}
   />
   <BreadcrumbList
     slot="head"
@@ -103,19 +104,14 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
     ]}
   />
   <section class="mx-auto max-w-6xl px-4 py-12">
-    <nav class="mb-6 text-sm text-muted" aria-label="Хлебные крошки">
-      <a href="/" class="hover:text-primary">Главная</a>
-      <span class="mx-2">/</span>
-      <a href="/products" class="hover:text-primary">Каталог</a>
-      {line && (
-        <>
-          <span class="mx-2">/</span>
-          <a href={`/lines/${line.id}`} class="hover:text-primary">{line.data.title}</a>
-        </>
-      )}
-      <span class="mx-2">/</span>
-      <span class="text-text">{p.title}</span>
-    </nav>
+    <Breadcrumbs
+      items={[
+        { name: labels?.breadcrumbsHome ?? 'Главная', url: '/' },
+        { name: labels?.breadcrumbsCatalog ?? 'Каталог', url: '/products' },
+        ...(line ? [{ name: line.data.title, url: `/lines/${line.id}` }] : []),
+        { name: p.title },
+      ]}
+    />
 
     <div class="grid gap-8 lg:grid-cols-2">
       <!-- Фото и галерея -->
@@ -177,7 +173,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
 
         {p.ctaText && (
           <a
-            href="#order-form"
+            href="/#contacts"
             class="mt-6 inline-block rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
           >
             {p.ctaText}
@@ -191,7 +187,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
         <!-- Характеристики (справа от галереи в десктопе) -->
         {p.specs && p.specs.length > 0 && (
           <div class="mt-8">
-            <h2 class="mb-3 text-lg font-bold text-text">Характеристики</h2>
+            <h2 class="mb-3 text-lg font-bold text-text">{labels?.specs ?? 'Характеристики'}</h2>
             <Specs items={p.specs} />
           </div>
         )}
@@ -206,7 +202,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
         aria-expanded="false"
         aria-controls="product-info"
       >
-        <span>Сведения о товаре</span>
+        <span>{labels?.productInfo ?? 'Сведения о товаре'}</span>
         <span class="faq-icon text-primary" aria-hidden="true">+</span>
       </button>
       <div id="product-info" class="faq-answer hidden px-4 pb-4">
@@ -249,7 +245,9 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
     <!-- Мини-карточки товаров той же линейки -->
     {relatedProducts.length > 0 && (
       <div class="mt-12">
-        <h2 class="mb-4 text-2xl font-bold text-text">Другие модели линейки</h2>
+        <h2 class="mb-4 text-2xl font-bold text-text">
+          {labels?.relatedProducts ?? 'Другие модели линейки'}
+        </h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {relatedProducts.map((rp) => (
             <ProductCard product={rp} />

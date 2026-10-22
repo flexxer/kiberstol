@@ -30,6 +30,7 @@ specs:
 image: /assets/uploads/meta-wb/image.jpg
 gallery: []
 badge: Самий красивий
+ctaText: Заказать
 order: 1
 content: []
 seo:

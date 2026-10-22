@@ -30,6 +30,7 @@ specs:
 image: /assets/uploads/meta-ob/image.jpg
 gallery: []
 badge: Забеись
+ctaText: Заказать
 order: 2
 content: []
 seo:

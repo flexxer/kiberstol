@@ -34,6 +34,7 @@ gallery:
   - /assets/uploads/meta-w/gallery/2.jpg
   - /assets/uploads/meta-w/gallery/3.jpg
 badge: Хитяра, уася
+ctaText: Заказать
 order: 0
 content: []
 seo:

@@ -7,8 +7,8 @@
 
 - [x] Фаза 0 — базовая линия, проверки, ADR формата блоков
 - [x] Фаза 1 — контракты, Keystatic production storage, схемы
-- [ ] Фаза 2 — фиксация утвержденного контента главной (только документация)
-- [ ] Фаза 3 — карточка товара и страница линейки
+- [x] Фаза 2 — фиксация утвержденного контента главной (только документация)
+- [x] Фаза 3 — карточка товара и страница линейки
 - [ ] Фаза 4 — формы, согласие, аналитика
 - [ ] Фаза 5 — SEO и медиа
 - [ ] Фаза 6 — очистка контента товаров и линеек
@@ -39,9 +39,21 @@
 | 2026-10-22 | 1 | Добавлены `site.labels` (схема, CMS, `settings.yaml`) | `npm run build` |
 | 2026-10-22 | 1 | FAQ зафиксирован в `sections` variant; пустая `src/content/faq` удалена; документация обновлена | `npm run build` |
 | 2026-10-22 | 1 | `content.config.ts` переведён на `astro/zod`; типизирован `contentBlocks` | `npm run check` |
+| 2026-10-22 | 2 | Зафиксирован утвержденный порядок секций главной: hero → advantages → catalog → delivery → faq → contact | — |
+| 2026-10-22 | 2 | ТЗ §4.1 переписан под эталон; добавлен §4.3 «Будущее развитие» (order/banners/модели на главной) | — |
+| 2026-10-22 | 2 | `architecture.md`: добавлен раздел «Утвержденный состав секций главной», зафиксирован каталог «только линейки» | — |
+| 2026-10-22 | 2 | `refactoring-v2.md`: order/banners/модели вынесены в «Будущее развитие» | — |
+| 2026-10-22 | 3 | CTA карточки товара ведёт на `/#contacts`; добавлен `ctaText` товарам | `npm run build` |
+| 2026-10-22 | 3 | Создан `Breadcrumbs.astro`; используется в каталоге, линейке и карточке | `npm run check` |
+| 2026-10-22 | 3 | Подписи «Характеристики», «Сведения о товаре», «Другие модели», «Модели линейки», каталог — из `site.labels` | `npm run check` |
+| 2026-10-22 | 3 | `ItemList` добавлен на страницу линейки; `BreadcrumbList` — в каталог | `npm run build` |
+| 2026-10-22 | 3 | `Product` JSON-LD: `sku`, `availability`, `brand`, `countryOfOrigin`, `offers.url` | `npm run build` |
+| 2026-10-22 | 3 | Удалён неиспользуемый `Image`; устранено дублирование `getImage`/`resolveImage` в карточке | `npm run check` |
+| 2026-10-22 | 3 | `noindex` из CMS передаётся на главную, каталог, линейку и карточку; canonical — из `Astro.url` | `npm run check` |
 
 ## Примечания
 
-- `site.labels` добавлены в схему и CMS; использование в компонентах — фаза 3.
+- `site.labels` используются в каталоге, линейке и карточке товара (фаза 3).
 - Keystatic routes проверены: в `dist/server/chunks` присутствуют `keystatic-api` и `keystatic-astro-page`.
 - Для production CMS нужно задать `PUBLIC_KEYSTATIC_STORAGE=github`, `PUBLIC_KEYSTATIC_GITHUB_REPO_OWNER`, `PUBLIC_KEYSTATIC_GITHUB_REPO_NAME` и OAuth-переменные.
+- Утвержденный эталон главной: hero, advantages, catalog (только линейки), delivery, faq, contact. Секции `order`/`banners` и модели на главной — вне рефакторинга v2.

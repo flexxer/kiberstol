@@ -131,7 +131,7 @@
 | `lines` | Линейки столов | `title`, `description`, `image`, `features`, `content` (blocks), `seo` |
 | `site` | Реквизиты ИП (единый источник правды) | `brand`, `tagline`, `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`, `phone`, `email`, `viber`, `instagram`, `address`, `workHours`, `authorizedBody`, `authorizedBodyPhone`, `labels`, `nav`, `analytics`, `advertising`, `seo` |
 | `legal` | Юр. документы | `title`, `updatedAt`, `seo` |
-| `sections` | Тексты секций главной | `heading`, `body`, `content` (blocks), `variant` (hero/catalog/advantages/delivery/order/faq/contact), `order` |
+| `sections` | Тексты секций главной | `heading`, `body`, `content` (blocks), `variant` (утверждено: hero/advantages/catalog/delivery/faq/contact; `order` — зарезервирован), `order` |
 
 > **Исключено из FastPage:** `blog`, `showcase`, `testimonials`, `instagram`, `integrations`, `products` (услуги). Добавлено: `lines`.
 
@@ -170,6 +170,32 @@
 - **Смена темы = смена CSS:** ребрендинг (цвета, шрифты) выполняется правкой CSS-темы без изменения контента и движка.
 
 > **Реализовано на старте:** [`index.astro`](../src/pages/index.astro) не содержит захардкоженных текстов — заголовок, описание и SEO-мета берутся из [`site/settings.yaml`](../src/content/site/settings.yaml) и [`sections/*.md`](../src/content/sections) через `getEntry`/`getCollection`.
+
+### Утвержденный состав секций главной (эталон)
+
+Текущий контент главной страницы зафиксирован как эталон. В рамках
+рефакторинга v2 состав, порядок и содержимое секций **не изменяются**.
+
+| # | Секция (`variant.discriminant`) | Файл | Якорь |
+|---|---|---|---|
+| 1 | `hero` | [`sections/hero.md`](../src/content/sections/hero.md) | — |
+| 2 | `advantages` | [`sections/advantages.md`](../src/content/sections/advantages.md) | `#advantages` |
+| 3 | `catalog` | [`sections/catalog.md`](../src/content/sections/catalog.md) | `#catalog` |
+| 4 | `delivery` | [`sections/delivery.md`](../src/content/sections/delivery.md) | `#delivery` |
+| 5 | `faq` | [`sections/faq.md`](../src/content/sections/faq.md) | `#faq` |
+| 6 | `contact` | [`sections/contacts.md`](../src/content/sections/contacts.md) | `#contacts` |
+
+**Зафиксированные решения:**
+
+- **Каталог на главной показывает только линейки** (баннеры → `/lines/[slug]`).
+  Модели выводятся на странице линейки и в `/products`. Это утвержденное
+  решение, а не временное ограничение.
+- **Секции `order` и `banners` не входят в эталон.** Схема допускает
+  `order` для обратной совместимости, но на главной он не используется.
+- **Модели на главной не выводятся.** Требования о вложенном каталоге
+  «линейки → модели» на главной относятся к будущему развитию.
+- **Навигация и якоря** задаются в [`site/settings.yaml`](../src/content/site/settings.yaml)
+  (`nav`) и соответствуют перечисленным секциям.
 
 ---
 

@@ -1,0 +1,41 @@
+---
+/**
+ * Breadcrumbs — визуальные хлебные крошки.
+ *
+ * Переиспользуется на страницах каталога, линейки и карточки товара.
+ * Последний элемент — текущая страница (без ссылки). Подписи передаются
+ * из CMS (`site.labels`) или из данных коллекций.
+ */
+interface Item {
+  name: string;
+  url?: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav class="mb-6 text-sm text-muted" aria-label="Хлебные крошки">
+  {
+    items.map((item, index) => {
+      const isLast = index === items.length - 1;
+      return (
+        <>
+          {index > 0 && <span class="mx-2">/</span>}
+          {isLast || !item.url ? (
+            <span class="text-text" aria-current={isLast ? 'page' : undefined}>
+              {item.name}
+            </span>
+          ) : (
+            <a href={item.url} class="hover:text-primary">
+              {item.name}
+            </a>
+          )}
+        </>
+      );
+    })
+  }
+</nav>

@@ -5,11 +5,13 @@
  * Строится из гибких блоков контента (`content` → `ContentBlocks.astro`)
  * + список моделей линейки. Данные — из CMS (`lines/*.md`, `products/*.md`).
  */
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ContentBlocks from '../../components/blocks/ContentBlocks.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import BreadcrumbList from '../../components/seo/jsonld/BreadcrumbList.astro';
+import ItemList from '../../components/seo/jsonld/ItemList.astro';
 import ProductCard from '../../components/ui/ProductCard.astro';
 import { resolveImage } from '../../lib/image';
 import { renderMarkdown } from '../../lib/markdown';
@@ -25,6 +27,9 @@ const products = (await getCollection('products'))
   .filter((p) => p.data.line === line.id)
   .sort((a, b) => a.data.order - b.data.order);
 
+const settings = await getEntry('site', 'settings');
+const labels = settings!.data.labels;
+
 const title = line.data.seo?.title ?? line.data.title;
 const description = line.data.seo?.description ?? line.body ?? '';
 
@@ -36,24 +41,33 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.
   description={description}
   image={line.data.image}
   imageAlt={line.data.title}
+  noindex={line.data.seo?.noindex}
   type="website"
 >
   <BreadcrumbList
     slot="head"
     items={[
-      { name: 'Главная', url: siteUrl },
-      { name: 'Каталог', url: `${siteUrl}/products` },
+      { name: labels?.breadcrumbsHome ?? 'Главная', url: siteUrl },
+      { name: labels?.breadcrumbsCatalog ?? 'Каталог', url: `${siteUrl}/products` },
       { name: line.data.title, url: `${siteUrl}/lines/${line.id}` },
     ]}
   />
+  <ItemList
+    slot="head"
+    items={products.map((product, i) => ({
+      name: product.data.title,
+      url: `${siteUrl}/products/${product.id}`,
+      position: i + 1,
+    }))}
+  />
   <section class="mx-auto max-w-6xl px-4 py-12">
-    <nav class="mb-6 text-sm text-muted" aria-label="Хлебные крошки">
-      <a href="/" class="hover:text-primary">Главная</a>
-      <span class="mx-2">/</span>
-      <a href="/products" class="hover:text-primary">Каталог</a>
-      <span class="mx-2">/</span>
-      <span class="text-text">{line.data.title}</span>
-    </nav>
+    <Breadcrumbs
+      items={[
+        { name: labels?.breadcrumbsHome ?? 'Главная', url: '/' },
+        { name: labels?.breadcrumbsCatalog ?? 'Каталог', url: '/products' },
+        { name: line.data.title },
+      ]}
+    />
 
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
       {resolveImage(line.data.image) && (
@@ -83,7 +97,9 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.
 
     {products.length > 0 && (
       <div class="mt-12">
-        <h2 class="mb-4 text-2xl font-bold text-text">Модели линейки</h2>
+        <h2 class="mb-4 text-2xl font-bold text-text">
+          {labels?.lineModels ?? 'Модели линейки'}
+        </h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {
             products.map((product) => (

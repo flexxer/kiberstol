@@ -8,6 +8,9 @@ interface Props {
   image?: string;
   brand?: string;
   countryOfOrigin?: string;
+  sku?: string;
+  /** schema.org availability URL; по умолчанию — InStock. */
+  availability?: string;
 }
 
 const {
@@ -19,6 +22,8 @@ const {
   image,
   brand,
   countryOfOrigin,
+  sku,
+  availability = 'https://schema.org/InStock',
 } = Astro.props;
 
 const jsonLd = {
@@ -28,6 +33,7 @@ const jsonLd = {
   ...(description && { description }),
   ...(url && { url }),
   ...(image && { image }),
+  ...(sku && { sku }),
   ...(brand && { brand: { '@type': 'Brand', name: brand } }),
   ...(countryOfOrigin && {
     countryOfOrigin: { '@type': 'Country', name: countryOfOrigin },
@@ -37,7 +43,8 @@ const jsonLd = {
       '@type': 'Offer',
       price,
       priceCurrency: currency,
-      availability: 'https://schema.org/InStock',
+      availability,
+      ...(url && { url }),
     },
   }),
 };

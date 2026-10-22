@@ -47,7 +47,12 @@ const faqItems: { question: string; answer: string }[] =
   [];
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} type="website">
+<BaseLayout
+  title={seoTitle}
+  description={seoDescription}
+  noindex={s.seo?.noindex}
+  type="website"
+>
   <Organization
     slot="head"
     name={s.fullName}
