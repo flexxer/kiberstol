@@ -12,6 +12,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "validate:content": "tsx scripts/validate-content.ts",
+    "import:products": "node scripts/import-products.mjs",
     "serve:php": "node scripts/serve-php.mjs",
     "check:secrets": "node scripts/check-no-secrets.mjs",
     "lint:php": "php -l public/api/submit.php",
@@ -58,6 +59,8 @@
     "lighthouse": "^13.5.0",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "xlsx": "^0.18.5",
+    "yaml": "^2.9.1"
   }
 }

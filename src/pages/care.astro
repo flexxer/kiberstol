@@ -1,0 +1,20 @@
+---
+/**
+ * care.astro — Условия хранения, ухода и эксплуатации.
+ * Контент — из `legal/care.md` (CMS). Страница noindex.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const entry = await getEntry('legal', 'care');
+const { Content } = await render(entry!);
+
+const title = entry!.data.seo?.title ?? entry!.data.title;
+const description = entry!.data.seo?.description ?? '';
+---
+
+<BaseLayout title={title} description={description} noindex={true}>
+  <article data-reveal="fade" class="prose prose-invert mx-auto max-w-3xl px-4 py-12">
+    <Content />
+  </article>
+</BaseLayout>

@@ -1,0 +1,35 @@
+{
+  "$comment": "Ручные правки поверх xlsx-импорта. Цены — плейсхолдеры до уточнения у клиента (меняются через CMS).",
+  "defaults": {
+    "warranty": "12 месяцев",
+    "ctaText": "Заказать"
+  },
+  "products": {
+    "meta-wb": { "price": 449, "oldPrice": 549, "badge": "Контрастный дизайн" },
+    "meta-w": { "price": 399, "oldPrice": 499, "badge": "Хит продаж" },
+    "meta-ob": { "price": 499, "oldPrice": 599, "badge": "Новинка" },
+    "meta-s": { "price": 429 },
+
+    "teco-wb": { "price": 549 },
+    "teco-w": { "price": 529 },
+    "teco-ob": { "price": 599 },
+    "teco-s": { "price": 559 },
+
+    "tower-wb": { "price": 749 },
+    "tower-w": { "price": 729 },
+    "tower-ob": { "price": 799 },
+    "tower-s": { "price": 759 },
+    "tower-13wb": { "price": 849 },
+    "tower-13w": {
+      "price": 829,
+      "specs": { "Цвет опор": "Белый матовый" }
+    },
+
+    "mwb": { "price": 89 },
+    "mw": { "price": 89 },
+    "mob": { "price": 99 },
+    "ms": { "price": 99 },
+    "m13wb": { "price": 109 },
+    "m13w": { "price": 109 }
+  }
+}

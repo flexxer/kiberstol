@@ -1,8 +1,8 @@
 ---
 title: Дополнительные Аксессуары
-image: /assets/uploads/addons/image.png
+image: /assets/uploads/addons/image.jpg
 features: []
-order: 0
+order: 10
 content: []
 seo:
   title: Дополнительные аксессуары | Kiberstol.by

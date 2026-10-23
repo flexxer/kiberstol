@@ -29,3 +29,7 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 downloads/14203482_3840_2160_25fps.mp4
+
+# исходники от клиента (Google Drive) — не хранятся в VCS
+downloads/client-files/
+downloads/client-photos/
