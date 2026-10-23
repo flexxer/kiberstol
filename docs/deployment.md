@@ -108,7 +108,8 @@ npm run preview
 |---|---|
 | `sitemap.xml` | `@astrojs/sitemap`; исключены `/keystatic` и юридические страницы |
 | `robots.txt` | [`public/robots.txt`](../public/robots.txt); юридические страницы не закрыты `Disallow` (работает `noindex`) |
-| `og-default.png` | [`public/assets/og-default.png`](../public/assets/og-default.png), пересоздаётся `node scripts/generate-og-default.mjs` |
+| `og-default.png` | [`public/assets/og-default.png`](../public/assets/og-default.png), пересоздаётся `npm run generate:og` |
+| Логотип и favicon | `src/assets/logo.png`, `public/favicon*.png`, `public/favicon.ico`, `public/favicon.svg` — `npm run generate:brand` |
 | Изображения | `src/assets/uploads/**` → `astro:assets` + `sharp` (WebP/AVIF, ресайз) |
 
 Приоритет `og:image`: изображение страницы → `site.seo.image` →

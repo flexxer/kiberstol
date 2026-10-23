@@ -18,7 +18,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "audit:a11y": "playwright test tests/e2e/accessibility.spec.ts",
-    "audit:lighthouse": "node scripts/lighthouse-audit.mjs"
+    "audit:lighthouse": "node scripts/lighthouse-audit.mjs",
+    "generate:brand": "node scripts/generate-brand-assets.mjs",
+    "generate:og": "node scripts/generate-og-default.mjs",
+    "generate:assets": "npm run generate:brand && npm run generate:og"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.8",

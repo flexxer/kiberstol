@@ -1,8 +1,9 @@
 /* ============================================================================
  * cyberpunk.css — единственная фиксированная тема Kiberstol.by
  *
- * Адаптация под бренд: голубой (#00d4ff) / фиолетовый (#8b5cf6) / белый (#ffffff)
- * на тёмном «неоновом» фоне. Без свитчера тем — тема задаётся только здесь.
+ * Адаптация под бренд: голубой (#37c5fa) / индиго (#7c6cff) / белый (#ffffff)
+ * на тёмном «неоновом» фоне. Палитра извлечена из фирменного логотипа
+ * (`downloads/kiberlogo.png`). Без свитчера тем — тема задаётся только здесь.
  *
  * Слой UI: цвета, шрифты, отступы, анимации настраиваются ТОЛЬКО в CSS.
  * Движок (Astro-компоненты) использует семантические Tailwind-токены
@@ -12,9 +13,10 @@
 
 @theme {
   /* --- Палитра бренда (задаётся только здесь, в слое UI) --- */
-  --color-primary: #00d4ff; /* голубой / неоновый циан */
-  --color-secondary: #8b5cf6; /* фиолетовый */
-  --color-accent: #8b5cf6; /* акцент (логотип «Stol») = secondary */
+  --color-primary: #37c5fa; /* голубой / неоновый циан (из логотипа) */
+  --color-secondary: #7c6cff; /* индиго (осветлённый цвет логотипа для контраста) */
+  --color-accent: #7c6cff; /* акцент (логотип «Stol») = secondary */
+  --color-brand-deep: #4438b6; /* глубокий индиго из логотипа (градиенты) */
 
   /* --- Фоновая шкала (тёмный cyberpunk) --- */
   --color-bg: #05070f; /* основной фон страницы */
@@ -39,8 +41,8 @@
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 
   /* --- Неоновое свечение (фирменный эффект) --- */
-  --shadow-glow: 0 0 0 1px rgba(0, 212, 255, 0.25), 0 0 24px rgba(0, 212, 255, 0.18);
-  --shadow-glow-strong: 0 0 0 1px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.3);
+  --shadow-glow: 0 0 0 1px rgba(55, 197, 250, 0.25), 0 0 24px rgba(55, 197, 250, 0.18);
+  --shadow-glow-strong: 0 0 0 1px rgba(55, 197, 250, 0.4), 0 0 40px rgba(55, 197, 250, 0.3);
 }
 
 /* ============================================================================
@@ -59,8 +61,8 @@
     font-family: var(--font-sans);
     /* Тонкая неоновая сетка на фоне — фирменный cyberpunk-акцент */
     background-image:
-      radial-gradient(circle at 15% 0%, rgba(0, 212, 255, 0.08), transparent 40%),
-      radial-gradient(circle at 85% 100%, rgba(139, 92, 246, 0.08), transparent 40%);
+      radial-gradient(circle at 15% 0%, rgba(55, 197, 250, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(124, 108, 255, 0.08), transparent 40%);
     background-attachment: fixed;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -80,7 +82,7 @@
 
   /* Выделение текста в фирменных цветах */
   ::selection {
-    background-color: rgba(0, 212, 255, 0.3);
+    background-color: rgba(55, 197, 250, 0.3);
     color: #ffffff;
   }
 
@@ -168,7 +170,7 @@
 
 .prose a {
   text-decoration: none;
-  border-bottom: 1px solid rgba(0, 212, 255, 0.4);
+  border-bottom: 1px solid rgba(55, 197, 250, 0.4);
   transition: color 0.2s ease, border-color 0.2s ease;
 }
 .prose a:hover {
@@ -229,8 +231,8 @@
   inset: 0;
   background:
     linear-gradient(180deg, rgba(5, 7, 15, 0.55), rgba(5, 7, 15, 0.85)),
-    radial-gradient(circle at 30% 20%, rgba(0, 212, 255, 0.22), transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.22), transparent 50%);
+    radial-gradient(circle at 30% 20%, rgba(55, 197, 250, 0.22), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(124, 108, 255, 0.22), transparent 50%);
   mix-blend-mode: multiply;
   pointer-events: none;
 }
@@ -239,7 +241,7 @@
 .hero-video-color {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #00d4ff 0%, #8b5cf6 100%);
+  background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-brand-deep) 100%);
   mix-blend-mode: color;
   opacity: 0.5;
   pointer-events: none;
