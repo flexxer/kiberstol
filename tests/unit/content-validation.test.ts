@@ -16,6 +16,7 @@ const product = (overrides: Record<string, unknown> = {}): ContentEntry => ({
     shortDescription: 'Игровой стол Meta W.',
     manufacturer: 'ООО МебельЛэнд М',
     manufacturerLocation: 'Республика Беларусь, Минск',
+    importer: 'ИП Суворов Александр Владимирович',
     supplier: 'ИП Суворов Александр Владимирович',
     countryOfOrigin: 'Республика Беларусь',
     image: '/assets/uploads/meta-w/image.jpg',

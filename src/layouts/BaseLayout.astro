@@ -68,6 +68,18 @@ const ogImage = image ?? settings?.data.seo?.image;
 
     <ClientRouter />
 
+    <!-- Fallback: если JavaScript отключён, reveal-анимация не должна
+         скрывать контент. -->
+    <noscript>
+      <style>
+        [data-reveal] {
+          opacity: 1 !important;
+          transform: none !important;
+          transition: none !important;
+        }
+      </style>
+    </noscript>
+
     <!-- Слот для JSON-LD компонентов (Organization, Product, ItemList, …) -->
     <slot name="head" />
   </head>

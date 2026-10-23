@@ -135,8 +135,8 @@ Keystatic сохраняет блок как:
 ### 7.1. Товары (`products`)
 
 Обязательные поля: `title`, `line` (relationship → `lines`), `price`,
-`shortDescription`, `manufacturer`, `manufacturerLocation`, `supplier`,
-`countryOfOrigin`, `image`.
+`shortDescription`, `manufacturer`, `manufacturerLocation`, `importer`,
+`supplier`, `countryOfOrigin`, `image`.
 
 Дополнительно: `oldPrice`, `warranty`, `used`, `specs`, `gallery`, `badge`,
 `ctaText`, `order`, `content` (блоки), `seo`.

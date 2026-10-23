@@ -193,6 +193,7 @@ export const productsSchema = z.object({
   // Юридически обязательные поля карточки
   manufacturer: z.string(), // наименование изготовителя
   manufacturerLocation: z.string(), // местонахождение изготовителя
+  importer: z.string(), // наименование + местонахождение импортера
   supplier: z.string(), // наименование + местонахождение поставщика
   countryOfOrigin: z.string(), // страна происхождения
   warranty: z.string().optional(), // гарантийный срок

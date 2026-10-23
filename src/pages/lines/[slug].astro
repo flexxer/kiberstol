@@ -80,7 +80,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kiberstol.
         />
       )}
       <div>
-        <h1 class="text-3xl font-bold text-text">{line.data.title}</h1>
+        <h1 data-reveal="up" class="text-3xl font-bold text-text">{line.data.title}</h1>
         {line.body && (
           <div class="prose prose-invert mt-2 max-w-3xl text-muted" set:html={renderMarkdown(line.body)} />
         )}

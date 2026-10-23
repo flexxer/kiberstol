@@ -58,17 +58,23 @@ const resolved = resolveImage(image);
     )
   }
   <div class="relative mx-auto max-w-6xl px-4 py-16 sm:py-24">
-    <h1 class="max-w-3xl text-3xl font-bold leading-tight text-text sm:text-5xl">
+    <h1
+      data-reveal="up"
+      class="max-w-3xl text-3xl font-bold leading-tight text-text sm:text-5xl"
+    >
       {heading}
     </h1>
     {
       subheading && (
-        <p class="mt-4 max-w-2xl text-lg text-muted">{subheading}</p>
+        <p data-reveal="up" class="mt-4 max-w-2xl text-lg text-muted">
+          {subheading}
+        </p>
       )
     }
     {
       ctaText && ctaHref && (
         <a
+          data-reveal="up"
           href={ctaHref}
           class="mt-8 inline-block rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
         >

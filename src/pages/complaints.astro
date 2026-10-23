@@ -14,7 +14,7 @@ const description = entry!.data.seo?.description ?? '';
 ---
 
 <BaseLayout title={title} description={description} noindex={true}>
-  <article class="prose prose-invert mx-auto max-w-3xl px-4 py-12">
+  <article data-reveal="fade" class="prose prose-invert mx-auto max-w-3xl px-4 py-12">
     <Content />
   </article>
 </BaseLayout>

@@ -71,9 +71,13 @@ const thumbnails = await Promise.all(
   galleryImages.map(async (img) => {
     const resolved = resolveImage(img.src);
     if (!resolved) return null;
-    const url = (await getImage({ src: resolved, width: 400, format: 'webp' })).src;
+    // Миниатюра для сетки и полноразмерная версия для главного превью/лайтбокса.
+    const [thumb, full] = await Promise.all([
+      getImage({ src: resolved, width: 400, format: 'webp' }),
+      getImage({ src: resolved, width: 1200, format: 'webp' }),
+    ]);
     const height = Math.round((400 * resolved.height) / resolved.width);
-    return { ...img, url, width: 400, height };
+    return { ...img, url: thumb.src, fullUrl: full.src, width: 400, height };
   }),
 );
 const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !== null);
@@ -125,7 +129,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
         {mainImageUrl && (
           <a
             href={mainImageUrl}
-            class="product-gallery-lightbox group block overflow-hidden rounded border border-border"
+            class="product-gallery-lightbox group block aspect-[4/3] overflow-hidden rounded border border-border bg-surface"
           >
             <img
               src={mainImageUrl}
@@ -142,7 +146,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
               <button
                 type="button"
                 class="product-gallery-thumb overflow-hidden rounded border border-border transition hover:border-primary"
-                data-src={img.url}
+                data-src={img.fullUrl}
                 data-alt={img.alt}
                 aria-label={img.alt}
               >
@@ -167,7 +171,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
             {p.badge}
           </span>
         )}
-        <h1 class="text-3xl font-bold text-text">{p.title}</h1>
+        <h1 data-reveal="up" class="text-3xl font-bold text-text">{p.title}</h1>
         {p.shortDescription && <p class="mt-2 text-muted">{p.shortDescription}</p>}
 
         <div class="mt-4 flex items-baseline gap-3">
@@ -220,6 +224,10 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
           <div>
             <dt class="font-semibold text-text">Изготовитель</dt>
             <dd class="text-muted">{p.manufacturer}{p.manufacturerLocation ? `, ${p.manufacturerLocation}` : ''}</dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-text">Импортер</dt>
+            <dd class="text-muted">{p.importer}</dd>
           </div>
           <div>
             <dt class="font-semibold text-text">Поставщик</dt>

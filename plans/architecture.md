@@ -15,10 +15,11 @@
 | Стилизация | **Tailwind CSS v4** (`@tailwindcss/vite`) + CSS-переменные |
 | Тема | **Одна фиксированная cyberpunk** (без свитчера), адаптирована под бренд |
 | Интерактив | Vanilla JS/TS, без сторонних библиотек |
-| Форма | `POST /api/submit.php` → Telegram Bot API, токен через `getenv` |
-| Защита форм | Honeypot + time-based honeypot |
+| Форма | Статика + PHP-модуль `POST /api/submit.php` → Telegram Bot API; creds только в env хостинга; dry-run для тестов |
+| Защита форм | Honeypot + `elapsed`-тайминг + rate limit IP/телефон + проверка Origin |
 | SEO | Сквозной слой: `SEO.astro` + JSON-LD + `@astrojs/sitemap` + семантика |
-| Деплой | BY-хостинг, домен `.BY` |
+| Деплой | hoster.by (PHP), домен `.BY`; статика + PHP-модуль формы |
+| CMS runtime | Keystatic требует Node для `/keystatic`; доступность Node на hoster.by — отдельный трек |
 
 ---
 
@@ -45,6 +46,8 @@
 > **Отличие от FastPage:** `@sveltia/cms` заменяется на `@keystatic/core` + `@keystatic/astro` + `react`/`react-dom`.
 
 > **Почему `@astrojs/node` при `output: 'static'`:** Keystatic нужен на проде, поэтому node-адаптер обслуживает только серверные маршруты `/keystatic` и `/api/keystatic`. Все контентные страницы остаются статичными (SSG).
+>
+> **hoster.by:** PHP подтверждён и используется для формы. Node.js на дешёвом тарифе может быть недоступен или ограничен — это влияет только на админку Keystatic, не на форму. Схема CMS фиксируется отдельным ADR.
 
 ### 1.2. Скрипты
 
@@ -93,6 +96,10 @@
 │   │   └── seo/                   # SEO.astro + jsonld/*
 │   ├── layouts/
 │   │   └── BaseLayout.astro
+│   ├── lib/
+│   │   ├── phone.ts               # Нормализация и маска телефона
+│   │   ├── form-timing.ts         # elapsed-тайминг формы
+│   │   └── form-errors.ts         # Коды и тексты ошибок формы
 │   ├── styles/
 │   │   ├── global.css
 │   │   ├── fonts.css
@@ -297,7 +304,7 @@
 
 | # | Шаг | Результат |
 |---|---|---|
-| 5.1 | `form.ts` + `public/api/submit.php` (honeypot, маска, Telegram) | заявки |
+| 5.1 | `form.ts` + `public/api/submit.php` (honeypot, маска, Telegram) — детальный план: [`refactoring-form-v3.md`](refactoring-form-v3.md) | заявки |
 | 5.2 | `consent.ts` + `cookie-consent.ts` (гранулярное согласие) | cookie-баннер |
 | 5.3 | `analytics.ts` + `advertising.ts` (gated) | аналитика/реклама |
 | 5.4 | `carousel.ts` + `lightbox.ts` | галерея |
@@ -368,3 +375,62 @@
 | Страницы | oferta/privacy/cookie-policy | privacy/cookie-policy/terms/returns/complaints |
 | Каталог | `/products/[slug]` | `/products` + `/lines/[slug]` + `/products/[slug]` |
 | Гибкие блоки | нет | `fields.blocks` + `ContentBlocks.astro` |
+
+---
+
+## 6. Архитектура формы заявок (финализировано)
+
+### 6.1. Принцип
+
+- Сайт остаётся статическим (`output: 'static'`).
+- Приём заявок — PHP-модуль [`public/api/submit.php`](../public/api/submit.php:1) на hoster.by.
+- Node-процесс для формы не используется.
+- Секреты — только `getenv()` в PHP; в клиент, `dist/client`, HTML и `data-*` не попадают.
+
+### 6.2. Поток
+
+```mermaid
+flowchart LR
+    A[ContactForm.astro] --> B[form.ts]
+    B -->|POST multipart| C[submit.php]
+    C -->|honeypot elapsed rate limit consent| D{Валидно?}
+    D -->|нет| E[JSON error]
+    D -->|да| F{TG_DRY_RUN?}
+    F -->|да| G[log + 200 dryRun]
+    F -->|нет| H[Telegram Bot API]
+    H -->|ok| I[200 ok]
+    H -->|error| J[502 telegram_failed]
+```
+
+### 6.3. Контракт
+
+Полный контракт — [`docs/forms.md`](../docs/forms.md:1). Кратко:
+
+- поля: `name`, `phone`, `message`, `consent-pd`, `marketing-consent`, `website`, `elapsed`, `ts`, `page`, `form-id`;
+- ответы: `200`, `403`, `405`, `422`, `429`, `502`, `503`, `500`;
+- ошибки: `{ok:false, error:{code, message, field?}}`;
+- health: `GET /api/submit.php?health=1`.
+
+### 6.4. Секреты
+
+| Переменная | Где задаётся | Куда попадает |
+|---|---|---|
+| `TG_BOT_TOKEN` | env хостинга | только `getenv()` в PHP |
+| `TG_CHAT_ID` | env хостинга | только `getenv()` в PHP |
+| `TG_DRY_RUN` | env хостинга / локально | только PHP |
+
+Запрещено: `PUBLIC_TG_*`, `import.meta.env.TG_*`, `data-tg-*`, инлайн-скрипты с токеном.
+CI-скрипт `scripts/check-no-secrets.mjs` проверяет `dist/client` и `src`.
+
+### 6.5. Тестирование без creds
+
+- `TG_DRY_RUN=1` — полный прогон без Telegram.
+- Playwright поднимает `php -S -t dist/client` с `TG_DRY_RUN=1`.
+- API-тесты проверяют коды и health.
+- После получения creds — тестовая заявка в тестовый чат, затем в боевой.
+
+### 6.6. Смежный риск Keystatic
+
+`/keystatic` и `/api/keystatic` требуют Node-процесс. На hoster.by доступность Node
+проверяется отдельно. Варианты: Node на hoster.by, отдельный Node-хостинг для админки,
+локальный Keystatic + git, другая CMS. Решение — отдельным ADR; форма не блокируется.

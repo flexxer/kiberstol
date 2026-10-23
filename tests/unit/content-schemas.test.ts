@@ -15,6 +15,7 @@ const validProduct = {
   shortDescription: 'Игровой стол Meta W.',
   manufacturer: 'ООО МебельЛэнд М',
   manufacturerLocation: 'Республика Беларусь, Минск',
+  importer: 'ИП Суворов Александр Владимирович',
   supplier: 'ИП Суворов Александр Владимирович',
   countryOfOrigin: 'Республика Беларусь',
   image: '/assets/uploads/meta-w/image.jpg',
@@ -39,6 +40,16 @@ describe('productsSchema', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues.some((issue) => issue.path.includes('manufacturer'))).toBe(true);
+    }
+  });
+
+  it('требует импортера', () => {
+    const { importer, ...withoutImporter } = validProduct;
+    const result = productsSchema.safeParse(withoutImporter);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.includes('importer'))).toBe(true);
     }
   });
 

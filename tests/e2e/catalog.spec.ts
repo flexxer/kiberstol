@@ -5,9 +5,9 @@ test.describe('Каталог', () => {
     await page.goto('/products');
 
     await expect(page.locator('h1')).toContainText('Каталог');
-    await expect(page.getByRole('heading', { name: 'Meta', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Imba', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Tower', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Серия Meta', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Серия Teco', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Серия Tower', exact: true })).toBeVisible();
     await expect(page.locator('a[href="/products/meta-w"]')).toBeVisible();
   });
 
@@ -28,6 +28,6 @@ test.describe('Каталог', () => {
 
     await expect(page.getByText('ООО МебельЛэнд М')).toBeVisible();
     await expect(page.getByText('Республика Беларусь; Китай')).toBeVisible();
-    await expect(page.getByText('24 месяца')).toBeVisible();
+    await expect(page.getByText('12 месяцев')).toBeVisible();
   });
 });

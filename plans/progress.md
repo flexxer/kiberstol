@@ -1,6 +1,7 @@
 # Прогресс рефакторинга — Kiberstol.by
 
-> План: [`plans/refactoring-v2.md`](refactoring-v2.md).
+> Основной план: [`plans/refactoring-v2.md`](refactoring-v2.md).
+> Форма заявок: [`plans/refactoring-form-v3.md`](refactoring-form-v3.md) (контракт — [`docs/forms.md`](../docs/forms.md)).
 > Обновляется после завершения каждой фазы.
 
 ## Статус фаз
@@ -14,6 +15,65 @@
 - [x] Фаза 6 — очистка контента товаров и линеек
 - [x] Фаза 7 — актуализация документации и ТЗ
 - [x] Фаза 8 — тесты, CI, аудит качества
+
+## Форма v3 — рефакторинг заявок
+
+> План: [`refactoring-form-v3.md`](refactoring-form-v3.md), контракт: [`docs/forms.md`](../docs/forms.md),
+> транспорт: [`adr-002-form-transport.md`](adr-002-form-transport.md).
+
+### Статус фаз
+
+- [x] Фаза 0 — baseline и проверка `dist/client/api/submit.php`
+- [x] Фаза 1 — модули `phone`, `form-timing`, `form-errors` + unit-тесты
+- [x] Фаза 2 — сервер `submit.php` (заголовки, health, origin, тайминг, rate limit, Telegram, dry-run)
+- [x] Фаза 3 — клиент (разметка, `form.ts`, конверсии)
+- [x] Фаза 4 — e2e, API-тесты, CI (`php -l`, секрет-скан, `test:api`)
+- [x] Фаза 5 — документация
+- [ ] Фаза 5 — staging/production smoke (ожидает Telegram creds)
+
+### Baseline формы v3 (2026-10-23, до изменений)
+
+| Проверка | Результат | Примечание |
+|---|---|---|
+| `npm run check` | 0 ошибок, 4 hints | 84 файла |
+| `npm run build` | ✅ | `dist/client/api/submit.php` присутствует (5 722 байта) |
+| `npm run test:unit` | 36 тестов | схемы, контент, consent |
+| `npm run test:e2e` | 14 passed / 2 failed | 2 падения `catalog.spec.ts` — контентные ожидания, не связаны с формой |
+
+### Результат формы v3
+
+| Проверка | Результат | Примечание |
+|---|---|---|
+| `npm run check` | 0 ошибок, 5 hints | hints — существующие/некритичные |
+| `npm run build` | ✅ | `dist/client/api/submit.php` копируется |
+| `php -l public/api/submit.php` | ✅ | PHP 8.4 локально, 8.3 в CI |
+| `npm run check:secrets` | ✅ | секретов в `dist/client` и `src` нет |
+| `npm run test:unit` | 81 тест | +45 к baseline |
+| `npm run test:e2e` | 29 passed | реальный `php -S`, `TG_DRY_RUN=1` |
+| `npm run test:api` | 22 passed | контракт API + фейковый Telegram |
+
+### Журнал формы v3
+
+| Дата | Фаза | Что сделано | Проверка |
+|---|---|---|---|
+| 2026-10-23 | 0 | Зафиксирован baseline; проверен `dist/client/api/submit.php`; выявлены 2 старых контентных падения e2e | check/build/unit/e2e |
+| 2026-10-23 | 1 | Созданы `src/lib/phone.ts`, `form-timing.ts`, `form-errors.ts`; `form.ts` переведён на них | unit + check + build |
+| 2026-10-23 | 1 | Unit-тесты: телефон (маски `29…`, `80…`, `+375…`), тайминг, коды ошибок | 81 unit |
+| 2026-10-23 | 2 | `submit.php`: no-store/nosniff, health, method + `Allow`, Origin/Referer | API |
+| 2026-10-23 | 2 | `submit.php`: `elapsed`/`ts`, согласия, `page`, валидация и нормализация | API |
+| 2026-10-23 | 2 | Rate limit IP + хеш телефона, `flock`, очистка, `TRUSTED_PROXIES` | API |
+| 2026-10-23 | 2 | Telegram cURL + fallback, парсинг `ok`, таймаут, dry-run, 503/502 | API |
+| 2026-10-23 | 2 | Структурированные ошибки, `error_log` без ПД/токена, `LEADS_LOG_PATH` | API |
+| 2026-10-23 | 2 | `scripts/serve-php.mjs` (загрузка `.env`, `--dry-run`, `--env`), `scripts/check-no-secrets.mjs` | check:secrets |
+| 2026-10-23 | 2 | Обновлены `.env.example`, `.gitignore`; `php -l` и секрет-скан в CI | CI |
+| 2026-10-23 | 3 | `ContactForm.astro`: статус, noscript, лимиты, off-screen honeypot, ссылка вне label, `marketing-consent`, уникальные id, hidden `page` | check |
+| 2026-10-23 | 3 | `form.ts`: `elapsed` от первого ввода, сброс, AbortController 15 с, ошибки/aria/фокус, кнопка, `dataset.bound` | e2e |
+| 2026-10-23 | 3 | Конверсии `generate_lead` и рекламная цель с учётом `hasConsent` | e2e |
+| 2026-10-23 | 4 | Playwright переведён на `php -S` с `TG_DRY_RUN=1`; e2e-сценарии формы | 29 e2e |
+| 2026-10-23 | 4 | API-тесты (health, 405/403/422/429/503/502, dry-run, honeypot, тайминг, XSS, rate limit) | 22 API |
+| 2026-10-23 | 4 | CI: PHP, `php -l`, `check:secrets`, `test:api`; скрипты `test:api`, `check:secrets`, `serve:php`, `lint:php` | CI |
+| 2026-10-23 | 4 | `catalog.spec.ts` приведён к фактическому контенту («Серия …», «12 месяцев») — падения baseline устранены | 29 e2e |
+| 2026-10-23 | 5 | Обновлены `docs/forms.md`, `docs/deployment.md`, `docs/quality.md`, `plans/progress.md` | — |
 
 ## Базовая линия
 

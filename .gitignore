@@ -7,6 +7,7 @@ dist/
 playwright-report/
 test-results/
 reports/
+.tmp/
 
 # Keystatic CMS (локальный медиа-слой и служебные файлы)
 .keystatic/
@@ -20,9 +21,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment variables
+# environment variables (в репозитории только .env.example)
 .env
-.env.production
+.env.*
+!.env.example
 
 # macOS-specific files
 .DS_Store

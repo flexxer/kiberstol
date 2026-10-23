@@ -7,22 +7,80 @@
 /* Единственная фиксированная тема — cyberpunk (без свитчера) */
 @import './themes/cyberpunk.css';
 
-/* Reveal-on-scroll (reveal.ts) */
+/* ============================================================================
+ * Reveal-on-scroll (reveal.ts)
+ *
+ * Блоки плавно «прорисовываются» при входе в область видимости. Направление
+ * сдвига зависит от направления прокрутки: вниз — снизу вверх, вверх — сверху
+ * вниз. При повторном входе анимация запускается снова.
+ *
+ * Настройки можно переопределять в разметке:
+ *   data-reveal            — направление по умолчанию (зависит от скролла)
+ *   data-reveal="fade"     — только прозрачность
+ *   data-reveal="up"       — снизу вверх
+ *   data-reveal="down"     — сверху вниз
+ *   data-reveal="left"     — слева направо
+ *   data-reveal="right"    — справа налево
+ *   data-reveal="zoom"     — лёгкое увеличение
+ *   data-reveal="section"  — мягкое появление крупных секций
+ * ========================================================================== */
+
 [data-reveal] {
+  --reveal-from: 24px;
+  --reveal-x: 0px;
+  --reveal-y: var(--reveal-from);
+  --reveal-scale: 1;
+  --reveal-delay: 0ms;
+  --reveal-duration: 0.7s;
+  --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translate3d(var(--reveal-x), var(--reveal-y), 0) scale(var(--reveal-scale));
+  transition:
+    opacity var(--reveal-duration) var(--reveal-ease) var(--reveal-delay),
+    transform var(--reveal-duration) var(--reveal-ease) var(--reveal-delay);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 [data-reveal].reveal-visible {
   opacity: 1;
-  transform: none;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: auto;
+}
+
+/* Варианты направления */
+[data-reveal='fade'] {
+  --reveal-y: 0px;
+}
+[data-reveal='up'] {
+  --reveal-y: 32px;
+}
+[data-reveal='down'] {
+  --reveal-y: -32px;
+}
+[data-reveal='left'] {
+  --reveal-x: -32px;
+  --reveal-y: 0px;
+}
+[data-reveal='right'] {
+  --reveal-x: 32px;
+  --reveal-y: 0px;
+}
+[data-reveal='zoom'] {
+  --reveal-y: 0px;
+  --reveal-scale: 0.94;
+}
+[data-reveal='section'] {
+  --reveal-y: 12px;
+  --reveal-duration: 0.9s;
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto;
   }
 }

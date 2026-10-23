@@ -362,6 +362,10 @@ const products = collection({
       label: 'Местонахождение изготовителя',
       validation: { isRequired: true },
     }),
+    importer: fields.text({
+      label: 'Импортер (наименование + местонахождение)',
+      validation: { isRequired: true },
+    }),
     supplier: fields.text({
       label: 'Поставщик (наименование + местонахождение)',
       validation: { isRequired: true },

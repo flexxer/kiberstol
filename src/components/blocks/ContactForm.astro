@@ -1,88 +1,200 @@
 ---
 /**
- * ContactForm — форма заказа (имя + телефон → Telegram).
+ * ContactForm — форма заказа (имя + телефон + согласия → Telegram).
  *
  * Вынесена из `index.astro` в отдельный компонент, чтобы переиспользоваться
- * секцией `contact` на главной. Отправка — на `/api/submit.php` (PHP-обработчик).
+ * секцией `contact`. Отправка — на `/api/submit.php` (PHP-обработчик).
  *
  * Защита от спама:
- *  - honeypot-поле `website` (скрытое, люди его не видят);
- *  - time-honeypot `ts` (unix-секунды показа формы, заполняется в `form.ts`).
+ *  - honeypot-поле `website` (off-screen, люди его не видят);
+ *  - тайминг `elapsed` (мс от первого ввода, заполняется в `form.ts`);
+ *  - `ts` — legacy-метка показа формы (серверный fallback).
+ *
+ * Доступность: статус с `role="status"`, ошибки полей через `aria-describedby`,
+ * ссылка на политику вынесена из `label`, чтобы клик по ней не переключал чекбокс.
  */
+import { getEntry } from 'astro:content';
+
+interface Props {
+  /** Уникальный id формы (нужен для страниц с несколькими формами). */
+  id?: string;
+}
+
+const { id = 'order-form' } = Astro.props;
+
+const settings = await getEntry('site', 'settings');
+const phone = settings?.data.phone ?? '';
+const telHref = phone ? `tel:${phone.replace(/[^+\d]/g, '')}` : '';
+
+const fieldId = (name: string): string => `${id}-${name}`;
+// Допускаем национальный формат, +375 и префикс 80; точную проверку делает сервер.
+const phonePattern = '[\\d\\s()+\\-]{9,20}';
 ---
 
 <form
-  id="order-form"
+  id={id}
+  data-form
   class="max-w-md space-y-4"
   action="/api/submit.php"
   method="POST"
+  aria-labelledby={fieldId('heading')}
 >
-  <!-- Honeypot: скрытое поле-ловушка для ботов (люди его не видят) -->
-  <div class="hidden" aria-hidden="true">
-    <label for="website">Website</label>
-    <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+  <h3 id={fieldId('heading')} class="text-lg font-semibold text-text">Оставить заявку</h3>
+
+  <!-- Honeypot: off-screen, а не display:none — боты заполняют видимые/спрятанные поля -->
+  <div
+    class="pointer-events-none absolute -left-[10000px] top-0 h-px w-px overflow-hidden"
+    aria-hidden="true"
+  >
+    <label for={fieldId('website')}>Website</label>
+    <input
+      id={fieldId('website')}
+      name="website"
+      type="text"
+      tabindex="-1"
+      autocomplete="off"
+    />
   </div>
 
-  <!-- Time-honeypot: время показа формы (unix-секунды) -->
-  <input type="hidden" name="ts" id="form-ts" />
+  <!-- Тайминг: elapsed (мс от первого ввода) и legacy ts (unix-секунды) -->
+  <input type="hidden" name="elapsed" id={fieldId('elapsed')} value="" />
+  <input type="hidden" name="ts" id={fieldId('ts')} value="" />
+  <!-- Страница заявки: заполняется JS, без JS остаётся пустой -->
+  <input type="hidden" name="page" id={fieldId('page')} value="" />
 
   <div>
-    <label for="name" class="mb-1 block text-sm font-semibold text-text">
+    <label for={fieldId('name')} class="mb-1 block text-sm font-semibold text-text">
       Имя
     </label>
     <input
-      id="name"
+      id={fieldId('name')}
       name="name"
       type="text"
       required
+      maxlength="100"
       autocomplete="name"
+      aria-describedby={fieldId('name-error')}
       class="w-full rounded border border-border bg-bg px-3 py-2 text-text"
     />
+    <p
+      id={fieldId('name-error')}
+      data-field-error="name"
+      class="mt-1 text-sm text-red-500"
+      hidden
+    ></p>
   </div>
+
   <div>
-    <label for="phone" class="mb-1 block text-sm font-semibold text-text">
+    <label for={fieldId('phone')} class="mb-1 block text-sm font-semibold text-text">
       Телефон
     </label>
     <input
-      id="phone"
+      id={fieldId('phone')}
       name="phone"
       type="tel"
       required
+      inputmode="tel"
       autocomplete="tel"
+      pattern={phonePattern}
       placeholder="+375 XX XXX-XX-XX"
+      aria-describedby={fieldId('phone-error')}
       class="w-full rounded border border-border bg-bg px-3 py-2 text-text"
     />
+    <p
+      id={fieldId('phone-error')}
+      data-field-error="phone"
+      class="mt-1 text-sm text-red-500"
+      hidden
+    ></p>
   </div>
+
   <div>
-    <label for="message" class="mb-1 block text-sm font-semibold text-text">
+    <label for={fieldId('message')} class="mb-1 block text-sm font-semibold text-text">
       Сообщение
     </label>
     <textarea
-      id="message"
+      id={fieldId('message')}
       name="message"
       rows="4"
+      maxlength="1000"
       placeholder="Комментарий к заявке (необязательно)"
+      aria-describedby={fieldId('message-error')}
       class="w-full rounded border border-border bg-bg px-3 py-2 text-text"
     ></textarea>
+    <p
+      id={fieldId('message-error')}
+      data-field-error="message"
+      class="mt-1 text-sm text-red-500"
+      hidden
+    ></p>
   </div>
 
-  <!-- Чекбоксы согласия (обязательны, закон РБ № 99-З) -->
-  <label class="flex items-start gap-2 text-sm text-muted">
-    <input type="checkbox" name="consent-pd" required class="mt-0.5" />
-    <span>
-      Согласен на обработку персональных данных в соответствии с{' '}
+  <!-- Согласия (закон РБ № 99-З). Ссылка на политику — вне label. -->
+  <div class="flex items-start gap-2 text-sm text-muted">
+    <input
+      id={fieldId('consent-pd')}
+      type="checkbox"
+      name="consent-pd"
+      required
+      class="mt-0.5"
+      aria-describedby={fieldId('consent-pd-error')}
+    />
+    <div>
+      <label for={fieldId('consent-pd')}>
+        Согласен на обработку персональных данных в соответствии с
+      </label>{' '}
       <a href="/privacy" class="text-primary hover:underline">политикой конфиденциальности</a>
-    </span>
-  </label>
-  <label class="flex items-start gap-2 text-sm text-muted">
-    <input type="checkbox" name="consent-marketing" class="mt-0.5" />
-    <span>Согласен на получение рекламных сообщений</span>
-  </label>
+      <p
+        id={fieldId('consent-pd-error')}
+        data-field-error="consent-pd"
+        class="mt-1 text-sm text-red-500"
+        hidden
+      ></p>
+    </div>
+  </div>
+
+  <div class="flex items-start gap-2 text-sm text-muted">
+    <input
+      id={fieldId('marketing-consent')}
+      type="checkbox"
+      name="marketing-consent"
+      class="mt-0.5"
+      aria-describedby={fieldId('marketing-consent-error')}
+    />
+    <div>
+      <label for={fieldId('marketing-consent')}>
+        Согласен на получение рекламных сообщений
+      </label>
+      <p
+        id={fieldId('marketing-consent-error')}
+        data-field-error="marketing-consent"
+        class="mt-1 text-sm text-red-500"
+        hidden
+      ></p>
+    </div>
+  </div>
 
   <button
     type="submit"
-    class="w-full rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
+    class="w-full rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90 disabled:opacity-60"
+    aria-busy="false"
   >
-    Отправить заявку
+    <span data-submit-label>Отправить заявку</span>
   </button>
+
+  <!-- Статус всегда в разметке: скринридер сообщает об отправке и ошибках -->
+  <p
+    id={fieldId('status')}
+    data-form-status
+    role="status"
+    aria-live="polite"
+    class="mt-3 text-sm"
+  ></p>
+
+  <noscript>
+    <p class="text-sm text-muted">
+      Если форма не отправляется, позвоните:
+      {telHref ? <a href={telHref} class="text-primary hover:underline">{phone}</a> : phone}
+    </p>
+  </noscript>
 </form>
