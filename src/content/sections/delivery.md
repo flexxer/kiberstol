@@ -1,4 +1,5 @@
 ---
+slug: delivery
 title: Доставка и оплата
 heading: Доставка и оплата
 content: []

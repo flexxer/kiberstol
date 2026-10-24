@@ -118,3 +118,166 @@ jobs:
 
       - name: API tests
         run: npm run test:api
+
+  a11y:
+    name: Accessibility audit (axe)
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Accessibility audit
+        run: npm run audit:a11y
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report
+          path: playwright-report/
+          retention-days: 7
+
+  lighthouse:
+    name: Lighthouse audit
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Preview на отдельном порту, чтобы не конфликтовать с e2e (4322).
+      - name: Start preview server
+        run: |
+          npx astro preview --host 127.0.0.1 --port 4323 &
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:4323/ > /dev/null; then
+              echo "preview готов"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::preview не поднялся за 120 с"
+          exit 1
+
+      - name: Lighthouse audit
+        run: npm run audit:lighthouse -- http://127.0.0.1:4323/
+
+      # Порог: не ниже baseline performance 84 / accessibility 89.
+      # Значения можно поднять через env, опускать ниже baseline — нет.
+      - name: Check Lighthouse thresholds
+        env:
+          MIN_PERFORMANCE: 84
+          MIN_ACCESSIBILITY: 89
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const path = require("node:path");
+            const dir = "reports";
+            const files = fs.readdirSync(dir).filter((f) => f.endsWith(".json")).sort();
+            if (files.length === 0) {
+              console.error("::error::Отчёт Lighthouse не найден");
+              process.exit(1);
+            }
+            const report = JSON.parse(fs.readFileSync(path.join(dir, files.at(-1)), "utf8"));
+            const score = (key) => Math.round((report.categories[key]?.score ?? 0) * 100);
+            const performance = score("performance");
+            const accessibility = score("accessibility");
+            const minPerformance = Number(process.env.MIN_PERFORMANCE ?? 84);
+            const minAccessibility = Number(process.env.MIN_ACCESSIBILITY ?? 89);
+            console.log(`performance=${performance} (min ${minPerformance}) accessibility=${accessibility} (min ${minAccessibility})`);
+            const failed = [];
+            if (performance < minPerformance) failed.push(`performance ${performance} < ${minPerformance}`);
+            if (accessibility < minAccessibility) failed.push(`accessibility ${accessibility} < ${minAccessibility}`);
+            if (failed.length > 0) {
+              console.error(`::error::Lighthouse ниже baseline: ${failed.join(", ")}`);
+              process.exit(1);
+            }
+          '
+
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: reports/
+          retention-days: 7
+
+  deploy:
+    name: Deploy static site (FTP)
+    runs-on: ubuntu-latest
+    needs: [quality, e2e, api]
+    # Деплой только при push в main и только после зелёных quality/e2e/api.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Секреты FTP_* задаются в Settings → Secrets and variables → Actions.
+      # Пока FTP_SERVER не добавлен, шаг выгрузки пропускается, job остаётся зелёным.
+      - name: Check FTP secrets
+        id: ftp
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        run: |
+          if [ -n "$FTP_SERVER" ]; then
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_secrets=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::FTP_SERVER не задан — деплой пропущен"
+          fi
+
+      - name: Deploy to hoster via FTP
+        if: steps.ftp.outputs.has_secrets == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/client/
+          server-dir: ./

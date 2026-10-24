@@ -1,4 +1,5 @@
 ---
+slug: cookie-policy
 title: Политика обработки файлов cookie
 updatedAt: 2026-10-18
 seo:

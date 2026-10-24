@@ -87,7 +87,7 @@
 │   │   ├── products/              # Модели столов (.md)
 │   │   ├── lines/                 # Линейки столов (.md)
 │   │   ├── site/                  # settings.yaml — реквизиты, nav, аналитика
-│   │   ├── legal/                 # privacy, cookie-policy, terms, returns, complaints
+│   │   ├── legal/                 # privacy, cookie-policy, terms, returns, complaints, care
 │   │   └── sections/              # Тексты секций главной (FAQ — в variant секции)
 │   ├── components/
 │   │   ├── layout/                # Header, Nav, Footer, LegalBlock
@@ -127,7 +127,9 @@
 │       ├── cookie-policy.astro
 │       ├── terms.astro
 │       ├── returns.astro
-│       └── complaints.astro
+│       ├── complaints.astro
+│       ├── care.astro
+│       └── 404.astro
 ├── keystatic.config.ts            # Конфиг Keystatic
 ├── astro.config.mjs               # output: static, sitemap, Tailwind, Keystatic
 └── package.json
@@ -342,7 +344,7 @@
 
 | # | Шаг | Результат |
 |---|---|---|
-| 9.1 | `legal/privacy.md`, `cookie-policy.md`, `terms.md`, `returns.md`, `complaints.md` | юр. тексты |
+| 9.1 | `legal/privacy.md`, `cookie-policy.md`, `terms.md`, `returns.md`, `complaints.md`, `care.md` | юр. тексты |
 | 9.2 | `site/settings.yaml` — реквизиты ИП, реестр; оплата/доставка — в `sections/delivery.md` | реквизиты |
 | 9.3 | Коммит + пуш | — |
 
@@ -350,7 +352,7 @@
 
 | # | Шаг | Результат |
 |---|---|---|
-| 10.1 | `lines/*.md` (3 линейки) + `products/*.md` (модели) с плейсхолдерами | каталог |
+| 10.1 | `lines/*.md` (4 линейки) + `products/*.md` (модели) с плейсхолдерами | каталог |
 | 10.2 | `sections/*.md` (FAQ — в `sections/faq.md`) | тексты главной |
 | 10.3 | Коммит + пуш | — |
 

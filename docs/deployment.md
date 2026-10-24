@@ -90,6 +90,25 @@ npm ci
   что PHP может писать в каталог.
 - `LEADS_LOG_PATH` (если включён) — вне webroot, с ограниченными правами.
 - `PUBLIC_TG_*` запрещены.
+- `FORM_CONSENT_VERSION` — версия редакции согласия на обработку ПД; текущее
+  значение `1`. При изменении редакции
+  [`privacy.md`](../src/content/legal/privacy.md) версию нужно повысить.
+- Срок хранения заявок и связанных персональных данных — **12 месяцев**
+  (см. [`privacy.md`](../src/content/legal/privacy.md)), после чего данные
+  удаляются или обезличиваются.
+
+### 2.4. Хранение, согласие, заголовки, мониторинг
+
+| Тема | Решение | Где настраивается |
+|---|---|---|
+| Срок хранения ПД | **12 месяцев** с момента заявки, далее удаление/обезличивание | `privacy.md`, `LEADS_LOG_PATH` |
+| Версия согласия | `FORM_CONSENT_VERSION=1`; при смене редакции политики — поднять | env хостинга |
+| Security headers | Настраиваются в **панели hoster.by**; `.htaccess` в репозитории не создаём | панель хостера |
+| Мониторинг | **Не внедряем** (решение клиента); контроль — `error_log` и health-эндпоинт | — |
+| Staging | **Отсутствует**; smoke-проверки выполняются только на production | — |
+
+> Аналитика (GA4, Яндекс.Метрика, Ads, Директ) подключается только после
+> согласия пользователя; ID задаются в `site.analytics` / `site.advertising`.
 
 Локально переменные подхватывает `npm run serve:php` из `.env`:
 
@@ -171,6 +190,32 @@ npm run serve:php -- --dry-run      # форма на реальном PHP бе�
 7. Проверить `error_log` на 4xx/5xx и отсутствие токена/ПД в логах.
 8. Проверить `429` (rate limit) и `403` (чужой origin) на staging.
 
+### 4.2. Артефакты деплоя и CMS runtime
+
+Решение по runtime CMS: **`node_on_hoster`** — на хостинге постоянно работает
+Node-процесс, который обслуживает только `/keystatic` и `/api/keystatic`.
+Контентные страницы остаются статическими.
+
+| Артефакт | Куда | Что обслуживает |
+|---|---|---|
+| `dist/client/` | webroot (`public_html`) | статические страницы, ассеты, `api/submit.php` |
+| Node-процесс (`dist/server/entry.mjs`) | отдельный порт/сервис хостинга | `/keystatic`, `/api/keystatic` |
+
+Переменные Node-процесса (см. §2.2): `PUBLIC_KEYSTATIC_STORAGE=github`,
+`PUBLIC_KEYSTATIC_GITHUB_REPO_OWNER`, `PUBLIC_KEYSTATIC_GITHUB_REPO_NAME`,
+`KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`,
+`KEYSTATIC_SECRET`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`.
+
+Переменные PHP-обработчика (см. §2.3): `TG_BOT_TOKEN`, `TG_CHAT_ID`,
+`ALLOWED_ORIGINS=https://kiberstol.by`, `FORM_CONSENT_VERSION=1`,
+`RATE_LIMIT_DIR` (TODO: указать каталог на хостинге), `LEADS_LOG_PATH`
+(не требуется — оставить пустым).
+
+Деплой статики — GitHub Actions, job `deploy` (только `main`), выгрузка по FTP:
+`local-dir: ./dist/client/`, секреты `FTP_SERVER`, `FTP_USERNAME`,
+`FTP_PASSWORD`. Пока секреты не добавлены, job пропускает выгрузку и остаётся
+зелёным.
+
 > Если CMS на production не требуется, серверные маршруты можно не поднимать:
 > статическая часть продолжит работать, но `/keystatic` будет недоступен.
 
@@ -182,8 +227,8 @@ npm run serve:php -- --dry-run      # форма на реальном PHP бе�
 |---|---|
 | `sitemap.xml` | `@astrojs/sitemap`; исключены `/keystatic` и юридические страницы |
 | `robots.txt` | [`public/robots.txt`](../public/robots.txt); юридические страницы не закрыты `Disallow` (работает `noindex`) |
-| `og-default.png` | [`public/assets/og-default.png`](../public/assets/og-default.png), пересоздаётся `npm run generate:og` |
-| Логотип и favicon | `src/assets/logo.png`, `public/favicon*.png`, `public/favicon.ico`, `public/favicon.svg` — `npm run generate:brand` |
+| `og-default.png` | [`public/assets/og-default.png`](../public/assets/og-default.png) — готовый ассет в репозитории |
+| Логотип и favicon | `src/assets/logo.png`, `public/favicon*.png`, `public/favicon.ico`, `public/favicon.svg` — готовые ассеты в репозитории |
 | Изображения | `src/assets/uploads/**` → `astro:assets` + `sharp` (WebP/AVIF, ресайз) |
 
 Приоритет `og:image`: изображение страницы → `site.seo.image` →
@@ -199,13 +244,13 @@ npm run serve:php -- --dry-run      # форма на реальном PHP бе�
 - [ ] `npm run check:secrets` — секретов в `dist/client` и `src` нет.
 - [ ] `npm run test:unit`, `npm run test:e2e`, `npm run test:api` — зелёные.
 - [ ] Заполнены `TG_BOT_TOKEN`, `TG_CHAT_ID` только в env хостинга.
-- [ ] `ALLOWED_ORIGINS` включает production- и staging-домены.
+- [ ] `ALLOWED_ORIGINS` = `https://kiberstol.by` (staging отсутствует).
 - [ ] `RATE_LIMIT_DIR` доступен PHP на запись; `LEADS_LOG_PATH` — вне webroot.
 - [ ] `GET /api/submit.php?health=1` → `configured:true`, `dryRun:false`.
 - [ ] Для production CMS задан `PUBLIC_KEYSTATIC_STORAGE=github` и OAuth-переменные.
-- [ ] Заменён плейсхолдер `authorizedBodyPhone` в
-      [`settings.yaml`](../src/content/site/settings.yaml:16).
-- [ ] Подтверждён гарантийный срок в контенте товаров (сейчас «12 месяцев»).
+- [x] `authorizedBodyPhone` заполнен: `+375 (212) 64-34-04`.
+- [x] Гарантийный срок в контенте товаров — «12 месяцев».
+- [ ] Security headers включены в панели hoster.by (`.htaccess` не создаём).
 - [ ] Проверены `/sitemap.xml`, `/robots.txt`, `og-default.png`.
 - [ ] Отправлена тестовая заявка через форму; проверен `error_log` без токена и ПД.
 
@@ -215,7 +260,7 @@ npm run serve:php -- --dry-run      # форма на реальном PHP бе�
 |---|---|---|
 | 1 | локально | `build` + `serve:php -- --dry-run` + `test:e2e` |
 | 2 | CI | `php -l`, `check:secrets`, unit, e2e, API |
-| 3 | staging | `TG_DRY_RUN=1`, health, отправка заявки |
-| 4 | staging | боевые creds → тестовый чат |
+| 3 | production | `TG_DRY_RUN=1`, health, отправка заявки (staging отсутствует) |
+| 4 | production | боевые creds → тестовый чат |
 | 5 | production | боевой чат, одна контрольная заявка |
 | 6 | production | `error_log`, rate limit, отсутствие секретов |

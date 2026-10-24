@@ -32,7 +32,7 @@
 |---|---|---|
 | **Товары** (`products`) | `src/content/products/*` | Модели столов, юр. поля, характеристики, галерея, блоки, SEO |
 | **Линейки** (`lines`) | `src/content/lines/*` | Линейки столов, описание, особенности, блоки, SEO |
-| **Юридические документы** (`legal`) | `src/content/legal/*` | privacy, cookie-policy, terms, returns, complaints |
+| **Юридические документы** (`legal`) | `src/content/legal/*` | privacy, cookie-policy, terms, returns, complaints, care |
 | **Секции главной** (`sections`) | `src/content/sections/*` | Тексты секций главной |
 | **Настройки сайта** (`site`) | `src/content/site/settings.yaml` | Реквизиты ИП, бренд, навигация, аналитика/реклама, подписи, SEO |
 
@@ -49,8 +49,11 @@ Singleton `site` — единый источник правды. Файл:
 Содержит:
 
 - реквизиты ИП: `fullName`, `unp`, `registrationDate`, `tradeRegistryNumber/Date`;
-- контакты: `phone`, `email`, `viber`, `instagram`, `address`, `workHours`;
+- контакты: `phone`, `email`, `viber`, `instagram`, `telegram`, `address`, `workHours`;
+- адреса: `legalAddress` (юр. адрес), `complaintsBookAddress` (книга замечаний),
+  `pickupAddress` (пункт выдачи, может быть пустым);
 - уполномоченный орган: `authorizedBody`, `authorizedBodyPhone`;
+- `belgieRegistration` — справка о регистрации в БелГИЭ (в UI не выводится);
 - `labels` — подписи интерфейса (характеристики, сведения о товаре, хлебные
   крошки, «Настройки cookie» и т.д.);
 - `nav` — пункты меню;
@@ -172,5 +175,6 @@ Keystatic сохраняет блок как:
 4. Запустите `npm run check` и `npm run build`.
 5. Опубликуйте сборку (см. [`docs/deployment.md`](deployment.md)).
 
-> Перед публикацией замените плейсхолдер `authorizedBodyPhone` и подтвердите
-> гарантийный срок «24 месяца» в контенте товаров.
+> Гарантийный срок в контенте товаров — **12 месяцев** (`commercial.warranty`).
+> Телефон уполномоченного органа заполнен (`+375 (212) 64-34-04`); при смене
+> реквизитов правьте их в `site`, а не в компонентах.

@@ -9,6 +9,7 @@ import { getEntry } from 'astro:content';
 
 const settings = await getEntry('site', 'settings');
 const s = settings!.data;
+const l = s.labels;
 
 // Способы оплаты/доставки теперь редактируются в секции «Доставка и оплата»
 // (коллекция `sections`), а не в настройках сайта.
@@ -27,6 +28,9 @@ const deliveryMethods = deliveryValue?.deliveryMethods ?? [];
       {s.unp && <> · УНП {s.unp}</>}
       {s.registrationDate && <> · зарегистрирован {s.registrationDate}</>}
     </p>
+    {s.legalAddress && (
+      <p>{l?.legalAddress ?? 'Юридический адрес'}: {s.legalAddress}</p>
+    )}
     <p>
       {s.tradeRegistryNumber && (
         <>Сведения о включении в торговый реестр: № {s.tradeRegistryNumber}</>
@@ -48,18 +52,30 @@ const deliveryMethods = deliveryValue?.deliveryMethods ?? [];
         </>
       )}
     </p>
-    {s.workHours && <p>Режим работы: {s.workHours}</p>}
+    {s.workHours && <p>{l?.workHours ?? 'Режим работы'}: {s.workHours}</p>}
+    {s.complaintsBookAddress && (
+      <p>
+        {l?.complaintsBookAddress ?? 'Книга замечаний и предложений'}: {s.complaintsBookAddress}
+      </p>
+    )}
+    {s.pickupAddress && (
+      <p>{l?.pickupAddress ?? 'Пункт выдачи'}: {s.pickupAddress}</p>
+    )}
     {s.authorizedBody && (
-      <p>Уполномоченный рассматривать обращения покупателей: {s.authorizedBody}</p>
+      <p>
+        {l?.authorizedBody ?? 'Уполномоченный рассматривать обращения покупателей'}: {s.authorizedBody}
+      </p>
     )}
     {s.authorizedBodyPhone && (
-      <p>Телефоны работников местного исполнительного органа: {s.authorizedBodyPhone}</p>
+      <p>
+        {l?.authorizedBodyPhone ?? 'Телефоны местного исполнительного органа'}: {s.authorizedBodyPhone}
+      </p>
     )}
     {paymentMethods.length > 0 && (
-      <p>Способы оплаты: {paymentMethods.join('; ')}</p>
+      <p>{l?.paymentMethods ?? 'Способы оплаты'}: {paymentMethods.join('; ')}</p>
     )}
     {deliveryMethods.length > 0 && (
-      <p>Способы и сроки доставки: {deliveryMethods.join('; ')}</p>
+      <p>{l?.deliveryMethods ?? 'Способы и сроки доставки'}: {deliveryMethods.join('; ')}</p>
     )}
   </div>
 </section>

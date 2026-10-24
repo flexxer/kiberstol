@@ -101,7 +101,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
     brand={brand}
     countryOfOrigin={p.countryOfOrigin}
     sku={product.id}
-    availability="https://schema.org/InStock"
+    availabilityStatus={p.availability}
     itemCondition={p.used ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition'}
   />
   <BreadcrumbList
@@ -169,6 +169,11 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
         {p.badge && (
           <span class="mb-2 inline-block rounded bg-secondary px-2 py-0.5 text-xs font-semibold text-bg">
             {p.badge}
+          </span>
+        )}
+        {p.availability !== 'in_stock' && (
+          <span class="mb-2 ml-2 inline-block rounded border border-border px-2 py-0.5 text-xs font-semibold text-muted">
+            {p.availability === 'out_of_stock' ? 'Нет в наличии' : 'Под заказ'}
           </span>
         )}
         <h1 data-reveal="up" class="text-3xl font-bold text-text">{p.title}</h1>

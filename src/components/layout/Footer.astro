@@ -8,7 +8,13 @@ import Logo from '../ui/Logo.astro';
 import LegalBlock from './LegalBlock.astro';
 
 const settings = await getEntry('site', 'settings');
-const { brand, phone, email } = settings!.data;
+const { brand, phone, email, viber, instagram, telegram, labels } = settings!.data;
+const l = labels;
+
+const isHttpUrl = (value?: string): value is string =>
+  Boolean(value && /^https?:\/\//i.test(value));
+const isViberLink = (value?: string): value is string =>
+  Boolean(value && /^viber:\/\//i.test(value));
 ---
 
 <footer class="border-t border-border bg-surface">
@@ -18,7 +24,7 @@ const { brand, phone, email } = settings!.data;
     </div>
     <div class="grid gap-6 md:grid-cols-3">
       <div>
-        <p class="mb-2 font-semibold text-text">Навигация</p>
+        <p class="mb-2 font-semibold text-text">{l?.footerNav ?? 'Навигация'}</p>
         <ul class="space-y-1 text-sm">
           {
             settings!.data.nav.map((item) => (
@@ -32,27 +38,27 @@ const { brand, phone, email } = settings!.data;
         </ul>
       </div>
       <div>
-        <p class="mb-2 font-semibold text-text">Документы</p>
+        <p class="mb-2 font-semibold text-text">{l?.footerDocuments ?? 'Документы'}</p>
         <ul class="space-y-1 text-sm">
-          <li><a href="/privacy" class="link-underline text-muted hover:text-primary">Политика конфиденциальности</a></li>
-          <li><a href="/cookie-policy" class="link-underline text-muted hover:text-primary">Политика cookie</a></li>
+          <li><a href="/privacy" class="link-underline text-muted hover:text-primary">{l?.legalPrivacy ?? 'Политика конфиденциальности'}</a></li>
+          <li><a href="/cookie-policy" class="link-underline text-muted hover:text-primary">{l?.legalCookiePolicy ?? 'Политика cookie'}</a></li>
           <li>
             <button
               type="button"
               data-open-consent
               class="link-underline text-muted hover:text-primary"
             >
-              Настройки cookie
+              {l?.cookieSettings ?? 'Настройки cookie'}
             </button>
           </li>
-          <li><a href="/terms" class="link-underline text-muted hover:text-primary">Оплата и доставка</a></li>
-          <li><a href="/returns" class="link-underline text-muted hover:text-primary">Возврат товара</a></li>
-          <li><a href="/care" class="link-underline text-muted hover:text-primary">Условия ухода и эксплуатации</a></li>
-          <li><a href="/complaints" class="link-underline text-muted hover:text-primary">Порядок обращений</a></li>
+          <li><a href="/terms" class="link-underline text-muted hover:text-primary">{l?.legalTerms ?? 'Оплата и доставка'}</a></li>
+          <li><a href="/returns" class="link-underline text-muted hover:text-primary">{l?.legalReturns ?? 'Возврат товара'}</a></li>
+          <li><a href="/care" class="link-underline text-muted hover:text-primary">{l?.legalCare ?? 'Условия ухода и эксплуатации'}</a></li>
+          <li><a href="/complaints" class="link-underline text-muted hover:text-primary">{l?.legalComplaints ?? 'Порядок обращений'}</a></li>
         </ul>
       </div>
       <div>
-        <p class="mb-2 font-semibold text-text">Контакты</p>
+        <p class="mb-2 font-semibold text-text">{l?.footerContacts ?? 'Контакты'}</p>
         <div class="flex flex-col gap-1">
           <a
             href={`tel:${phone.replace(/[^+\d]/g, '')}`}
@@ -66,6 +72,15 @@ const { brand, phone, email } = settings!.data;
           >
             {email}
           </a>
+          {(isViberLink(viber) || isHttpUrl(viber)) && (
+            <a href={viber} class="link-underline text-sm text-muted hover:text-primary">Viber</a>
+          )}
+          {isHttpUrl(instagram) && (
+            <a href={instagram} class="link-underline text-sm text-muted hover:text-primary">Instagram</a>
+          )}
+          {isHttpUrl(telegram) && (
+            <a href={telegram} class="link-underline text-sm text-muted hover:text-primary">Telegram</a>
+          )}
         </div>
       </div>
     </div>

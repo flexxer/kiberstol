@@ -198,6 +198,8 @@ export const productsSchema = z.object({
   countryOfOrigin: z.string(), // страна происхождения
   warranty: z.string().optional(), // гарантийный срок
   used: z.boolean().default(false), // б/у или конфискован
+  // Наличие товара: влияет на бейдж в карточке и JSON-LD `availability`.
+  availability: z.enum(['in_stock', 'out_of_stock', 'preorder']).default('in_stock'),
 
   specs: z.array(z.object({ name: z.string(), value: z.string() })).optional(),
   image: z.string(),
@@ -242,6 +244,12 @@ export const siteSchema = z.object({
   workHours: z.string(),
   authorizedBody: z.string(),
   authorizedBodyPhone: z.string(),
+  // Юридические и контактные реквизиты (аудит 2026-10-23).
+  legalAddress: z.string().optional(),
+  complaintsBookAddress: z.string().optional(),
+  pickupAddress: z.string().optional(),
+  belgieRegistration: z.string().optional(),
+  telegram: z.string().optional(),
   // Подписи интерфейса (микротексты), чтобы не хардкодить их в компонентах.
   labels: z
     .object({
@@ -256,6 +264,26 @@ export const siteSchema = z.object({
       breadcrumbsHome: z.string().default('Главная'),
       breadcrumbsCatalog: z.string().default('Каталог'),
       cookieSettings: z.string().default('Настройки cookie'),
+      // Подписи юридических документов (футер).
+      legalPrivacy: z.string().default('Политика конфиденциальности'),
+      legalCookiePolicy: z.string().default('Политика cookie'),
+      legalTerms: z.string().default('Оплата и доставка'),
+      legalReturns: z.string().default('Возврат товара'),
+      legalComplaints: z.string().default('Порядок обращений'),
+      legalCare: z.string().default('Условия ухода и эксплуатации'),
+      // Заголовки блоков футера.
+      footerNav: z.string().default('Навигация'),
+      footerDocuments: z.string().default('Документы'),
+      footerContacts: z.string().default('Контакты'),
+      // Подписи юридического блока.
+      legalAddress: z.string().default('Юридический адрес'),
+      complaintsBookAddress: z.string().default('Книга замечаний и предложений'),
+      pickupAddress: z.string().default('Пункт выдачи'),
+      authorizedBody: z.string().default('Уполномоченный рассматривать обращения покупателей'),
+      authorizedBodyPhone: z.string().default('Телефоны местного исполнительного органа'),
+      workHours: z.string().default('Режим работы'),
+      paymentMethods: z.string().default('Способы оплаты'),
+      deliveryMethods: z.string().default('Способы и сроки доставки'),
     })
     .optional(),
   nav: z.array(z.object({ label: z.string(), href: z.string() })),
@@ -276,7 +304,7 @@ export const siteSchema = z.object({
 
 /**
  * `legal` — юридические документы.
- * Файлы: privacy, cookie-policy, terms, returns, complaints.
+ * Файлы: privacy, cookie-policy, terms, returns, complaints, care.
  */
 export const legalSchema = z.object({
   title: z.string(),

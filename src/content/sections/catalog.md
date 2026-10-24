@@ -1,11 +1,12 @@
 ---
+slug: catalog
 title: Каталог
 heading: Каталог
 content: []
 variant:
   discriminant: catalog
   value:
-    subheading: Три линейки - выберите свой идеальный формат
+    subheading: "Четыре линейки: Meta, Teco, Tower и аксессуары"
     ctaText: Смотреть все модели
     ctaHref: /products
 order: 2

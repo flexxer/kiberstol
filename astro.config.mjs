@@ -29,14 +29,15 @@ export default defineConfig({
     keystatic(),
     sitemap({
       // Исключаем служебные и noindex-страницы из sitemap:
-      // /keystatic (CMS) и юридические страницы.
+      // /keystatic (CMS), юридические страницы и /care (noindex).
       filter: (page) =>
         !page.includes('/keystatic') &&
         !page.includes('/privacy') &&
         !page.includes('/cookie-policy') &&
         !page.includes('/terms') &&
         !page.includes('/returns') &&
-        !page.includes('/complaints'),
+        !page.includes('/complaints') &&
+        !page.includes('/care'),
     }),
   ],
 });

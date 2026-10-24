@@ -1,4 +1,6 @@
 ---
+type AvailabilityStatus = 'in_stock' | 'out_of_stock' | 'preorder';
+
 interface Props {
   name: string;
   description?: string;
@@ -9,11 +11,20 @@ interface Props {
   brand?: string;
   countryOfOrigin?: string;
   sku?: string;
-  /** schema.org availability URL; по умолчанию — InStock. */
+  /** Статус наличия из CMS; маппится в schema.org availability. */
+  availabilityStatus?: AvailabilityStatus;
+  /** Готовый schema.org availability URL; приоритетнее статуса. */
   availability?: string;
   /** schema.org itemCondition URL; по умолчанию — NewCondition. */
   itemCondition?: string;
 }
+
+/** Маппинг статуса наличия в schema.org. */
+const AVAILABILITY_URLS: Record<AvailabilityStatus, string> = {
+  in_stock: 'https://schema.org/InStock',
+  out_of_stock: 'https://schema.org/OutOfStock',
+  preorder: 'https://schema.org/PreOrder',
+};
 
 const {
   name,
@@ -25,9 +36,14 @@ const {
   brand,
   countryOfOrigin,
   sku,
-  availability = 'https://schema.org/InStock',
+  availabilityStatus,
+  availability: availabilityUrl,
   itemCondition = 'https://schema.org/NewCondition',
 } = Astro.props;
+
+const availability =
+  availabilityUrl ??
+  (availabilityStatus ? AVAILABILITY_URLS[availabilityStatus] : AVAILABILITY_URLS.in_stock);
 
 const jsonLd = {
   '@context': 'https://schema.org',

@@ -12,8 +12,16 @@ instagram: https://www.instagram.com/kiberstol
 address: г. Минск, ул. Грушевская 17-14
 workHours: Заказы принимаются с 9:00 до 21:00 без выходных
 authorizedBody: ИП Суворов Александр Владимирович
-# TODO: уточнить актуальный телефон администрации Первомайского района г. Витебска.
-authorizedBodyPhone: +375 212 XX-XX-XX (администрация Первомайского района г. Витебска)
+authorizedBodyPhone: +375 (212) 64-34-04 (администрация Первомайского района г. Витебска)
+# Юридический адрес ИП (взят из карточек товаров: supplier).
+legalAddress: г. Витебск, пр-т Строителей 18к3-252
+complaintsBookAddress: г. Минск, ул. Грушевская 17-14
+# Отдельного пункта выдачи нет.
+pickupAddress: ''
+# Справочное поле: регистрация в БелГИЭ не требуется, в UI не выводится.
+belgieRegistration: не требуется
+# TODO: нужна ссылка t.me (во входных данных был телефон, а не ссылка).
+telegram: ''
 labels:
   specs: Характеристики
   productInfo: Сведения о товаре
@@ -24,6 +32,26 @@ labels:
   breadcrumbsHome: Главная
   breadcrumbsCatalog: Каталог
   cookieSettings: Настройки cookie
+  # Подписи юридических документов (футер).
+  legalPrivacy: Политика конфиденциальности
+  legalCookiePolicy: Политика cookie
+  legalTerms: Оплата и доставка
+  legalReturns: Возврат товара
+  legalComplaints: Порядок обращений
+  legalCare: Условия ухода и эксплуатации
+  # Заголовки блоков футера.
+  footerNav: Навигация
+  footerDocuments: Документы
+  footerContacts: Контакты
+  # Подписи юридического блока.
+  legalAddress: Юридический адрес
+  complaintsBookAddress: Книга замечаний и предложений
+  pickupAddress: Пункт выдачи
+  authorizedBody: Уполномоченный рассматривать обращения покупателей
+  authorizedBodyPhone: Телефоны местного исполнительного органа
+  workHours: Режим работы
+  paymentMethods: Способы оплаты
+  deliveryMethods: Способы и сроки доставки
 nav:
   - label: Главная
     href: /
@@ -32,7 +60,7 @@ nav:
   - label: Каталог
     href: /products
   - label: Доставка и оплата
-    href: /terms
+    href: /#delivery
   - label: FAQ
     href: /#faq
   - label: Контакты

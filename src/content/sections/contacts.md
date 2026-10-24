@@ -1,4 +1,5 @@
 ---
+slug: contacts
 title: Контакты
 heading: Оставить заявку
 content: []

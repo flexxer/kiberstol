@@ -16,6 +16,7 @@ import {
   validateContent,
   type ContentBundle,
   type ContentEntry,
+  type ValidationIssue,
 } from '../src/lib/content-validation';
 
 const root = process.cwd();
@@ -69,6 +70,117 @@ const bundle: ContentBundle = {
 };
 
 const issues = validateContent(bundle, imageExists);
+
+/**
+ * Ожидаемые идентификаторы записей. Идентификатор = имя файла и поле `slug`
+ * во frontmatter; переименование заголовка в CMS не должно менять ссылки
+ * `getEntry('legal', 'privacy')` и `getEntry('sections', 'delivery')`.
+ */
+const expectedSlugs: Record<'legal' | 'sections', string[]> = {
+  legal: ['privacy', 'cookie-policy', 'terms', 'returns', 'complaints', 'care'],
+  sections: ['hero', 'advantages', 'catalog', 'delivery', 'faq', 'contacts'],
+};
+
+/** Проверяет наличие и уникальность ожидаемых slug в коллекции. */
+function validateExpectedSlugs(
+  entries: ContentEntry[],
+  expected: string[],
+  collection: 'legal' | 'sections',
+): ValidationIssue[] {
+  const found: ValidationIssue[] = [];
+  const seen = new Map<string, string>();
+
+  for (const entry of entries) {
+    const raw = entry.data.slug;
+    if (typeof raw !== 'string' || raw.trim() === '') {
+      found.push({
+        file: entry.file,
+        field: 'slug',
+        message: `Не задан slug для коллекции "${collection}"`,
+      });
+      continue;
+    }
+
+    const value = raw.trim();
+    const existing = seen.get(value);
+    if (existing) {
+      found.push({
+        file: entry.file,
+        field: 'slug',
+        message: `Дублируется с ${existing}: "${value}"`,
+      });
+    } else {
+      seen.set(value, entry.file);
+    }
+  }
+
+  for (const slug of expected) {
+    if (!seen.has(slug)) {
+      found.push({
+        file: `src/content/${collection}`,
+        field: 'slug',
+        message: `Отсутствует ожидаемый slug "${slug}"`,
+      });
+    }
+  }
+
+  return found;
+}
+
+issues.push(...validateExpectedSlugs(bundle.legal, expectedSlugs.legal, 'legal'));
+issues.push(...validateExpectedSlugs(bundle.sections, expectedSlugs.sections, 'sections'));
+
+/**
+ * Проверяет уникальность slug и совпадение с именем файла.
+ * Для products/lines имя файла = публичный URL, поэтому расхождение
+ * означало бы смену адреса страницы.
+ */
+function validateSlugMatchesFile(
+  entries: ContentEntry[],
+  collection: 'products' | 'lines',
+): ValidationIssue[] {
+  const found: ValidationIssue[] = [];
+  const seen = new Map<string, string>();
+
+  for (const entry of entries) {
+    const raw = entry.data.slug;
+    const fileSlug = entry.file.replace(/^.*\//, '').replace(/\.md$/, '');
+
+    if (typeof raw !== 'string' || raw.trim() === '') {
+      found.push({
+        file: entry.file,
+        field: 'slug',
+        message: `Не задан slug для коллекции "${collection}"`,
+      });
+      continue;
+    }
+
+    const value = raw.trim();
+    if (value !== fileSlug) {
+      found.push({
+        file: entry.file,
+        field: 'slug',
+        message: `Slug "${value}" не совпадает с именем файла "${fileSlug}"`,
+      });
+    }
+
+    const existing = seen.get(value);
+    if (existing) {
+      found.push({
+        file: entry.file,
+        field: 'slug',
+        message: `Дублируется с ${existing}: "${value}"`,
+      });
+    } else {
+      seen.set(value, entry.file);
+    }
+  }
+
+  return found;
+}
+
+issues.push(...validateSlugMatchesFile(bundle.products, 'products'));
+issues.push(...validateSlugMatchesFile(bundle.lines, 'lines'));
 
 if (issues.length === 0) {
   console.log(

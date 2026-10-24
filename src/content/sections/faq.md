@@ -1,4 +1,5 @@
 ---
+slug: faq
 title: FAQ
 heading: Частые вопросы
 content: []
@@ -41,4 +42,3 @@ variant:
           доставке за дополнительную плату (укажите это при заказе).
 order: 5
 ---
-FAQ description

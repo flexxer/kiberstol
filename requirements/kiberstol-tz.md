@@ -169,6 +169,7 @@ const products = defineCollection({
     // Юридически обязательные поля карточки
     manufacturer: z.string(),        // наименование изготовителя
     manufacturerLocation: z.string(),// местонахождение изготовителя
+    importer: z.string(),            // наименование + местонахождение импортёра
     supplier: z.string(),            // наименование + местонахождение поставщика
     countryOfOrigin: z.string(),     // страна происхождения
     warranty: z.string().optional(), // гарантийный срок
@@ -186,7 +187,7 @@ const products = defineCollection({
 });
 ```
 
-### 6.2. `lines` — линейки (старт — 3, с перспективой расширения)
+### 6.2. `lines` — линейки (старт — 4: Meta, Teco, Tower, аксессуары)
 
 ```ts
 const lines = defineCollection({

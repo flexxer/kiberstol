@@ -4,6 +4,54 @@
 > Форма заявок: [`plans/refactoring-form-v3.md`](refactoring-form-v3.md) (контракт — [`docs/forms.md`](../docs/forms.md)).
 > Обновляется после завершения каждой фазы.
 
+## Аудит 2026-10-23
+
+- [x] Проведён статический аудит проекта.
+- [x] Волна 0 (SUB-01): baseline и гигиена входных данных.
+- [x] Волна 1 (SUB-02…SUB-05): юр. поля в настройках, `complaints`/`returns`, `privacy`, UI футера и `sameAs`.
+- [ ] Волна 2 (SUB-06…SUB-08): заблокирована — нет цен, тарифов доставки и секретов Telegram.
+- [x] Волна 3 (SUB-09…SUB-15): SEO линеек, уникальные описания товаров и линеек, копирайт главной.
+- [x] Волна 4 (SUB-16…SUB-19): sitemap/404, slug в CMS, runtime и deploy-job.
+- [x] Волна 5 (SUB-20…SUB-23): CI a11y/lighthouse, синхронизация docs, housekeeping.
+- [ ] SUB-24, SUB-25: заблокированы до данных клиента (аналитика, фото).
+- Отчёт: [`audit-2026-10-23.md`](audit-2026-10-23.md).
+- Входные данные: [`audit-inputs.md`](audit-inputs.md) — заполнены, запуск по карточкам [`audit-2026-10-23-subtasks.md`](audit-2026-10-23-subtasks.md).
+- Журнал запусков: [`audit-2026-10-23-runs.md`](audit-2026-10-23-runs.md).
+
+### Baseline аудита (2026-10-24, SUB-01)
+
+| Проверка | Результат | Примечание |
+|---|---|---|
+| `npm run check` | ✅ 0 ошибок, 5 hints | 98 файлов; hints — неиспользуемые переменные в скриптах/компонентах |
+| `npm run validate:content` | ✅ | 20 товаров, 4 линейки, 6 секций, 6 документов |
+| `npm run build` | ✅ | `dist/client` + `dist/server`; предупреждение о размере чанка |
+| `npm run test:unit` | ✅ 81 тест | 6 файлов, все зелёные |
+
+### Baseline аудита — повторный прогон после волны 1 (2026-10-24, SUB-01)
+
+| Проверка | Результат | Примечание |
+|---|---|---|
+| `npm run check` | ✅ 0 ошибок, 0 warnings, 5 hints | 98 файлов; hints те же (скрипты, `Gallery.astro`, `HomeSections.astro`) |
+| `npm run validate:content` | ✅ | 20 товаров, 4 линейки, 6 секций, 6 документов |
+| `npm run build` | ✅ | 33 статических маршрута, 180 изображений из кеша; предупреждение о размере чанка |
+| `npm run test:unit` | ✅ 81 тест | 6 файлов, все зелёные |
+
+Регрессий после волны 1 (SUB-02…SUB-05) нет. Входные данные: опечатка `penansweredding` отсутствует, `meta.updated` = `2026-10-24`. Открытые `pending`: `legal.privacy_policy`, `commercial.prices`, `commercial.delivery_tariffs`, `analytics.*` (4 ID), `ops.rate_limit_dir`, `secrets.status`.
+
+### Итог волны 5 (2026-10-24, SUB-20…SUB-23)
+
+| Проверка | Результат | Примечание |
+|---|---|---|
+| `npm run check` | ✅ 0 ошибок, 5 hints | 99 файлов |
+| `npm run validate:content` | ✅ | 20 товаров, 4 линейки, 6 секций, 6 документов |
+| `npm run build` | ✅ | 33 маршрута, 180 изображений |
+| `npm run audit:a11y` | ✅ 3/3 | 0 critical-нарушений |
+| `npm run audit:lighthouse` | ✅ | performance 84, accessibility 93, best-practices 100, SEO 100 |
+
+- CI: добавлены job `a11y` и `lighthouse` (порог 84/89, отчёты — артефактами).
+- Docs: baseline обновлён, `docs/cms.md` (гарантия 12 месяцев, `care`), `architecture.md` (4 линейки), ТЗ (`importer`), решения по объёму — [`adr-003-scope-decisions.md`](adr-003-scope-decisions.md).
+- Housekeeping: скрипты фото в [`scripts/photo/`](../scripts/photo/README.md), поле `products.availability` + бейдж и JSON-LD.
+
 ## Статус фаз
 
 - [x] Фаза 0 — базовая линия, проверки, ADR формата блоков
@@ -79,13 +127,14 @@
 
 | Проверка | Команда | Статус | Примечание |
 |---|---|---|---|
-| Сборка | `npm run build` | ✅ | `output: static`, node adapter, Keystatic server chunks в `dist/server` |
-| Типы | `npm run check` | ✅ | 0 ошибок, 3 hints (неиспользуемые переменные/импорт) |
-| Контент | `npm run validate:content` | ✅ | 3 товара, 3 линейки, 6 секций, 5 документов |
-| Unit-тесты | `npm run test:unit` | ✅ | 25 тестов (Vitest) |
-| E2E | `npm run test:e2e` | ✅ | 14 тестов (Playwright, Chromium) |
-| Доступность | `npm run audit:a11y` | ✅ | 0 critical-нарушений (axe) |
-| Lighthouse | `npm run audit:lighthouse` | ✅ | performance 84, accessibility 89, best-practices 100, SEO 100 |
+| Сборка | `npm run build` | ✅ | `output: static`, node adapter, Keystatic server chunks в `dist/server`, 33 маршрута |
+| Типы | `npm run check` | ✅ | 0 ошибок, 5 hints (неиспользуемые переменные/импорт) |
+| Контент | `npm run validate:content` | ✅ | 20 товаров, 4 линейки, 6 секций, 6 документов |
+| Unit-тесты | `npm run test:unit` | ✅ | 81 тест (Vitest) |
+| E2E | `npm run test:e2e` | ✅ | 29 тестов (Playwright, Chromium) |
+| API | `npm run test:api` | ✅ | 22 теста (контракт `submit.php`) |
+| Доступность | `npm run audit:a11y` | ✅ | 0 critical-нарушений (axe), 3 страницы |
+| Lighthouse | `npm run audit:lighthouse` | ✅ | performance 84, accessibility 93, best-practices 100, SEO 100 |
 
 ## Журнал
 
@@ -150,16 +199,16 @@
 - Keystatic routes проверены: в `dist/server/chunks` присутствуют `keystatic-api` и `keystatic-astro-page`.
 - Для production CMS нужно задать `PUBLIC_KEYSTATIC_STORAGE=github`, `PUBLIC_KEYSTATIC_GITHUB_REPO_OWNER`, `PUBLIC_KEYSTATIC_GITHUB_REPO_NAME` и OAuth-переменные.
 - Утвержденный эталон главной: hero, advantages, catalog (только линейки), delivery, faq, contact. Секции `order`/`banners` и модели на главной — вне рефакторинга v2.
-- OG-изображение по умолчанию: `public/assets/og-default.png` (1200×630), пересоздаётся командой `node scripts/generate-og-default.mjs`. Приоритет: `og:image` страницы → `site.seo.image` → дефолтный баннер.
+- OG-изображение по умолчанию: `public/assets/og-default.png` (1200×630) — готовый ассет в репозитории. Приоритет: `og:image` страницы → `site.seo.image` → дефолтный баннер.
 - `og:site_name` берётся из `site.brand`; `Organization.logo` — `/favicon.svg`, `sameAs` — `viber`/`instagram` из `settings.yaml`.
-- `Product` JSON-LD: `availability` всегда `InStock`, признак б/у вынесен в `itemCondition` (`UsedCondition`/`NewCondition`).
+- `Product` JSON-LD: `availability` берётся из `products.availability` (`in_stock` → `InStock`, `out_of_stock` → `OutOfStock`, `preorder` → `PreOrder`), признак б/у вынесен в `itemCondition` (`UsedCondition`/`NewCondition`).
 - Медиа: актуальные загрузки — `src/assets/uploads/**`; `public/assets/uploads` — legacy-заглушка (см. README внутри).
 - Юридические страницы: `noindex,nofollow` + исключение из sitemap; в `robots.txt` не закрываются, чтобы поисковики видели `noindex`.
-- Контент товаров: гарантийный срок указан как «24 месяца» — требует подтверждения у заказчика.
-- `authorizedBodyPhone` — плейсхолдер `+375 212 XX-XX-XX`, помечен TODO в `settings.yaml` и `complaints.md`; заменить перед публикацией.
+- Контент товаров: гарантийный срок — **12 месяцев** (`commercial.warranty`), синхронизирован с `docs/cms.md`.
+- `authorizedBodyPhone` заполнен: `+375 (212) 64-34-04`; TODO снят в `settings.yaml` и `complaints.md`.
 - SEO товаров и линеек уникальны; изображения присутствуют в `src/assets/uploads/**`, alt формируется из названия товара/линейки.
 - Документация фазы 7: [`architecture.md`](architecture.md), [`kiberstol-tz.md`](../requirements/kiberstol-tz.md), [`docs/deployment.md`](../docs/deployment.md), [`docs/cms.md`](../docs/cms.md). Старый [`refactoring.md`](refactoring.md) — superseded.
 - Качество фазы 8: [`docs/quality.md`](../docs/quality.md). Unit-тесты — `npm run test:unit`, e2e — `npm run test:e2e` (нужен `npm run build`), доступность — `npm run audit:a11y`, Lighthouse — `npm run audit:lighthouse`.
-- Playwright поднимает `astro preview` на порту `4322`, чтобы не конфликтовать с локальным dev-сервером на `4321`.
-- CI: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — `check` → `validate:content` → `build` → `test:unit`, затем отдельный job с Playwright.
+- Playwright поднимает `php -S` (через `scripts/serve-php.mjs`) на порту `4322` против `dist/client`; Lighthouse-аудит — против `astro preview` на `4323`.
+- CI: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — `quality` (`check` → `validate:content` → `build` → `test:unit`), затем `e2e`, `api`, `a11y`, `lighthouse` и `deploy` (только `main`, FTP).
 - Отчёты Lighthouse сохраняются в `reports/` (исключён из git); Playwright — в `playwright-report/` и `test-results/`.

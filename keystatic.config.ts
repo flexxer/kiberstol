@@ -337,11 +337,22 @@ const contentBlocks = fields.blocks(
 const products = collection({
   label: 'Товары',
   path: 'src/content/products/*',
-  slugField: 'title',
+  // Идентификатор записи = имя файла (публичный URL /products/<slug>).
+  // Отдельное поле `slug` фиксирует его, чтобы переименование товара в CMS
+  // не меняло URL.
+  slugField: 'slug',
   format: { data: 'yaml', contentField: 'description' },
   columns: ['title', 'line', 'price'],
   schema: {
-    title: fields.slug({ name: { label: 'Наименование товара' } }),
+    title: fields.text({ label: 'Наименование товара', validation: { isRequired: true } }),
+    slug: fields.slug({
+      name: {
+        label: 'Slug (идентификатор, не менять)',
+        description: 'Совпадает с именем файла и публичным URL /products/<slug>',
+        validation: { isRequired: true },
+      },
+      slug: { label: 'Slug (имя файла)' },
+    }),
     line: fields.relationship({
       label: 'Линейка',
       collection: 'lines',
@@ -376,6 +387,15 @@ const products = collection({
     }),
     warranty: fields.text({ label: 'Гарантийный срок' }),
     used: fields.checkbox({ label: 'Б/у или конфискованный товар', defaultValue: false }),
+    availability: fields.select({
+      label: 'Наличие',
+      options: [
+        { label: 'В наличии', value: 'in_stock' },
+        { label: 'Нет в наличии', value: 'out_of_stock' },
+        { label: 'Под заказ', value: 'preorder' },
+      ],
+      defaultValue: 'in_stock',
+    }),
 
     specs: fields.array(specItem, {
       label: 'Характеристики',
@@ -406,11 +426,22 @@ const products = collection({
 const lines = collection({
   label: 'Линейки',
   path: 'src/content/lines/*',
-  slugField: 'title',
+  // Идентификатор записи = имя файла (публичный URL /lines/<slug>).
+  // Отдельное поле `slug` фиксирует его, чтобы переименование линейки в CMS
+  // не меняло URL.
+  slugField: 'slug',
   format: { data: 'yaml', contentField: 'description' },
   columns: ['title', 'order'],
   schema: {
-    title: fields.slug({ name: { label: 'Название линейки' } }),
+    title: fields.text({ label: 'Название линейки', validation: { isRequired: true } }),
+    slug: fields.slug({
+      name: {
+        label: 'Slug (идентификатор, не менять)',
+        description: 'Совпадает с именем файла и публичным URL /lines/<slug>',
+        validation: { isRequired: true },
+      },
+      slug: { label: 'Slug (имя файла)' },
+    }),
     description: fields.mdx({ label: 'Описание', extension: 'md' }),
     image: fields.image({
       label: 'Изображение',
@@ -449,6 +480,25 @@ const site = singleton({
     workHours: fields.text({ label: 'Режим работы' }),
     authorizedBody: fields.text({ label: 'Уполномоченный орган' }),
     authorizedBodyPhone: fields.text({ label: 'Телефон уполномоченного органа' }),
+    legalAddress: fields.text({
+      label: 'Юридический адрес ИП',
+      description: 'Адрес регистрации индивидуального предпринимателя',
+    }),
+    complaintsBookAddress: fields.text({
+      label: 'Адрес книги замечаний и предложений',
+    }),
+    pickupAddress: fields.text({
+      label: 'Адрес пункта выдачи',
+      description: 'Оставьте пустым, если отдельного пункта выдачи нет',
+    }),
+    belgieRegistration: fields.text({
+      label: 'Регистрация в БелГИЭ',
+      description: 'Справочное поле, в интерфейсе сайта не выводится',
+    }),
+    telegram: fields.text({
+      label: 'Telegram (ссылка t.me)',
+      description: 'Только ссылка вида https://t.me/…; телефон сюда не подходит',
+    }),
     labels: fields.object(
       {
         specs: fields.text({ label: 'Характеристики' }),
@@ -460,6 +510,23 @@ const site = singleton({
         breadcrumbsHome: fields.text({ label: 'Хлебные крошки: главная' }),
         breadcrumbsCatalog: fields.text({ label: 'Хлебные крошки: каталог' }),
         cookieSettings: fields.text({ label: 'Ссылка «Настройки cookie»' }),
+        legalPrivacy: fields.text({ label: 'Документ: политика конфиденциальности' }),
+        legalCookiePolicy: fields.text({ label: 'Документ: политика cookie' }),
+        legalTerms: fields.text({ label: 'Документ: оплата и доставка' }),
+        legalReturns: fields.text({ label: 'Документ: возврат товара' }),
+        legalComplaints: fields.text({ label: 'Документ: порядок обращений' }),
+        legalCare: fields.text({ label: 'Документ: уход и эксплуатация' }),
+        footerNav: fields.text({ label: 'Футер: заголовок навигации' }),
+        footerDocuments: fields.text({ label: 'Футер: заголовок документов' }),
+        footerContacts: fields.text({ label: 'Футер: заголовок контактов' }),
+        legalAddress: fields.text({ label: 'Юр. блок: юридический адрес' }),
+        complaintsBookAddress: fields.text({ label: 'Юр. блок: книга замечаний' }),
+        pickupAddress: fields.text({ label: 'Юр. блок: пункт выдачи' }),
+        authorizedBody: fields.text({ label: 'Юр. блок: уполномоченный орган' }),
+        authorizedBodyPhone: fields.text({ label: 'Юр. блок: телефон органа' }),
+        workHours: fields.text({ label: 'Юр. блок: режим работы' }),
+        paymentMethods: fields.text({ label: 'Юр. блок: способы оплаты' }),
+        deliveryMethods: fields.text({ label: 'Юр. блок: способы доставки' }),
       },
       { label: 'Подписи интерфейса' },
     ),
@@ -495,11 +562,21 @@ const site = singleton({
 const legal = collection({
   label: 'Юридические документы',
   path: 'src/content/legal/*',
-  slugField: 'title',
+  // Идентификатор записи = имя файла. Отдельное поле `slug` фиксирует его,
+  // чтобы переименование заголовка в CMS не ломало `getEntry('legal', 'privacy')`.
+  slugField: 'slug',
   format: { data: 'yaml', contentField: 'body' },
   columns: ['title', 'updatedAt'],
   schema: {
-    title: fields.slug({ name: { label: 'Название документа' } }),
+    title: fields.text({ label: 'Название документа', validation: { isRequired: true } }),
+    slug: fields.slug({
+      name: {
+        label: 'Slug (идентификатор, не менять)',
+        description: 'Совпадает с именем файла; изменение ломает ссылки getEntry()',
+        validation: { isRequired: true },
+      },
+      slug: { label: 'Slug (имя файла)' },
+    }),
     updatedAt: fields.date({ label: 'Дата обновления', defaultValue: { kind: 'today' } }),
     body: fields.mdx({ label: 'Текст документа', extension: 'md' }),
     seo: fields.object(seoFields, { label: 'SEO' }),
@@ -510,11 +587,21 @@ const legal = collection({
 const sections = collection({
   label: 'Секции главной',
   path: 'src/content/sections/*',
-  slugField: 'title',
+  // Идентификатор записи = имя файла. Отдельное поле `slug` фиксирует его,
+  // чтобы переименование заголовка в CMS не ломало `getEntry('sections', 'delivery')`.
+  slugField: 'slug',
   format: { data: 'yaml', contentField: 'body' },
   columns: ['title', 'order'],
   schema: {
-    title: fields.slug({ name: { label: 'Название секции' } }),
+    title: fields.text({ label: 'Название секции', validation: { isRequired: true } }),
+    slug: fields.slug({
+      name: {
+        label: 'Slug (идентификатор, не менять)',
+        description: 'Совпадает с именем файла; изменение ломает ссылки getEntry()',
+        validation: { isRequired: true },
+      },
+      slug: { label: 'Slug (имя файла)' },
+    }),
     heading: fields.text({ label: 'Заголовок', validation: { isRequired: true } }),
     body: fields.mdx({ label: 'Текст', extension: 'md' }),
     // Гибкие контент-блоки (картинки, видео, кнопки и т.д.) — доступны

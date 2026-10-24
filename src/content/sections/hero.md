@@ -1,4 +1,5 @@
 ---
+slug: hero
 title: Hero
 heading: Kiberstol.by
 content: []

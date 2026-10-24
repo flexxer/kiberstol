@@ -28,8 +28,15 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
-downloads/14203482_3840_2160_25fps.mp4
 
-# исходники от клиента (Google Drive) — не хранятся в VCS
-downloads/client-files/
-downloads/client-photos/
+# исходники и материалы клиента (Google Drive) — не хранятся в VCS
+downloads/
+
+# сгенерированные артефакты документации
+docs/client-instructions-analytics-telegram.pdf
+
+# одноразовые скрипты генерации ассетов и обработки фото
+scripts/generate-brand-assets.mjs
+scripts/generate-og-default.mjs
+scripts/generate-client-pdf.mjs
+scripts/photo/
