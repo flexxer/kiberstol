@@ -8,6 +8,7 @@
  */
 import { initMenu } from './menu';
 import { initForm } from './form';
+import { initModal } from './modal';
 import { initCarousel } from './carousel';
 import { initLightbox } from './lightbox';
 import { initProductGallery } from './product-gallery';
@@ -21,6 +22,7 @@ import { initAdvertising } from './advertising';
 export function initPage(): void {
   initMenu();
   initForm();
+  initModal();
   initCarousel();
   initLightbox();
   initProductGallery();

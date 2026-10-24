@@ -13,9 +13,11 @@ import { getCollection, getEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ContentBlocks from '../../components/blocks/ContentBlocks.astro';
+import ContactForm from '../../components/blocks/ContactForm.astro';
 import Specs from '../../components/blocks/Specs.astro';
 import ProductCard from '../../components/ui/ProductCard.astro';
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import Modal from '../../components/ui/Modal.astro';
 import Product from '../../components/seo/jsonld/Product.astro';
 import BreadcrumbList from '../../components/seo/jsonld/BreadcrumbList.astro';
 import { resolveImage } from '../../lib/image';
@@ -43,6 +45,11 @@ const relatedProducts = (await getCollection('products'))
 const settings = await getEntry('site', 'settings');
 const brand = settings!.data.brand;
 const labels = settings!.data.labels;
+
+// CTA карточки: текст кнопки заказа и ссылка на аксессуары (правятся в CMS).
+const orderCtaText = p.ctaText ?? labels?.orderCta ?? 'Заказать';
+const addonsLabel = labels?.addons ?? 'Дополнительные аксессуары';
+const addonsHref = '/lines/addons';
 
 const title = p.seo?.title ?? p.title;
 const description = p.seo?.description ?? p.shortDescription;
@@ -164,7 +171,7 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
         )}
       </div>
 
-      <!-- Основная информация + характеристики -->
+      <!-- Основная информация, заказ и характеристики -->
       <div>
         {p.badge && (
           <span class="mb-2 inline-block rounded bg-secondary px-2 py-0.5 text-xs font-semibold text-bg">
@@ -190,20 +197,24 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
           )}
         </div>
 
-        {p.ctaText && (
+        <!-- Заказ открывается в попапе; без JS ссылка ведёт к форме на главной. -->
+        <div class="mt-6 flex flex-wrap items-center gap-3">
           <a
             href="/#contacts"
-            class="mt-6 inline-block rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
+            data-modal-open="order-modal"
+            class="inline-block rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90"
           >
-            {p.ctaText}
+            {orderCtaText}
           </a>
-        )}
+          <a
+            href={addonsHref}
+            class="inline-block rounded border border-border px-6 py-3 font-semibold text-text transition hover:border-primary hover:text-primary"
+          >
+            {addonsLabel}
+          </a>
+        </div>
 
-        {product.body && (
-          <div class="prose prose-invert mt-6 max-w-none text-muted" set:html={renderMarkdown(product.body)} />
-        )}
-
-        <!-- Характеристики (справа от галереи в десктопе) -->
+        <!-- Характеристики (справа от галереи) -->
         {p.specs && p.specs.length > 0 && (
           <div class="mt-8">
             <h2 class="mb-3 text-lg font-bold text-text">{labels?.specs ?? 'Характеристики'}</h2>
@@ -212,6 +223,11 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
         )}
       </div>
     </div>
+
+    <!-- Описание модели (на всю ширину, под галереей и характеристиками) -->
+    {product.body && (
+      <div class="prose prose-invert mt-10 max-w-none text-muted" set:html={renderMarkdown(product.body)} />
+    )}
 
     <!-- Юридически обязательные сведения о товаре (аккордеон, скрыт по умолчанию) -->
     <div class="faq-item mt-10 rounded border border-border bg-surface">
@@ -278,5 +294,10 @@ const validThumbnails = thumbnails.filter((t): t is NonNullable<typeof t> => t !
         </div>
       </div>
     )}
+
+    <!-- Попап заказа: переиспользует ContactForm, отправка не меняется. -->
+    <Modal id="order-modal" labelledBy="order-modal-form-heading">
+      <ContactForm id="order-modal-form" heading={`Заказать ${p.title}`} />
+    </Modal>
   </section>
 </BaseLayout>

@@ -26,6 +26,8 @@ labels:
   specs: Характеристики
   productInfo: Сведения о товаре
   relatedProducts: Другие модели линейки
+  orderCta: Заказать
+  addons: Дополнительные аксессуары
   lineModels: Модели линейки
   catalogTitle: Каталог
   catalogDescription: 'Каталог игровых компьютерных столов: линейки и модели.'

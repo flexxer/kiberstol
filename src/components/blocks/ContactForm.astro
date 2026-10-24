@@ -18,9 +18,17 @@ import { getEntry } from 'astro:content';
 interface Props {
   /** Уникальный id формы (нужен для страниц с несколькими формами). */
   id?: string;
+  /** Заголовок формы (например, «Заказать Meta WB» в попапе). */
+  heading?: string;
+  /** Текст кнопки отправки. */
+  submitLabel?: string;
 }
 
-const { id = 'order-form' } = Astro.props;
+const {
+  id = 'order-form',
+  heading = 'Оставить заявку',
+  submitLabel = 'Отправить заявку',
+} = Astro.props;
 
 const settings = await getEntry('site', 'settings');
 const phone = settings?.data.phone ?? '';
@@ -39,7 +47,7 @@ const phonePattern = '[\\d\\s()+\\-]{9,20}';
   method="POST"
   aria-labelledby={fieldId('heading')}
 >
-  <h3 id={fieldId('heading')} class="text-lg font-semibold text-text">Оставить заявку</h3>
+  <h3 id={fieldId('heading')} class="text-lg font-semibold text-text">{heading}</h3>
 
   <!-- Honeypot: off-screen, а не display:none — боты заполняют видимые/спрятанные поля -->
   <div
@@ -179,7 +187,7 @@ const phonePattern = '[\\d\\s()+\\-]{9,20}';
     class="w-full rounded bg-primary px-6 py-3 font-semibold text-bg transition hover:opacity-90 disabled:opacity-60"
     aria-busy="false"
   >
-    <span data-submit-label>Отправить заявку</span>
+    <span data-submit-label>{submitLabel}</span>
   </button>
 
   <!-- Статус всегда в разметке: скринридер сообщает об отправке и ошибках -->

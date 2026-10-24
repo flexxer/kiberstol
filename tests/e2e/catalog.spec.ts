@@ -30,4 +30,26 @@ test.describe('Каталог', () => {
     await expect(page.getByText('Республика Беларусь; Китай')).toBeVisible();
     await expect(page.getByText('12 месяцев')).toBeVisible();
   });
+
+  test('ссылка на аксессуары ведёт на страницу линейки', async ({ page }) => {
+    await page.goto('/products/meta-w');
+
+    await expect(
+      page.getByRole('link', { name: 'Дополнительные аксессуары' }),
+    ).toHaveAttribute('href', '/lines/addons');
+  });
+
+  test('кнопка заказа открывает форму в попапе', async ({ page }) => {
+    await page.goto('/products/meta-w');
+
+    await page.locator('[data-modal-open="order-modal"]').click();
+
+    const dialog = page.locator('#order-modal');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: /Заказать Meta W/ })).toBeVisible();
+    await expect(dialog.locator('input[name="name"]')).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+  });
 });

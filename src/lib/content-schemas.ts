@@ -256,6 +256,8 @@ export const siteSchema = z.object({
       specs: z.string().default('Характеристики'),
       productInfo: z.string().default('Сведения о товаре'),
       relatedProducts: z.string().default('Другие модели линейки'),
+      orderCta: z.string().default('Заказать'),
+      addons: z.string().default('Дополнительные аксессуары'),
       lineModels: z.string().default('Модели линейки'),
       catalogTitle: z.string().default('Каталог'),
       catalogDescription: z

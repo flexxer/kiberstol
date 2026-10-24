@@ -504,6 +504,8 @@ const site = singleton({
         specs: fields.text({ label: 'Характеристики' }),
         productInfo: fields.text({ label: 'Сведения о товаре' }),
         relatedProducts: fields.text({ label: 'Другие модели линейки' }),
+        orderCta: fields.text({ label: 'Кнопка заказа (карточка товара)' }),
+        addons: fields.text({ label: 'Кнопка аксессуаров (карточка товара)' }),
         lineModels: fields.text({ label: 'Модели линейки' }),
         catalogTitle: fields.text({ label: 'Заголовок каталога' }),
         catalogDescription: fields.text({ label: 'Описание каталога', multiline: true }),

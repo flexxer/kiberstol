@@ -1,0 +1,51 @@
+---
+/**
+ * Modal — переиспользуемый модальный диалог на нативном `<dialog>`.
+ *
+ * Нативный `showModal()` даёт бесплатный focus trap, инертный фон и
+ * закрытие по Esc; `modal.ts` добавляет открытие по `[data-modal-open]`,
+ * закрытие по клику на фон/кнопку и блокировку прокрутки страницы.
+ *
+ * Без JS триггер остаётся обычной ссылкой (`href`), поэтому контент
+ * остаётся доступным (прогрессивное улучшение).
+ */
+interface Props {
+  /** id диалога; на него ссылается `data-modal-open` у триггера. */
+  id: string;
+  /** id заголовка внутри диалога для `aria-labelledby`. */
+  labelledBy?: string;
+  /** Ширина панели. */
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const { id, labelledBy, size = 'md' } = Astro.props;
+
+const sizeClass = {
+  sm: 'w-[min(92vw,24rem)]',
+  md: 'w-[min(92vw,32rem)]',
+  lg: 'w-[min(92vw,48rem)]',
+}[size];
+---
+
+<dialog
+  id={id}
+  data-modal
+  aria-labelledby={labelledBy}
+  class:list={[
+    'modal m-auto max-h-[90vh] w-full max-w-none overflow-y-auto rounded border border-border bg-surface p-0 text-text shadow-xl',
+    '[&::backdrop]:bg-black/70',
+    sizeClass,
+  ]}
+>
+  <div class="relative p-6">
+    <button
+      type="button"
+      data-modal-close
+      aria-label="Закрыть"
+      class="absolute right-3 top-3 rounded p-1 text-2xl leading-none text-muted transition hover:text-primary"
+    >
+      ×
+    </button>
+    <slot />
+  </div>
+</dialog>
